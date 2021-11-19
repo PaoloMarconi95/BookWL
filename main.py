@@ -1,4 +1,5 @@
 import json
+import time
 
 from selenium.webdriver.support import expected_conditions as EC
 from selenium import webdriver
@@ -18,13 +19,14 @@ def start():
         login(login_el)
 
     set_date_to_next_week()
+    time.sleep(10)
+    wl_booking_el = findWLbooking_el()
 
-    booking_el = WebDriverWait(driver, 5).until(
-        EC.presence_of_element_located(
-            (By.ID, "AthleteTheme_wt6_block_wtMainContent_wt9_wtClassTable_ctl13_wtAddReservationLink2"))
-    )
-    booking_el.click()
-    driver.implicitly_wait(4)
+    # start the loop
+
+    wl_booking_el.click()
+
+    time.sleep(3)
 
     driver.close()
 
@@ -46,9 +48,19 @@ def set_date_to_next_week():
         EC.presence_of_element_located(
             (By.ID, "AthleteTheme_wt6_block_wtMainContent_wt9_W_Utils_UI_wt216_block_wtDateInputFrom"))
     )
-    date_of_today_plus_7 = ((datetime.date.today()) + datetime.timedelta(days=7)).strftime('%d-%m-%y')
+    # date_of_today_plus_7 = ((datetime.date.today()) + datetime.timedelta(days=7)).strftime('%d-%m-%y')
+    date_of_today_plus_7 = (datetime.date.fromisoformat("2021-11-22") + datetime.timedelta(days=7)).strftime('%d-%m-%y')
     element.clear()
     element.send_keys(date_of_today_plus_7)
+
+def findWLbooking_el():
+    print("cerco wl el")
+    span_inner_el = driver.find_element(By.XPATH, "//span[@title='WEIGHTLIFTING 19.00']")
+    outer_el = span_inner_el.find_element(By.XPATH, '../../..')
+    print(str(outer_el))
+    wl_booking_el = outer_el.find_element(By.XPATH, "//a[@title='Reserve spot in class']")
+    return wl_booking_el
+
 
 
 if __name__ == "__main__":
