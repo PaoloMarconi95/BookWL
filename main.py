@@ -9,7 +9,7 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.wait import WebDriverWait
 
-driver = webdriver.Edge()
+driver = webdriver.Chrome()
 driver.get("https://app.wodify.com/Schedule/CalendarListViewEntry.aspx")
 
 
@@ -34,7 +34,7 @@ def start():
     # check the damage
     wl_booking_el = findWLbooking_el()
     wl_booking_el.click()
-    book_completed = did_I_booked()
+    book_completed = did_i_booked()
 
     # end of the process
     time.sleep(3)
@@ -44,7 +44,7 @@ def start():
     if book_completed:
         mail_text = "Booked WL Class for next week"
     else:
-        mail_text = "I was not able to book WL class for nextr week.\nSorry :( :("
+        mail_text = "I was not able to book WL class for next week. Sorry :( :("
 
     send_me_an_email(mail_text)
 
@@ -67,7 +67,7 @@ def set_date_to_next_week():
             (By.ID, "AthleteTheme_wt6_block_wtMainContent_wt9_W_Utils_UI_wt216_block_wtDateInputFrom"))
     )
     date_of_today_plus_7 = ((dt.date.today()) + dt.timedelta(days=7)).strftime('%d-%m-%y')
-    #date_of_today_plus_7 = (dt.date.fromisoformat("2021-11-22") + dt.timedelta(days=7)).strftime('%d-%m-%y')
+    # date_of_today_plus_7 = (dt.date.fromisoformat("2021-11-22") + dt.timedelta(days=7)).strftime('%d-%m-%y')
     element.clear()
     element.send_keys(date_of_today_plus_7)
 
@@ -76,8 +76,12 @@ def findWLbooking_el():
     print("cerco wl el")
     span_inner_el = driver.find_element(By.XPATH, "//span[@title='WEIGHTLIFTING 19.00']")
     outer_el = span_inner_el.find_element(By.XPATH, '../../..')
-    print(str(outer_el))
-    wl_booking_el = outer_el.find_element(By.XPATH, "//a[@title='Reserve spot in class']")
+    print("as outer I found el with style")
+    print(str(outer_el.get_attribute("style")))
+    wl_booking_el = outer_el.find_element(By.XPATH, ".//a[@title='Reserve spot in class']")
+    print("as wl_booking_el I found el with")
+    print(
+        "id = " + str(wl_booking_el.get_attribute("id")) + " and title = " + str(wl_booking_el.get_attribute("title")))
     return wl_booking_el
 
 
@@ -99,15 +103,19 @@ def start_busy_wait(wl_booking_el):
         time.sleep(3)
 
 
-def did_I_booked():
-    fdb_element = WebDriverWait(driver, 10).until(
-        EC.presence_of_element_located(
-            (By.CLASS_NAME, "Feedback_Message_Text"))
-    )
-    if fdb_element.text == "You have a reservation for this class":
-        return True
-    else:
+def did_i_booked():
+    try:
+        fdb_element = WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located(
+                (By.CLASS_NAME, "Feedback_Message_Text"))
+        )
+        if fdb_element.text == "You have a reservation for this class":
+            return True
+        else:
+            return False
+    except:
         return False
+
 
 def send_me_an_email(message):
     url = "https://da897d59ec3093f998d930d05ceb60e4.m.pipedream.net"
@@ -115,7 +123,6 @@ def send_me_an_email(message):
 
     x = requests.post(url, data=msg)
     print(x.text)
-
 
 
 if __name__ == "__main__":
