@@ -18,7 +18,7 @@ driver.get("https://app.wodify.com/Schedule/CalendarListViewEntry.aspx")
 
 
 def start():
-    login_el = WebDriverWait(driver, 3).until(
+    login_el = WebDriverWait(driver, 5).until(
         EC.presence_of_element_located((By.ID, "FormLogin"))
     )
     if login_el is not None:
@@ -43,7 +43,7 @@ def start():
     book_completed = did_i_booked()
 
     # end of the process
-    time.sleep(3)
+    time.sleep(5)
     driver.close()
 
     mail_text = ""
