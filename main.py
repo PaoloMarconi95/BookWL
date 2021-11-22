@@ -8,8 +8,12 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.wait import WebDriverWait
+from selenium.webdriver.chrome.options import Options
 
-driver = webdriver.Chrome()
+options = Options()
+options.headless = True
+driver = webdriver.Chrome(options=options)
+
 driver.get("https://app.wodify.com/Schedule/CalendarListViewEntry.aspx")
 
 
@@ -19,13 +23,15 @@ def start():
     )
     if login_el is not None:
         login(login_el)
+    else:
+        time.sleep(5)
 
     # prepare the target for the fire
     set_date_to_next_week()
-    time.sleep(10)
+    time.sleep(10)  # date changes require some times for their backend
     wl_booking_el = findWLbooking_el()
 
-    # unleash the fire
+    # unleash the fire when the time's ready
     start_busy_wait(wl_booking_el)
 
     # let the fire extinguish
@@ -91,8 +97,8 @@ def start_busy_wait(wl_booking_el):
 
     while not finish:
         now = datetime.now().time()
-        if now >= datetime.strptime('19:00:00', '%H:%M:%S').time():
 
+        if now >= datetime.strptime('19:00:00', '%H:%M:%S').time():
             while not finish:
                 wl_booking_el.click()
                 count += 1
