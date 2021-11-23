@@ -11,7 +11,7 @@ from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.chrome.options import Options
 
 options = Options()
-options.headless = True
+# options.headless = True
 driver = webdriver.Chrome(options=options)
 
 driver.get("https://app.wodify.com/Schedule/CalendarListViewEntry.aspx")
@@ -33,6 +33,7 @@ def start():
 
     # unleash the fire when the time's ready
     start_busy_wait(wl_booking_el)
+    print("Fire ended")
 
     # let the fire extinguish
     time.sleep(15)
@@ -73,22 +74,17 @@ def set_date_to_next_week():
             (By.ID, "AthleteTheme_wt6_block_wtMainContent_wt9_W_Utils_UI_wt216_block_wtDateInputFrom"))
     )
     date_of_today_plus_7 = ((dt.date.today()) + dt.timedelta(days=7)).strftime('%d-%m-%y')
-    # date_of_today_plus_7 = (dt.date.fromisoformat("2021-11-22") + dt.timedelta(days=7)).strftime('%d-%m-%y')
     element.clear()
     element.send_keys(date_of_today_plus_7)
 
 
 def findWLbooking_el():
-    print("cerco wl el")
-    span_inner_el = driver.find_element(By.XPATH, "//span[@title='WEIGHTLIFTING 19.00']")
+    span_inner_el = WebDriverWait(driver, 10).until(
+        EC.presence_of_element_located((By.XPATH, "//span[@title='WEIGHTLIFTING 19.00']"))
+    )
     outer_el = span_inner_el.find_element(By.XPATH, '../../..')
-    print("as outer I found el with style")
-    print(str(outer_el.get_attribute("style")))
-    wl_booking_el = outer_el.find_element(By.XPATH, ".//a[@title='Reserve spot in class']")
-    print("as wl_booking_el I found el with")
-    print(
-        "id = " + str(wl_booking_el.get_attribute("id")) + " and title = " + str(wl_booking_el.get_attribute("title")))
-    return wl_booking_el
+    booking_el = outer_el.find_elements(By.XPATH, ".//a")
+    return booking_el[1]
 
 
 def start_busy_wait(wl_booking_el):
@@ -99,12 +95,13 @@ def start_busy_wait(wl_booking_el):
         now = datetime.now().time()
 
         if now >= datetime.strptime('19:00:00', '%H:%M:%S').time():
+            print("Start the fire")
             while not finish:
                 wl_booking_el.click()
                 count += 1
-                if count > 50:
+                if count > 5:
                     finish = True
-                time.sleep(0.5)
+                wl_booking_el = findWLbooking_el()
 
         time.sleep(3)
 
@@ -116,20 +113,26 @@ def did_i_booked():
                 (By.CLASS_NAME, "Feedback_Message_Text"))
         )
         if fdb_element.text == "You have a reservation for this class":
+            print("Found the correct ticket icon with the correct text")
             return True
         else:
+            print("Found the correct ticket icon without the correct text")
             return False
     except:
+        print("Didn't found the correct ticket in 10 seconds")
         return False
 
 
 def send_me_an_email(message):
     url = "https://da897d59ec3093f998d930d05ceb60e4.m.pipedream.net"
     msg = {'message': message}
-
-    x = requests.post(url, data=msg)
-    print(x.text)
+    requests.post(url, data=msg)
 
 
 if __name__ == "__main__":
-    start()
+    finish = False
+    while not finish:
+        if datetime.now().time() >= datetime.strptime('18:57:00', '%H:%M:%S').time():
+            finish = True
+            start()
+        time.sleep(10)
