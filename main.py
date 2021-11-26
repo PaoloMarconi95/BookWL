@@ -10,6 +10,11 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.chrome.options import Options
 
+MAX_ATTEMPTS = 300
+PROCEDURE_START_AT = "18:58:00"
+FIRE_START_AT = "18:59:58"
+CLASS_TARGET = "WEIGHTLIFTING 19.00"
+
 options = Options()
 # options.headless = True
 driver = webdriver.Chrome(options=options)
@@ -33,15 +38,15 @@ def start():
 
     # unleash the fire when the time's ready
     start_busy_wait(wl_booking_el)
-    print("Fire ended")
 
     # let the fire extinguish
-    time.sleep(15)
+    time.sleep(20)
 
-    # check the damage
-    wl_booking_el = findWLbooking_el()
-    wl_booking_el.click()
-    book_completed = did_i_booked()
+    # Check the registration success by clicking on ticket icon
+    ticket_el = findWLbooking_el()
+    ticket_el.click()
+    time.sleep(4)
+    book_completed = did_i_booked(verbosity=True)
 
     # end of the process
     time.sleep(5)
@@ -57,7 +62,7 @@ def start():
 
 
 def login(login_el):
-    # Opening JSON file
+    print("Logging in at " + str(datetime.now().time()))
     f = open('config.json', 'r')
     config = json.load(f)
     username_el = login_el.find_element(By.ID, "Input_UserName")
@@ -75,12 +80,12 @@ def set_date_to_next_week():
     )
     date_of_today_plus_7 = ((dt.date.today()) + dt.timedelta(days=7)).strftime('%d-%m-%y')
     element.clear()
-    element.send_keys(date_of_today_plus_7)
+    element.send_keys("15-12-2021")
 
 
 def findWLbooking_el():
     span_inner_el = WebDriverWait(driver, 10).until(
-        EC.presence_of_element_located((By.XPATH, "//span[@title='WEIGHTLIFTING 19.00']"))
+        EC.presence_of_element_located((By.XPATH, "//span[@title='" + CLASS_TARGET + "']"))
     )
     outer_el = span_inner_el.find_element(By.XPATH, '../../..')
     booking_el = outer_el.find_elements(By.XPATH, ".//a")
@@ -94,32 +99,43 @@ def start_busy_wait(wl_booking_el):
     while not finish:
         now = datetime.now().time()
 
-        if now >= datetime.strptime('19:00:00', '%H:%M:%S').time():
-            print("Start the fire")
+        if now >= datetime.strptime(FIRE_START_AT, '%H:%M:%S').time():
+            print("Fire starded at " + str(datetime.now().time()))
             while not finish:
                 wl_booking_el.click()
                 count += 1
-                if count > 5:
+                if did_i_booked():
                     finish = True
+                    print("Booked after " + str(count) + " clicks, at " + str(datetime.now().time()))
+                if count > MAX_ATTEMPTS:
+                    finish = True
+                    print("reached the maximum number of attempts at " + str(datetime.now().time()))
+                time.sleep(1)
                 wl_booking_el = findWLbooking_el()
 
         time.sleep(3)
 
 
-def did_i_booked():
+def did_i_booked(verbosity=False):
     try:
         fdb_element = WebDriverWait(driver, 10).until(
             EC.presence_of_element_located(
                 (By.CLASS_NAME, "Feedback_Message_Text"))
         )
-        if fdb_element.text == "You have a reservation for this class":
-            print("Found the correct ticket icon with the correct text")
+        text_found = fdb_element.text.rstrip().lower()
+        if text_found == "Reservation Confirmed".lower() or \
+                text_found == "You have a reservation fo this class".lower():
+            if verbosity:
+                print("Found the correct ticket icon with the correct text")
             return True
         else:
-            print("Found the correct ticket icon without the correct text")
+            if verbosity:
+                print("Found the correct ticket icon without the correct text")
+                print("The text found was " + str(text_found))
             return False
     except:
-        print("Didn't found the correct ticket in 10 seconds")
+        if verbosity:
+            print("Didn't found the correct ticket in 10 seconds")
         return False
 
 
@@ -132,7 +148,7 @@ def send_me_an_email(message):
 if __name__ == "__main__":
     finish = False
     while not finish:
-        if datetime.now().time() >= datetime.strptime('18:57:00', '%H:%M:%S').time():
+        if datetime.now().time() >= datetime.strptime(PROCEDURE_START_AT, '%H:%M:%S').time():
             finish = True
             start()
         time.sleep(10)
