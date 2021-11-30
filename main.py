@@ -125,7 +125,7 @@ def did_i_booked(verbosity=False):
         )
         text_found = fdb_element.text.rstrip().lower()
         if text_found == "Reservation Confirmed".lower() or \
-                text_found == "You have a reservation fo this class".lower():
+                text_found == "You have a reservation for this class".lower():
             if verbosity:
                 print("Found the correct ticket icon with the correct text")
             return True
