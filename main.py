@@ -12,14 +12,14 @@ from selenium.webdriver.chrome.options import Options
 
 MAX_ATTEMPTS = 300
 PROCEDURE_START_AT = "18:58:00"
-FIRE_START_AT = "18:59:58"
+FIRE_START_AT = "18:59:59"
 CLASS_TARGET = "WEIGHTLIFTING 19.00"
+URL = "https://app.wodify.com/Schedule/CalendarListViewEntry.aspx"
 
 options = Options()
 # options.headless = True
 driver = webdriver.Chrome(options=options)
-
-driver.get("https://app.wodify.com/Schedule/CalendarListViewEntry.aspx")
+driver.get(URL)
 
 
 def start():
@@ -80,7 +80,7 @@ def set_date_to_next_week():
     )
     date_of_today_plus_7 = ((dt.date.today()) + dt.timedelta(days=7)).strftime('%d-%m-%y')
     element.clear()
-    element.send_keys("15-12-2021")
+    element.send_keys(date_of_today_plus_7)
 
 
 def findWLbooking_el():
@@ -111,6 +111,7 @@ def start_busy_wait(wl_booking_el):
                     finish = True
                     print("reached the maximum number of attempts at " + str(datetime.now().time()))
                 time.sleep(1)
+                refresh_page()
                 wl_booking_el = findWLbooking_el()
 
         time.sleep(3)
@@ -143,6 +144,12 @@ def send_me_an_email(message):
     url = "https://da897d59ec3093f998d930d05ceb60e4.m.pipedream.net"
     msg = {'message': message}
     requests.post(url, data=msg)
+
+
+def refresh_page():
+    global driver
+    driver.get(URL)
+    driver.refresh()
 
 
 if __name__ == "__main__":
