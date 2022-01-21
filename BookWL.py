@@ -64,10 +64,10 @@ def start():
     time.sleep(5)
     driver.close()
 
-    # if book_completed:
-    #     mail_text = 'Booked WL Class for next week'
-    # else:
-    #     mail_text = 'I was not able to book WL class for next week. Sorry :( :('
+    if book_completed:
+        mail_text = 'Booked WL Class for next week'
+    else:
+        mail_text = 'I was not able to book WL class for next week. Sorry :( :('
 
     send_me_an_email(mail_text)
 
