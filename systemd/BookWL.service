@@ -1,0 +1,10 @@
+[Unit]
+Description=BookWL Service
+Wants=BookWL.timer
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/free
+
+[Install]
+WantedBy=multi-user.target

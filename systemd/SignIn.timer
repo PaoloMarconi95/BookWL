@@ -1,0 +1,11 @@
+[Unit]
+Description=Timer for SignIn Service
+Requires=SignIn.service
+
+[Timer]
+Unit=SignIn.service
+OnCalendar=Mon..Fri 18:55:00
+OnCalendar=Sat 10:50
+
+[Install]
+WantedBy=timers.target

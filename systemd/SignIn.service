@@ -1,0 +1,10 @@
+[Unit]
+Description=SignIn Service
+Wants=SignIn.timer
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/free
+
+[Install]
+WantedBy=multi-user.target
