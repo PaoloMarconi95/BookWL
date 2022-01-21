@@ -10,16 +10,39 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.chrome.options import Options
 
-MAX_ATTEMPTS = 300
+MAX_ATTEMPTS = 20
 PROCEDURE_START_AT = "18:58:00"
-FIRE_START_AT = "18:59:59"
+FIRE_START_AT = "19:00:00"
 CLASS_TARGET = "WEIGHTLIFTING 19.00"
-URL = "https://app.wodify.com/Schedule/CalendarListViewEntry.aspx"
 
-options = Options()
-# options.headless = True
-driver = webdriver.Chrome(options=options)
-driver.get(URL)
+
+def main_function(procedure_start_at=None, fire_start_at=None):
+    set_global_variables(procedure_start_at, fire_start_at)
+
+    time_to_start = False
+    while not time_to_start:
+        if datetime.now().time() >= datetime.strptime(PROCEDURE_START_AT, '%H:%M:%S').time():
+            time_to_start = True
+            start()
+        time.sleep(10)
+
+
+def set_global_variables(procedure_start_at, fire_start_at):
+    global URL, driver, PROCEDURE_START_AT, FIRE_START_AT
+
+    options = Options()
+    # options.headless = True
+    driver = webdriver.Chrome(options=options)
+    driver.get(URL)
+
+    f = open('config.json', 'r')
+    config = json.load(f)
+    URL = config['CALENDAR_URL']
+
+    if procedure_start_at is not None:
+        PROCEDURE_START_AT = procedure_start_at
+    if fire_start_at is not None:
+        FIRE_START_AT = fire_start_at
 
 
 def start():
@@ -33,7 +56,7 @@ def start():
 
     # prepare the target for the fire
     set_date_to_next_week()
-    time.sleep(10)  # date changes require some times for their backend
+    time.sleep(10)  # date changes require some time for their backend
     wl_booking_el = findWLbooking_el()
 
     # unleash the fire when the time's ready
@@ -52,7 +75,6 @@ def start():
     time.sleep(5)
     driver.close()
 
-    mail_text = ""
     if book_completed:
         mail_text = "Booked WL Class for next week"
     else:
@@ -94,20 +116,21 @@ def findWLbooking_el():
 
 def start_busy_wait(wl_booking_el):
     finish = False
-    count = 0
+    clicks = 0
 
     while not finish:
         now = datetime.now().time()
 
         if now >= datetime.strptime(FIRE_START_AT, '%H:%M:%S').time():
-            print("Fire starded at " + str(datetime.now().time()))
+            refresh_page()
+            print("Fire started at " + str(datetime.now().time()))
             while not finish:
                 wl_booking_el.click()
-                count += 1
+                clicks += 1
                 if did_i_booked():
                     finish = True
-                    print("Booked after " + str(count) + " clicks, at " + str(datetime.now().time()))
-                if count > MAX_ATTEMPTS:
+                    print("Booked after " + str(clicks) + " clicks, at " + str(datetime.now().time()))
+                if clicks > MAX_ATTEMPTS:
                     finish = True
                     print("reached the maximum number of attempts at " + str(datetime.now().time()))
                 time.sleep(1)
@@ -150,12 +173,3 @@ def refresh_page():
     global driver
     driver.get(URL)
     driver.refresh()
-
-
-if __name__ == "__main__":
-    finish = False
-    while not finish:
-        if datetime.now().time() >= datetime.strptime(PROCEDURE_START_AT, '%H:%M:%S').time():
-            finish = True
-            start()
-        time.sleep(10)
