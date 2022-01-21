@@ -11,43 +11,27 @@ from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.chrome.options import Options
 
 MAX_ATTEMPTS = 20
-PROCEDURE_START_AT = "18:58:00"
-FIRE_START_AT = "19:00:00"
-CLASS_TARGET = "WEIGHTLIFTING 19.00"
+PROCEDURE_START_AT = '18:58:00'
+FIRE_START_AT = '19:00:00'
+CLASS_TARGET = 'WEIGHTLIFTING 19.00'
 
 
-def main_function(procedure_start_at=None, fire_start_at=None):
-    set_global_variables(procedure_start_at, fire_start_at)
+def set_global_variables():
+    global URL, driver
 
-    time_to_start = False
-    while not time_to_start:
-        if datetime.now().time() >= datetime.strptime(PROCEDURE_START_AT, '%H:%M:%S').time():
-            time_to_start = True
-            start()
-        time.sleep(10)
-
-
-def set_global_variables(procedure_start_at, fire_start_at):
-    global URL, driver, PROCEDURE_START_AT, FIRE_START_AT
+    f = open('config.json', 'r')
+    config = json.load(f)
+    URL = config['CALENDAR_URL']
 
     options = Options()
     # options.headless = True
     driver = webdriver.Chrome(options=options)
     driver.get(URL)
 
-    f = open('config.json', 'r')
-    config = json.load(f)
-    URL = config['CALENDAR_URL']
-
-    if procedure_start_at is not None:
-        PROCEDURE_START_AT = procedure_start_at
-    if fire_start_at is not None:
-        FIRE_START_AT = fire_start_at
-
 
 def start():
     login_el = WebDriverWait(driver, 5).until(
-        EC.presence_of_element_located((By.ID, "FormLogin"))
+        EC.presence_of_element_located((By.ID, 'FormLogin'))
     )
     if login_el is not None:
         login(login_el)
@@ -76,29 +60,29 @@ def start():
     driver.close()
 
     if book_completed:
-        mail_text = "Booked WL Class for next week"
+        mail_text = 'Booked WL Class for next week'
     else:
-        mail_text = "I was not able to book WL class for next week. Sorry :( :("
+        mail_text = 'I was not able to book WL class for next week. Sorry :( :('
 
     send_me_an_email(mail_text)
 
 
 def login(login_el):
-    print("Logging in at " + str(datetime.now().time()))
+    print('Logging in at ' + str(datetime.now().time()))
     f = open('config.json', 'r')
     config = json.load(f)
-    username_el = login_el.find_element(By.ID, "Input_UserName")
-    username_el.send_keys(config["Username"])
-    pwd_el = login_el.find_element(By.ID, "Input_Password")
-    pwd_el.send_keys(config["Password"])
-    submit_el = login_el.find_element(By.TAG_NAME, "button")
+    username_el = login_el.find_element(By.ID, 'Input_UserName')
+    username_el.send_keys(config['Username'])
+    pwd_el = login_el.find_element(By.ID, 'Input_Password')
+    pwd_el.send_keys(config['Password'])
+    submit_el = login_el.find_element(By.TAG_NAME, 'button')
     submit_el.click()
 
 
 def set_date_to_next_week():
     element = WebDriverWait(driver, 5).until(
         EC.presence_of_element_located(
-            (By.ID, "AthleteTheme_wt6_block_wtMainContent_wt9_W_Utils_UI_wt216_block_wtDateInputFrom"))
+            (By.ID, 'AthleteTheme_wt6_block_wtMainContent_wt9_W_Utils_UI_wt216_block_wtDateInputFrom'))
     )
     date_of_today_plus_7 = ((dt.date.today()) + dt.timedelta(days=7)).strftime('%d-%m-%y')
     element.clear()
@@ -107,10 +91,10 @@ def set_date_to_next_week():
 
 def findWLbooking_el():
     span_inner_el = WebDriverWait(driver, 10).until(
-        EC.presence_of_element_located((By.XPATH, "//span[@title='" + CLASS_TARGET + "']"))
+        EC.presence_of_element_located((By.XPATH, '//span[@title='' + CLASS_TARGET + '']'))
     )
     outer_el = span_inner_el.find_element(By.XPATH, '../../..')
-    booking_el = outer_el.find_elements(By.XPATH, ".//a")
+    booking_el = outer_el.find_elements(By.XPATH, './/a')
     return booking_el[1]
 
 
@@ -123,16 +107,16 @@ def start_busy_wait(wl_booking_el):
 
         if now >= datetime.strptime(FIRE_START_AT, '%H:%M:%S').time():
             refresh_page()
-            print("Fire started at " + str(datetime.now().time()))
+            print('Fire started at ' + str(datetime.now().time()))
             while not finish:
                 wl_booking_el.click()
                 clicks += 1
                 if did_i_booked():
                     finish = True
-                    print("Booked after " + str(clicks) + " clicks, at " + str(datetime.now().time()))
+                    print('Booked after ' + str(clicks) + ' clicks, at ' + str(datetime.now().time()))
                 if clicks > MAX_ATTEMPTS:
                     finish = True
-                    print("reached the maximum number of attempts at " + str(datetime.now().time()))
+                    print('reached the maximum number of attempts at ' + str(datetime.now().time()))
                 time.sleep(1)
                 refresh_page()
                 wl_booking_el = findWLbooking_el()
@@ -144,32 +128,41 @@ def did_i_booked(verbosity=False):
     try:
         fdb_element = WebDriverWait(driver, 10).until(
             EC.presence_of_element_located(
-                (By.CLASS_NAME, "Feedback_Message_Text"))
+                (By.CLASS_NAME, 'Feedback_Message_Text'))
         )
         text_found = fdb_element.text.rstrip().lower()
-        if text_found == "Reservation Confirmed".lower() or \
-                text_found == "You have a reservation for this class".lower():
+        if text_found == 'Reservation Confirmed'.lower() or \
+                text_found == 'You have a reservation for this class'.lower():
             if verbosity:
-                print("Found the correct ticket icon with the correct text")
+                print('Found the correct ticket icon with the correct text')
             return True
         else:
             if verbosity:
-                print("Found the correct ticket icon without the correct text")
-                print("The text found was " + str(text_found))
+                print('Found the correct ticket icon without the correct text')
+                print('The text found was ' + str(text_found))
             return False
     except:
         if verbosity:
-            print("Didn't found the correct ticket in 10 seconds")
+            print('Didn\'t found the correct ticket in 10 seconds')
         return False
 
 
 def send_me_an_email(message):
-    url = "https://da897d59ec3093f998d930d05ceb60e4.m.pipedream.net"
+    url = 'https://da897d59ec3093f998d930d05ceb60e4.m.pipedream.net'
     msg = {'message': message}
     requests.post(url, data=msg)
 
 
 def refresh_page():
-    global driver
     driver.get(URL)
     driver.refresh()
+
+
+if __name__ == '__main__':
+    set_global_variables()
+    time_to_start = False
+    while not time_to_start:
+        if datetime.now().time() >= datetime.strptime(PROCEDURE_START_AT, '%H:%M:%S').time():
+            time_to_start = True
+            start()
+        time.sleep(10)

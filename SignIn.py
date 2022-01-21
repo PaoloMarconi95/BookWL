@@ -15,6 +15,7 @@ from Exceptions import NoReservationFoundException, ClassNotFoundWithinDropDownE
 def start():
     set_global_variables()
 
+    # Set page to calendar
     driver.get(CALENDAR_URL)
 
     login_el = WebDriverWait(driver, 5).until(
@@ -26,15 +27,13 @@ def start():
         time.sleep(5)
 
     class_reserved = reservation_for_today()
-    print("class reserved : " + str(class_reserved))
+    print('class reserved : ' + str(class_reserved))
 
+    # Change page to signin
     driver.get(SIGNIN_URL)
 
-    # prepare the target for the fire
+    # set correct class and sign in
     set_correct_class_for_dropdown(class_reserved)
-
-    time.sleep(2)  # date changes require some time for their backend
-
     sign_in()
 
     # end of the process
@@ -68,7 +67,7 @@ def login(login_el):
 def reservation_for_today():
     driver.get(CALENDAR_URL)
     daily_classes = get_every_class_of_today()
-    print("got every classes")
+    print('got every classes')
     class_reserved = search_for_ticket_icon_within(daily_classes)
 
     if class_reserved is None:
@@ -95,9 +94,9 @@ def get_every_class_of_today():
     every_tr = tbody_el.find_elements(By.TAG_NAME, 'tr')
     classes = []
     for tr in every_tr:
-        if tr.get_attribute("style") != "":
+        if tr.get_attribute('style') != '':
             classes.append(tr)
-        if tr.get_attribute("style") == "" and len(classes) > 0:
+        if tr.get_attribute('style') == '' and len(classes) > 0:
             return classes
 
 
@@ -105,7 +104,7 @@ def set_correct_class_for_dropdown(class_name):
     dropdown = WebDriverWait(driver, 10).until(
         EC.presence_of_element_located((By.ID, 'AthleteTheme_wtLayout_block_wtMainContent_wtClass_Input'))
     )
-    all_options = dropdown.find_elements(By.TAG_NAME, "option")
+    all_options = dropdown.find_elements(By.TAG_NAME, 'option')
     correctly_set = False
     for option in all_options:
         if option.text == class_name:
@@ -126,3 +125,7 @@ def sign_in():
 def refresh_page(url):
     driver.get(url)
     driver.refresh()
+
+
+if __name__ == '__main__':
+    start()
