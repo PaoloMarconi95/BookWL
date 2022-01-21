@@ -10,6 +10,8 @@ from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.chrome.options import Options
 
 from Exceptions import NoReservationFoundException, ClassNotFoundWithinDropDownException
+# noinspection PyPep8Naming
+from Log import Log as LOG
 
 
 def start():
@@ -27,7 +29,6 @@ def start():
         time.sleep(5)
 
     class_reserved = reservation_for_today()
-    print('class reserved : ' + str(class_reserved))
 
     # Change page to signin
     driver.get(SIGNIN_URL)
@@ -35,14 +36,13 @@ def start():
     # set correct class and sign in
     set_correct_class_for_dropdown(class_reserved)
     sign_in()
+    LOG.info('Process correctly ended, closing driver')
 
-    # end of the process
-    time.sleep(2)
     driver.close()
 
 
 def set_global_variables():
-    global SIGNIN_URL, CALENDAR_URL, driver
+    global SIGNIN_URL, CALENDAR_URL, driver, LOG
     options = Options()
     # options.headless = True
     driver = webdriver.Chrome(options=options)
@@ -50,10 +50,12 @@ def set_global_variables():
     config = json.load(f)
     SIGNIN_URL = config['SIGNIN_URL']
     CALENDAR_URL = config['CALENDAR_URL']
+    LOG = LOG('SignIn')
+    LOG.info('Global variables set')
 
 
 def login(login_el):
-    print('Logging in at ' + str(datetime.now().time()))
+    LOG.info('Logging in at ' + str(datetime.now().time()))
     f = open('config.json', 'r')
     config = json.load(f)
     username_el = login_el.find_element(By.ID, 'Input_UserName')
@@ -62,21 +64,25 @@ def login(login_el):
     pwd_el.send_keys(config['Password'])
     submit_el = login_el.find_element(By.TAG_NAME, 'button')
     submit_el.click()
+    LOG.info('Logged in')
 
 
 def reservation_for_today():
     driver.get(CALENDAR_URL)
     daily_classes = get_every_class_of_today()
-    print('got every classes')
+    LOG.info('Retrieved a total of ' + str(len(daily_classes)) + ' classes for today')
     class_reserved = search_for_ticket_icon_within(daily_classes)
 
     if class_reserved is None:
+        LOG.info('No reservation found for today')
         raise NoReservationFoundException('No reservation Found for today')
     else:
+        LOG.info('Found reservation for class ' + str(class_reserved))
         return class_reserved
 
 
 def search_for_ticket_icon_within(daily_classes):
+    LOG.info('Looking for a class with ticket icon')
     today_reservation = None
     for class_entry in daily_classes:
         try:
@@ -101,6 +107,7 @@ def get_every_class_of_today():
 
 
 def set_correct_class_for_dropdown(class_name):
+    LOG.info('Looking for dropdown')
     dropdown = WebDriverWait(driver, 10).until(
         EC.presence_of_element_located((By.ID, 'AthleteTheme_wtLayout_block_wtMainContent_wtClass_Input'))
     )
@@ -108,6 +115,7 @@ def set_correct_class_for_dropdown(class_name):
     correctly_set = False
     for option in all_options:
         if option.text == class_name:
+            LOG.info('Found correct value')
             option.click()
             correctly_set = True
 
@@ -116,15 +124,11 @@ def set_correct_class_for_dropdown(class_name):
 
 
 def sign_in():
+    LOG.info('Clicking sign-in button')
     signin_button = WebDriverWait(driver, 10).until(
         EC.presence_of_element_located((By.ID, 'AthleteTheme_wtLayout_block_wtSubNavigation_wtSignInButton2'))
     )
     signin_button.click()
-
-
-def refresh_page(url):
-    driver.get(url)
-    driver.refresh()
 
 
 if __name__ == '__main__':

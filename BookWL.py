@@ -10,14 +10,17 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.chrome.options import Options
 
+# noinspection PyPep8Naming
+from Log import Log as LOG
+
 MAX_ATTEMPTS = 20
-PROCEDURE_START_AT = '18:58:00'
-FIRE_START_AT = '19:00:00'
+PROCEDURE_START_AT = '17:18:10'
+FIRE_START_AT = '17:22:59.999'
 CLASS_TARGET = 'WEIGHTLIFTING 19.00'
 
 
 def set_global_variables():
-    global URL, driver
+    global URL, driver, LOG
 
     f = open('config.json', 'r')
     config = json.load(f)
@@ -27,6 +30,8 @@ def set_global_variables():
     # options.headless = True
     driver = webdriver.Chrome(options=options)
     driver.get(URL)
+    LOG = LOG('BookWL')
+    LOG.info('Global variables set')
 
 
 def start():
@@ -40,11 +45,11 @@ def start():
 
     # prepare the target for the fire
     set_date_to_next_week()
-    time.sleep(10)  # date changes require some time for their backend
-    wl_booking_el = findWLbooking_el()
+    LOG.info('Waiting for their backend to complete the date changing')
+    time.sleep(8)  # date changes require some time for their backend
 
     # unleash the fire when the time's ready
-    start_busy_wait(wl_booking_el)
+    start_busy_wait()
 
     # let the fire extinguish
     time.sleep(20)
@@ -53,7 +58,7 @@ def start():
     ticket_el = findWLbooking_el()
     ticket_el.click()
     time.sleep(4)
-    book_completed = did_i_booked(verbosity=True)
+    book_completed = did_i_booked()
 
     # end of the process
     time.sleep(5)
@@ -68,7 +73,7 @@ def start():
 
 
 def login(login_el):
-    print('Logging in at ' + str(datetime.now().time()))
+    LOG.info('Logging in')
     f = open('config.json', 'r')
     config = json.load(f)
     username_el = login_el.find_element(By.ID, 'Input_UserName')
@@ -77,9 +82,11 @@ def login(login_el):
     pwd_el.send_keys(config['Password'])
     submit_el = login_el.find_element(By.TAG_NAME, 'button')
     submit_el.click()
+    LOG.info('Logged in')
 
 
 def set_date_to_next_week():
+    LOG.info('Setting date to next week')
     element = WebDriverWait(driver, 5).until(
         EC.presence_of_element_located(
             (By.ID, 'AthleteTheme_wt6_block_wtMainContent_wt9_W_Utils_UI_wt216_block_wtDateInputFrom'))
@@ -91,40 +98,35 @@ def set_date_to_next_week():
 
 def findWLbooking_el():
     span_inner_el = WebDriverWait(driver, 10).until(
-        EC.presence_of_element_located((By.XPATH, '//span[@title='' + CLASS_TARGET + '']'))
+        EC.presence_of_element_located((By.XPATH, "//span[@title='" + CLASS_TARGET + "']"))
     )
     outer_el = span_inner_el.find_element(By.XPATH, '../../..')
-    booking_el = outer_el.find_elements(By.XPATH, './/a')
-    return booking_el[1]
+    booking_el = outer_el.find_element(By.XPATH, ".//a[@title='Reserve spot in class']")
+    return booking_el
 
 
-def start_busy_wait(wl_booking_el):
+def start_busy_wait():
     finish = False
     clicks = 0
-
+    LOG.info('Waiting for fire to start')
     while not finish:
         now = datetime.now().time()
 
-        if now >= datetime.strptime(FIRE_START_AT, '%H:%M:%S').time():
+        if now >= datetime.strptime(FIRE_START_AT, '%H:%M:%S.%f').time():
             refresh_page()
-            print('Fire started at ' + str(datetime.now().time()))
+            wl_booking_el = findWLbooking_el()
+            LOG.info('Fire started at ' + str(datetime.now().time()))
             while not finish:
                 wl_booking_el.click()
                 clicks += 1
-                if did_i_booked():
-                    finish = True
-                    print('Booked after ' + str(clicks) + ' clicks, at ' + str(datetime.now().time()))
                 if clicks > MAX_ATTEMPTS:
                     finish = True
-                    print('reached the maximum number of attempts at ' + str(datetime.now().time()))
-                time.sleep(1)
-                refresh_page()
-                wl_booking_el = findWLbooking_el()
+                    LOG.info('reached the maximum number of attempts at ' + str(datetime.now().time()))
 
-        time.sleep(3)
+        time.sleep(1)
 
 
-def did_i_booked(verbosity=False):
+def did_i_booked():
     try:
         fdb_element = WebDriverWait(driver, 10).until(
             EC.presence_of_element_located(
@@ -133,17 +135,14 @@ def did_i_booked(verbosity=False):
         text_found = fdb_element.text.rstrip().lower()
         if text_found == 'Reservation Confirmed'.lower() or \
                 text_found == 'You have a reservation for this class'.lower():
-            if verbosity:
-                print('Found the correct ticket icon with the correct text')
+            LOG.info('Found the correct ticket icon with the correct text')
             return True
         else:
-            if verbosity:
-                print('Found the correct ticket icon without the correct text')
-                print('The text found was ' + str(text_found))
+            LOG.error('Found the correct ticket icon without the correct text')
+            LOG.error('The text found was ' + str(text_found))
             return False
     except:
-        if verbosity:
-            print('Didn\'t found the correct ticket in 10 seconds')
+        LOG.error('Didn\'t found the correct ticket in 10 seconds')
         return False
 
 
@@ -154,6 +153,7 @@ def send_me_an_email(message):
 
 
 def refresh_page():
+    LOG.info('Refreshing page')
     driver.get(URL)
     driver.refresh()
 
@@ -164,5 +164,6 @@ if __name__ == '__main__':
     while not time_to_start:
         if datetime.now().time() >= datetime.strptime(PROCEDURE_START_AT, '%H:%M:%S').time():
             time_to_start = True
+            LOG.info('Starting the procedure')
             start()
         time.sleep(10)
