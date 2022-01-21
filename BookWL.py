@@ -64,10 +64,10 @@ def start():
     time.sleep(5)
     driver.close()
 
-    if book_completed:
-        mail_text = 'Booked WL Class for next week'
-    else:
-        mail_text = 'I was not able to book WL class for next week. Sorry :( :('
+    # if book_completed:
+    #     mail_text = 'Booked WL Class for next week'
+    # else:
+    #     mail_text = 'I was not able to book WL class for next week. Sorry :( :('
 
     send_me_an_email(mail_text)
 
@@ -113,10 +113,10 @@ def start_busy_wait():
         now = datetime.now().time()
 
         if now >= datetime.strptime(FIRE_START_AT, '%H:%M:%S.%f').time():
-            refresh_page()
-            wl_booking_el = findWLbooking_el()
             LOG.info('Fire started at ' + str(datetime.now().time()))
             while not finish:
+                refresh_page()
+                wl_booking_el = findWLbooking_el()
                 wl_booking_el.click()
                 clicks += 1
                 if clicks > MAX_ATTEMPTS:
