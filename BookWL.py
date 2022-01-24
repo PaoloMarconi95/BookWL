@@ -3,6 +3,7 @@ import time
 import datetime as dt
 from datetime import datetime
 import requests
+from selenium.common.exceptions import NoSuchElementException
 
 from selenium.webdriver.support import expected_conditions as EC
 from selenium import webdriver
@@ -13,9 +14,9 @@ from selenium.webdriver.chrome.options import Options
 # noinspection PyPep8Naming
 from Log import Log as LOG
 
-MAX_ATTEMPTS = 20
-PROCEDURE_START_AT = '17:18:10'
-FIRE_START_AT = '17:22:59.999'
+MAX_ATTEMPTS = 30
+PROCEDURE_START_AT = '17:59:00'
+FIRE_START_AT = '17:59:58.999'
 CLASS_TARGET = 'WEIGHTLIFTING 19.00'
 
 
@@ -49,16 +50,7 @@ def start():
     time.sleep(8)  # date changes require some time for their backend
 
     # unleash the fire when the time's ready
-    start_busy_wait()
-
-    # let the fire extinguish
-    time.sleep(20)
-
-    # Check the registration success by clicking on ticket icon
-    ticket_el = findWLbooking_el()
-    ticket_el.click()
-    time.sleep(4)
-    book_completed = did_i_booked()
+    book_completed = book_class()
 
     # end of the process
     time.sleep(5)
@@ -96,17 +88,18 @@ def set_date_to_next_week():
     element.send_keys(date_of_today_plus_7)
 
 
-def findWLbooking_el():
-    span_inner_el = WebDriverWait(driver, 10).until(
+def find_booking_el_and_class_row():
+    span_inner_el = WebDriverWait(driver, 2).until(
         EC.presence_of_element_located((By.XPATH, "//span[@title='" + CLASS_TARGET + "']"))
     )
-    outer_el = span_inner_el.find_element(By.XPATH, '../../..')
-    booking_el = outer_el.find_element(By.XPATH, ".//a[@title='Reserve spot in class']")
-    return booking_el
+    wl_class_row = span_inner_el.find_element(By.XPATH, '../../..')
+    booking_el = wl_class_row.find_element(By.XPATH, ".//a[@title='Reserve spot in class']")
+    return booking_el, wl_class_row
 
 
-def start_busy_wait():
+def book_class():
     finish = False
+    success = False
     clicks = 0
     LOG.info('Waiting for fire to start')
     while not finish:
@@ -116,33 +109,27 @@ def start_busy_wait():
             LOG.info('Fire started at ' + str(datetime.now().time()))
             while not finish:
                 refresh_page()
-                wl_booking_el = findWLbooking_el()
+                wl_booking_el, wl_class_row = find_booking_el_and_class_row()
                 wl_booking_el.click()
                 clicks += 1
+                if find_ticket_icon_within(wl_class_row):
+                    finish = True
+                    success = True
+                    LOG.info('Booked after ' + str(clicks) + ' clicks')
                 if clicks > MAX_ATTEMPTS:
                     finish = True
                     LOG.info('reached the maximum number of attempts at ' + str(datetime.now().time()))
 
-        time.sleep(1)
+        time.sleep(0.5)
+
+    return success
 
 
-def did_i_booked():
+def find_ticket_icon_within(wl_class_row):
     try:
-        fdb_element = WebDriverWait(driver, 10).until(
-            EC.presence_of_element_located(
-                (By.CLASS_NAME, 'Feedback_Message_Text'))
-        )
-        text_found = fdb_element.text.rstrip().lower()
-        if text_found == 'Reservation Confirmed'.lower() or \
-                text_found == 'You have a reservation for this class'.lower():
-            LOG.info('Found the correct ticket icon with the correct text')
-            return True
-        else:
-            LOG.error('Found the correct ticket icon without the correct text')
-            LOG.error('The text found was ' + str(text_found))
-            return False
-    except:
-        LOG.error('Didn\'t found the correct ticket in 10 seconds')
+        wl_class_row.find_element(By.CLASS_NAME, 'icon-ticket')
+        return True
+    except NoSuchElementException:
         return False
 
 
@@ -153,7 +140,6 @@ def send_me_an_email(message):
 
 
 def refresh_page():
-    LOG.info('Refreshing page')
     driver.get(URL)
     driver.refresh()
 
