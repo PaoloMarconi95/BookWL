@@ -5,7 +5,7 @@ from datetime import datetime
 class Log:
 
     def __init__(self, entry_point):
-        # initialize a log file, named by the date in which it was created
+        # initialize a log file, named after the date in which it was created
         self.file = open('./Logs/' + str(dt.date.today()) + '_' + entry_point + '.txt', 'w+')
         self.file.close()
         super().__init__()

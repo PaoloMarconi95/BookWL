@@ -33,7 +33,7 @@ def start():
 
     # set correct class and sign in
     set_correct_class_for_dropdown(class_reserved)
-    sign_in()
+    click_sign_in_button()
     LOG.info('Process correctly ended, closing driver')
 
     driver.close()
@@ -121,7 +121,7 @@ def set_correct_class_for_dropdown(class_name):
         raise ClassNotFoundWithinDropDownException(class_name)
 
 
-def sign_in():
+def click_sign_in_button():
     LOG.info('Clicking sign-in button')
     signin_button = WebDriverWait(driver, 10).until(
         EC.presence_of_element_located((By.ID, 'AthleteTheme_wtLayout_block_wtSubNavigation_wtSignInButton2'))
