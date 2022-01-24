@@ -15,8 +15,6 @@ from Log import Log as LOG
 
 
 def start():
-    set_global_variables()
-
     # Set page to calendar
     driver.get(CALENDAR_URL)
 
@@ -132,4 +130,8 @@ def sign_in():
 
 
 if __name__ == '__main__':
-    start()
+    try:
+        set_global_variables()
+        start()
+    except Exception as e:
+        LOG.error(str(e))
