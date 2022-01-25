@@ -58,8 +58,10 @@ def start():
     driver.close()
 
     if book_completed:
+        LOG.info('Successfully booked ' + CLASS_TARGET)
         mail_text = 'Booked WL Class for next week'
     else:
+        LOG.error('Class not booked!!')
         mail_text = 'I was not able to book WL class for next week. Sorry :( :('
 
     send_me_an_email(mail_text)
@@ -108,7 +110,7 @@ def book_class():
         now = datetime.now().time()
 
         if now >= datetime.strptime(FIRE_START_AT, '%H:%M:%S').time():
-            LOG.info('Fire started at ' + str(datetime.now().time()))
+            LOG.info('Fire started')
             while not finish:
                 refresh_page()
                 wl_booking_el, wl_class_row = find_booking_el_and_class_row()
@@ -120,7 +122,7 @@ def book_class():
                     LOG.info('Booked after ' + str(clicks) + ' clicks')
                 if clicks > MAX_ATTEMPTS:
                     finish = True
-                    LOG.info('reached the maximum number of attempts at ' + str(datetime.now().time()))
+                    LOG.info('reached the maximum number of attempts')
 
         time.sleep(0.5)
 
