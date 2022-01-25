@@ -15,8 +15,8 @@ from selenium.webdriver.chrome.options import Options
 from Log import Log as LOG
 
 MAX_ATTEMPTS = 30
-PROCEDURE_START_AT = '17:59:00'
-FIRE_START_AT = '17:59:58.999'
+PROCEDURE_START_AT = '18:58:00'
+FIRE_START_AT = '18:59:57'
 CLASS_TARGET = 'WEIGHTLIFTING 19.00'
 
 
@@ -33,6 +33,7 @@ def set_global_variables():
     driver.get(URL)
     LOG = LOG('BookWL')
     LOG.info('Global variables set')
+    f.close()
 
 
 def start():
@@ -75,6 +76,7 @@ def login(login_el):
     submit_el = login_el.find_element(By.TAG_NAME, 'button')
     submit_el.click()
     LOG.info('Logged in')
+    f.close()
 
 
 def set_date_to_next_week():
@@ -105,7 +107,7 @@ def book_class():
     while not finish:
         now = datetime.now().time()
 
-        if now >= datetime.strptime(FIRE_START_AT, '%H:%M:%S.%f').time():
+        if now >= datetime.strptime(FIRE_START_AT, '%H:%M:%S').time():
             LOG.info('Fire started at ' + str(datetime.now().time()))
             while not finish:
                 refresh_page()
