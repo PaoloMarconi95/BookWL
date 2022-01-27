@@ -3,7 +3,7 @@ import time
 import datetime as dt
 from datetime import datetime
 import requests
-from selenium.common.exceptions import NoSuchElementException
+from selenium.common.exceptions import NoSuchElementException, TimeoutException
 
 from selenium.webdriver.support import expected_conditions as EC
 from selenium import webdriver
@@ -37,12 +37,12 @@ def set_global_variables():
 
 
 def start():
-    login_el = WebDriverWait(driver, 5).until(
-        EC.presence_of_element_located((By.ID, 'FormLogin'))
-    )
-    if login_el is not None:
+    try:
+        login_el = WebDriverWait(driver, 5).until(
+            EC.presence_of_element_located((By.ID, 'FormLogin'))
+        )
         login(login_el)
-    else:
+    except TimeoutException:
         time.sleep(5)
 
     # prepare the target for the fire
@@ -97,7 +97,7 @@ def find_booking_el_and_class_row():
         EC.presence_of_element_located((By.XPATH, "//span[@title='" + CLASS_TARGET + "']"))
     )
     wl_class_row = span_inner_el.find_element(By.XPATH, '../../..')
-    booking_el = wl_class_row.find_element(By.XPATH, ".//a[@title='Reserve spot in class']")
+    booking_el = wl_class_row.find_element(By.XPATH, ".//a[@title='Make Reservation']")
     return booking_el, wl_class_row
 
 
@@ -112,17 +112,20 @@ def book_class():
         if now >= datetime.strptime(FIRE_START_AT, '%H:%M:%S').time():
             LOG.info('Fire started')
             while not finish:
-                refresh_page()
-                wl_booking_el, wl_class_row = find_booking_el_and_class_row()
-                wl_booking_el.click()
-                clicks += 1
-                if find_ticket_icon_within(wl_class_row):
-                    finish = True
-                    success = True
-                    LOG.info('Booked after ' + str(clicks) + ' clicks')
-                if clicks > MAX_ATTEMPTS:
-                    finish = True
-                    LOG.info('reached the maximum number of attempts')
+                driver.refresh()
+                try:
+                    wl_booking_el, wl_class_row = find_booking_el_and_class_row()
+                    wl_booking_el.click()
+                    clicks += 1
+                    if find_ticket_icon_within(wl_class_row):
+                        finish = True
+                        success = True
+                        LOG.info('Booked after ' + str(clicks) + ' clicks')
+                    if clicks > MAX_ATTEMPTS:
+                        finish = True
+                        LOG.info('reached the maximum number of attempts')
+                except NoSuchElementException:
+                    LOG.info('Class not open yet')
 
         time.sleep(0.5)
 
@@ -143,17 +146,17 @@ def send_me_an_email(message):
     requests.post(url, data=msg)
 
 
-def refresh_page():
-    driver.get(URL)
-    driver.refresh()
-
-
 if __name__ == '__main__':
+    global driver
     set_global_variables()
     time_to_start = False
     while not time_to_start:
         if datetime.now().time() >= datetime.strptime(PROCEDURE_START_AT, '%H:%M:%S').time():
             time_to_start = True
             LOG.info('Starting the procedure')
-            start()
+            try:
+                start()
+            except Exception as e:
+                LOG.error(str(e.__class__) + ' : ' + str(e))
+                driver.close()
         time.sleep(10)

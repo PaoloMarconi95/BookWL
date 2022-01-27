@@ -130,8 +130,10 @@ def click_sign_in_button():
 
 
 if __name__ == '__main__':
+    global driver
+    set_global_variables()
     try:
-        set_global_variables()
         start()
     except Exception as e:
-        LOG.error(str(e))
+        LOG.error(str(e.__class__) + ' : ' + str(e))
+        driver.close()
