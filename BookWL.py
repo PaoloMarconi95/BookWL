@@ -15,12 +15,9 @@ from selenium.webdriver.chrome.options import Options
 from Log import Log as LOG
 
 MAX_ATTEMPTS = 30
-# PROCEDURE_START_AT = '18:58:00'
-# FIRE_START_AT = '18:59:57'
-# CLASS_TARGET = 'WEIGHTLIFTING 19.00'
-PROCEDURE_START_AT = '08:21:00'
-FIRE_START_AT = '08:22:00'
-CLASS_TARGET = '19:00 WOD'
+PROCEDURE_START_AT = '18:58:00'
+FIRE_START_AT = '18:59:57'
+CLASS_TARGET = 'WEIGHTLIFTING 19.00'
 
 def set_global_variables():
     global URL, driver, LOG
