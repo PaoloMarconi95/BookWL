@@ -15,10 +15,12 @@ from selenium.webdriver.chrome.options import Options
 from Log import Log as LOG
 
 MAX_ATTEMPTS = 30
-PROCEDURE_START_AT = '18:58:00'
-FIRE_START_AT = '18:59:57'
-CLASS_TARGET = 'WEIGHTLIFTING 19.00'
-
+# PROCEDURE_START_AT = '18:58:00'
+# FIRE_START_AT = '18:59:57'
+# CLASS_TARGET = 'WEIGHTLIFTING 19.00'
+PROCEDURE_START_AT = '08:21:00'
+FIRE_START_AT = '08:22:00'
+CLASS_TARGET = '19:00 WOD'
 
 def set_global_variables():
     global URL, driver, LOG
@@ -81,6 +83,15 @@ def login(login_el):
     f.close()
 
 
+def get_row_class_target():
+    span_inner_el = WebDriverWait(driver, 2).until(
+        EC.presence_of_element_located((By.XPATH, "//span[@title='" + CLASS_TARGET + "']"))
+    )
+    wl_class_row = span_inner_el.find_element(By.XPATH, '../../..')
+    return wl_class_row
+
+
+
 def set_date_to_next_week():
     LOG.info('Setting date to next week')
     element = WebDriverWait(driver, 5).until(
@@ -98,7 +109,7 @@ def find_booking_el_and_class_row():
     )
     wl_class_row = span_inner_el.find_element(By.XPATH, '../../..')
     booking_el = wl_class_row.find_element(By.XPATH, ".//a[@title='Make Reservation']")
-    return booking_el, wl_class_row
+    return booking_el
 
 
 def book_class():
@@ -114,29 +125,34 @@ def book_class():
             while not finish:
                 driver.refresh()
                 try:
-                    wl_booking_el, wl_class_row = find_booking_el_and_class_row()
+                    wl_booking_el = find_booking_el_and_class_row()
                     wl_booking_el.click()
                     clicks += 1
-                    if find_ticket_icon_within(wl_class_row):
-                        finish = True
-                        success = True
-                        LOG.info('Booked after ' + str(clicks) + ' clicks')
                     if clicks > MAX_ATTEMPTS:
                         finish = True
                         LOG.info('reached the maximum number of attempts')
                 except NoSuchElementException:
-                    LOG.info('Class not open yet')
+                    LOG.info('Make Reservation title not found, could be already booked or not opened yet')
+                    if find_ticket_icon():
+                        finish = True
+                        success = True
+                        LOG.info('Booked after ' + str(clicks) + ' clicks')
 
         time.sleep(0.5)
 
     return success
 
 
-def find_ticket_icon_within(wl_class_row):
+def find_ticket_icon():
+    span_inner_el = WebDriverWait(driver, 2).until(
+        EC.presence_of_element_located((By.XPATH, "//span[@title='" + CLASS_TARGET + "']"))
+    )
+    wl_class_row = span_inner_el.find_element(By.XPATH, '../../..')
     try:
-        wl_class_row.find_element(By.CLASS_NAME, 'icon-ticket')
+        wl_class_row.find_element(By.CSS_SELECTOR, '.icon.icon-ticket')
         return True
     except NoSuchElementException:
+        LOG.info('Didn\'t find icon svg')
         return False
 
 
