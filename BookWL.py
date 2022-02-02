@@ -112,7 +112,7 @@ def find_booking_el_and_class_row():
 def book_class():
     finish = False
     success = False
-    clicks = 0
+    clicks, tries = 0, 0
     LOG.info('Waiting for fire to start')
     while not finish:
         now = datetime.now().time()
@@ -122,14 +122,15 @@ def book_class():
             while not finish:
                 driver.refresh()
                 try:
+                    tries += 1
                     wl_booking_el = find_booking_el_and_class_row()
                     wl_booking_el.click()
                     clicks += 1
-                    if clicks > MAX_ATTEMPTS:
-                        finish = True
-                        LOG.info('reached the maximum number of attempts')
                 except NoSuchElementException:
                     LOG.info('Make Reservation title not found, could be already booked or not opened yet')
+                    if tries > MAX_ATTEMPTS:
+                        finish = True
+                        LOG.info('reached the maximum number of attempts')
                     if find_ticket_icon():
                         finish = True
                         success = True
