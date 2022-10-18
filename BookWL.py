@@ -3,7 +3,7 @@ import time
 import datetime as dt
 from datetime import datetime
 import requests
-from selenium.common.exceptions import NoSuchElementException, TimeoutException
+from selenium.common.exceptions import NoSuchElementException, TimeoutException, SessionNotCreatedException
 
 from selenium.webdriver.support import expected_conditions as EC
 from selenium import webdriver
@@ -19,6 +19,7 @@ PROCEDURE_START_AT = '18:58:00'
 FIRE_START_AT = '18:59:57'
 CLASS_TARGET = 'WEIGHTLIFTING 19.00'
 
+
 def set_global_variables():
     global URL, driver, LOG
 
@@ -28,7 +29,11 @@ def set_global_variables():
 
     options = Options()
     # options.headless = True
-    driver = webdriver.Chrome(options=options)
+    try:
+        driver = webdriver.Chrome(options=options)
+    except SessionNotCreatedException as exc:
+        LOG.warn('Error occurred in driver initialization. Trying to retrieve an updated version of chromedriver...')
+        print(str(exc))
     driver.get(URL)
     LOG = LOG('BookWL')
     LOG.info('Global variables set')
@@ -50,13 +55,13 @@ def start():
     time.sleep(8)  # date changes require some time for their backend
 
     # unleash the fire when the time's ready
-    book_completed = book_class()
+    is_book_completed = book_class()
 
     # end of the process
     time.sleep(5)
     driver.close()
 
-    if book_completed:
+    if is_book_completed:
         LOG.info('Successfully booked ' + CLASS_TARGET)
         mail_text = 'Booked WL Class for next week'
     else:
@@ -86,7 +91,6 @@ def get_row_class_target():
     )
     wl_class_row = span_inner_el.find_element(By.XPATH, '../../..')
     return wl_class_row
-
 
 
 def set_date_to_next_week():
