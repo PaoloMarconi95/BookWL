@@ -3,7 +3,7 @@ from zipfile import ZipFile
 
 BASE_ZIP_PATH = 'https://chromedriver.storage.googleapis.com/'
 ZIP_FILE_NAME = 'chromedriver_win32.zip'
-ZIP_LOCAL_FOLDER = 'C:/Users/paolo.marconi/Desktop/pha/'
+ZIP_LOCAL_FOLDER = 'C:/Users/paolo.marconi/Desktop/prova/'
 
 
 def start_update():
