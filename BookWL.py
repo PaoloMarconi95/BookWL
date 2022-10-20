@@ -3,21 +3,25 @@ import time
 import datetime as dt
 from datetime import datetime
 import requests
-from selenium.common.exceptions import NoSuchElementException, TimeoutException, SessionNotCreatedException
 
 from selenium.webdriver.support import expected_conditions as EC
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.chrome.options import Options
+from selenium.common.exceptions import NoSuchElementException, TimeoutException, SessionNotCreatedException, \
+    WebDriverException
 
 # noinspection PyPep8Naming
 from Log import Log as LOG
+
+from ChromeDriverUpdater import update_chromedriver
 
 MAX_ATTEMPTS = 30
 PROCEDURE_START_AT = '18:58:00'
 FIRE_START_AT = '18:59:57'
 CLASS_TARGET = 'WEIGHTLIFTING 19.00'
+MAX_START_ATTEMPTS = 3
 
 
 def set_global_variables():
@@ -26,18 +30,21 @@ def set_global_variables():
     f = open('config.json', 'r')
     config = json.load(f)
     URL = config['CALENDAR_URL']
+    LOG = LOG('BookWL')
 
     options = Options()
     # options.headless = True
     try:
         driver = webdriver.Chrome(options=options)
-    except SessionNotCreatedException as exc:
+        driver.get(URL)
+    except (SessionNotCreatedException, WebDriverException):
         LOG.warn('Error occurred in driver initialization. Trying to retrieve an updated version of chromedriver...')
-        print(str(exc))
-    driver.get(URL)
-    LOG = LOG('BookWL')
-    LOG.info('Global variables set')
-    f.close()
+        raise SessionNotCreatedException
+    except FileNotFoundError as e:
+        print(str(e))
+        print('blblbl')
+    finally:
+        f.close()
 
 
 def start():
@@ -166,15 +173,35 @@ def send_me_an_email(message):
 
 if __name__ == '__main__':
     global driver
-    set_global_variables()
-    time_to_start = False
-    while not time_to_start:
-        if datetime.now().time() >= datetime.strptime(PROCEDURE_START_AT, '%H:%M:%S').time():
-            time_to_start = True
-            LOG.info('Starting the procedure')
-            try:
-                start()
-            except Exception as e:
-                LOG.error(str(e.__class__) + ' : ' + str(e))
-                driver.close()
-        time.sleep(10)
+    start_attempts = 0
+    initialized = False
+
+    # Try to initialize global variables, main Exception may occur
+    # from a non-updated version of chromedriver
+    while not initialized and start_attempts != MAX_START_ATTEMPTS:
+        try:
+            set_global_variables()
+            initialized = True
+        except:
+            initialized = update_chromedriver()
+            start_attempts += 1
+            LOG.warn('set_global_variables, ' + str(MAX_START_ATTEMPTS - start_attempts) + ' attempts remaining')
+
+    # If ChromeDriverUpdater terminated correctly, proceed with booking
+    if initialized:
+        LOG.info('Instance correctly initialized')
+        time_to_start = False
+        # Wait until it's time to start the process
+        while not time_to_start:
+            if datetime.now().time() >= datetime.strptime(PROCEDURE_START_AT, '%H:%M:%S').time():
+                time_to_start = True
+                try:
+                    LOG.info('Starting the procedure')
+                    start()
+                except Exception as e:
+                    LOG.error(str(e.__class__) + ' : ' + str(e))
+                    driver.close()
+            LOG.info('Waiting for the correct dayTime...')
+            time.sleep(10)
+    else:
+        LOG.error('System failed to initialize session. check log for more info')
