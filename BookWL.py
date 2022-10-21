@@ -1,9 +1,11 @@
+# Standard
 import json
 import time
 import datetime as dt
 from datetime import datetime
 import requests
 
+# Selenium
 from selenium.webdriver.support import expected_conditions as EC
 from selenium import webdriver
 from selenium.webdriver.common.by import By
@@ -12,19 +14,20 @@ from selenium.webdriver.chrome.options import Options
 from selenium.common.exceptions import NoSuchElementException, TimeoutException, SessionNotCreatedException, \
     WebDriverException
 
+# Custom
 from Log import Log
-
 from ChromeDriverUpdater import update_chromedriver
 
 MAX_ATTEMPTS = 30
-PROCEDURE_START_AT = '18:58:00'
-FIRE_START_AT = '18:59:57'
+PROCEDURE_START_AT = '16:56:00'
+FIRE_START_AT = '16:59:12'
 CLASS_TARGET = 'WEIGHTLIFTING 19.00'
 MAX_START_ATTEMPTS = 3
+Log = Log.get_instance()
 
 
 def set_global_variables():
-    global URL, driver, Log
+    global URL, driver
 
     f = open('config.json', 'r')
     config = json.load(f)
@@ -35,7 +38,7 @@ def set_global_variables():
     try:
         driver = webdriver.Chrome(options=options)
         driver.get(URL)
-    except (SessionNotCreatedException, WebDriverException, FileNotFoundError) as e:
+    except (SessionNotCreatedException, WebDriverException, FileNotFoundError):
         Log.warn('Error occurred in driver initialization. Trying to retrieve an updated version of chromedriver...')
         raise SessionNotCreatedException
     finally:
@@ -51,12 +54,12 @@ def start():
     except TimeoutException:
         time.sleep(5)
 
-    # prepare the target for the fire
+    # prepare the target
     set_date_to_next_week()
-    Log.info('Waiting for their backend to complete the date changing')
+    Log.info('Waiting for their backend to complete the date change')
     time.sleep(8)  # date changes require some time for their backend
 
-    # unleash the fire when the time's ready
+    # unleash the fire when it's the time
     is_book_completed = book_class()
 
     # end of the process
@@ -167,8 +170,7 @@ def send_me_an_email(message):
 
 
 if __name__ == '__main__':
-    global driver, log
-    Log = Log.get_instance()
+    global driver
     start_attempts = 0
     initialized = False
 
@@ -181,9 +183,12 @@ if __name__ == '__main__':
         except:
             initialized = update_chromedriver()
             start_attempts += 1
-            Log.warn('set_global_variables, ' + str(MAX_START_ATTEMPTS - start_attempts) + ' attempts remaining')
+            Log.info('set_global_variables, ' + str(MAX_START_ATTEMPTS - start_attempts) + ' attempts remaining')
+            if initialized:
+                Log.info('chromedriver updated, trying to redefine global variables')
+                set_global_variables()
 
-    # If ChromeDriverUpdater terminated correctly, proceed with booking
+    # If ChromeDriverUpdater terminated correctly, proceed with booking algorithm
     if initialized:
         Log.info('Instance correctly initialized')
         time_to_start = False
@@ -197,7 +202,7 @@ if __name__ == '__main__':
                 except Exception as e:
                     Log.error(str(e.__class__) + ' : ' + str(e))
                     driver.close()
-            Log.info('Waiting for the correct dayTime...')
+            Log.info('Waiting for correct dayTime...')
             time.sleep(10)
     else:
         Log.error('System failed to initialize session. check log for more info')
