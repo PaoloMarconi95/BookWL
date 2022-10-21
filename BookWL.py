@@ -12,8 +12,7 @@ from selenium.webdriver.chrome.options import Options
 from selenium.common.exceptions import NoSuchElementException, TimeoutException, SessionNotCreatedException, \
     WebDriverException
 
-# noinspection PyPep8Naming
-from Log import Log as LOG
+from Log import Log
 
 from ChromeDriverUpdater import update_chromedriver
 
@@ -25,24 +24,20 @@ MAX_START_ATTEMPTS = 3
 
 
 def set_global_variables():
-    global URL, driver, LOG
+    global URL, driver, Log
 
     f = open('config.json', 'r')
     config = json.load(f)
     URL = config['CALENDAR_URL']
-    LOG = LOG('BookWL')
 
     options = Options()
     # options.headless = True
     try:
         driver = webdriver.Chrome(options=options)
         driver.get(URL)
-    except (SessionNotCreatedException, WebDriverException):
-        LOG.warn('Error occurred in driver initialization. Trying to retrieve an updated version of chromedriver...')
+    except (SessionNotCreatedException, WebDriverException, FileNotFoundError) as e:
+        Log.warn('Error occurred in driver initialization. Trying to retrieve an updated version of chromedriver...')
         raise SessionNotCreatedException
-    except FileNotFoundError as e:
-        print(str(e))
-        print('blblbl')
     finally:
         f.close()
 
@@ -58,7 +53,7 @@ def start():
 
     # prepare the target for the fire
     set_date_to_next_week()
-    LOG.info('Waiting for their backend to complete the date changing')
+    Log.info('Waiting for their backend to complete the date changing')
     time.sleep(8)  # date changes require some time for their backend
 
     # unleash the fire when the time's ready
@@ -69,17 +64,17 @@ def start():
     driver.close()
 
     if is_book_completed:
-        LOG.info('Successfully booked ' + CLASS_TARGET)
+        Log.info('Successfully booked ' + CLASS_TARGET)
         mail_text = 'Booked WL Class for next week'
     else:
-        LOG.error('Class not booked!!')
+        Log.error('Class not booked!!')
         mail_text = 'I was not able to book WL class for next week. Sorry :( :('
 
     send_me_an_email(mail_text)
 
 
 def login(login_el):
-    LOG.info('Logging in')
+    Log.info('Logging in')
     f = open('config.json', 'r')
     config = json.load(f)
     username_el = login_el.find_element(By.ID, 'Input_UserName')
@@ -88,7 +83,7 @@ def login(login_el):
     pwd_el.send_keys(config['Password'])
     submit_el = login_el.find_element(By.TAG_NAME, 'button')
     submit_el.click()
-    LOG.info('Logged in')
+    Log.info('Logged in')
     f.close()
 
 
@@ -101,7 +96,7 @@ def get_row_class_target():
 
 
 def set_date_to_next_week():
-    LOG.info('Setting date to next week')
+    Log.info('Setting date to next week')
     element = WebDriverWait(driver, 5).until(
         EC.presence_of_element_located(
             (By.ID, 'AthleteTheme_wt6_block_wtMainContent_wt9_W_Utils_UI_wt216_block_wtDateInputFrom'))
@@ -124,12 +119,12 @@ def book_class():
     finish = False
     success = False
     clicks, tries = 0, 0
-    LOG.info('Waiting for fire to start')
+    Log.info('Waiting for fire to start')
     while not finish:
         now = datetime.now().time()
 
         if now >= datetime.strptime(FIRE_START_AT, '%H:%M:%S').time():
-            LOG.info('Fire started')
+            Log.info('Fire started')
             while not finish:
                 driver.refresh()
                 try:
@@ -138,14 +133,14 @@ def book_class():
                     wl_booking_el.click()
                     clicks += 1
                 except NoSuchElementException:
-                    LOG.info('Make Reservation title not found, could be already booked or not opened yet')
+                    Log.info('Make Reservation title not found, could be already booked or not opened yet')
                     if tries > MAX_ATTEMPTS:
                         finish = True
-                        LOG.info('reached the maximum number of attempts')
+                        Log.info('reached the maximum number of attempts')
                     if find_ticket_icon():
                         finish = True
                         success = True
-                        LOG.info('Booked after ' + str(clicks) + ' clicks')
+                        Log.info('Booked after ' + str(clicks) + ' clicks')
 
         time.sleep(0.5)
 
@@ -161,7 +156,7 @@ def find_ticket_icon():
         wl_class_row.find_element(By.CSS_SELECTOR, '.icon.icon-ticket')
         return True
     except NoSuchElementException:
-        LOG.info('Didn\'t find icon svg')
+        Log.info('Didn\'t find icon svg')
         return False
 
 
@@ -172,7 +167,8 @@ def send_me_an_email(message):
 
 
 if __name__ == '__main__':
-    global driver
+    global driver, log
+    Log = Log.get_instance()
     start_attempts = 0
     initialized = False
 
@@ -185,23 +181,23 @@ if __name__ == '__main__':
         except:
             initialized = update_chromedriver()
             start_attempts += 1
-            LOG.warn('set_global_variables, ' + str(MAX_START_ATTEMPTS - start_attempts) + ' attempts remaining')
+            Log.warn('set_global_variables, ' + str(MAX_START_ATTEMPTS - start_attempts) + ' attempts remaining')
 
     # If ChromeDriverUpdater terminated correctly, proceed with booking
     if initialized:
-        LOG.info('Instance correctly initialized')
+        Log.info('Instance correctly initialized')
         time_to_start = False
         # Wait until it's time to start the process
         while not time_to_start:
             if datetime.now().time() >= datetime.strptime(PROCEDURE_START_AT, '%H:%M:%S').time():
                 time_to_start = True
                 try:
-                    LOG.info('Starting the procedure')
+                    Log.info('Starting the procedure')
                     start()
                 except Exception as e:
-                    LOG.error(str(e.__class__) + ' : ' + str(e))
+                    Log.error(str(e.__class__) + ' : ' + str(e))
                     driver.close()
-            LOG.info('Waiting for the correct dayTime...')
+            Log.info('Waiting for the correct dayTime...')
             time.sleep(10)
     else:
-        LOG.error('System failed to initialize session. check log for more info')
+        Log.error('System failed to initialize session. check log for more info')
