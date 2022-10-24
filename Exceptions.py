@@ -2,6 +2,10 @@ class NoReservationFoundException(Exception):
     pass
 
 
+class GlobalVariablesNotSetException(Exception):
+    pass
+
+
 class ClassNotFoundWithinDropDownException(Exception):
 
     def __init__(self, class_name, message='Class not found within dropdown with value '):

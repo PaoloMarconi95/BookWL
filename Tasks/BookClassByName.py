@@ -16,7 +16,7 @@ from selenium.common.exceptions import NoSuchElementException, TimeoutException,
 
 # Custom
 from Log import Log
-from ChromeDriverUpdater import update_chromedriver
+from Tasks.ChromeDriverUpdater import update_chromedriver
 
 MAX_ATTEMPTS = 30
 PROCEDURE_START_AT = '16:56:00'

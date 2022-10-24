@@ -44,7 +44,7 @@ def set_global_variables():
     options = Options()
     # options.headless = True
     driver = webdriver.Chrome(options=options)
-    f = open('config.json', 'r')
+    f = open('../config.json', 'r')
     config = json.load(f)
     SIGNIN_URL = config['SIGNIN_URL']
     CALENDAR_URL = config['CALENDAR_URL']
@@ -54,7 +54,7 @@ def set_global_variables():
 
 def login(login_el):
     LOG.info('Logging in at ' + str(datetime.now().time()))
-    f = open('config.json', 'r')
+    f = open('../config.json', 'r')
     config = json.load(f)
     username_el = login_el.find_element(By.ID, 'Input_UserName')
     username_el.send_keys(config['Username'])
