@@ -2,6 +2,7 @@ import requests
 from zipfile import ZipFile
 import os
 from Log import Log
+Log = Log.get_instance()
 
 BASE_ZIP_PATH = 'https://chromedriver.storage.googleapis.com/'
 ZIP_FILE_NAME = 'chromedriver_win32.zip'
@@ -9,7 +10,6 @@ CHROMEDRIVER_FOLDER = 'C:/Users/Public/Selenium/'
 
 
 def update_chromedriver():
-    log = Log.get_instance()
     log.info('Updating chromedriver...')
     response = requests.get("https://chromedriver.storage.googleapis.com/LATEST_RELEASE")
     zip_url = BASE_ZIP_PATH + response.text + '/' + ZIP_FILE_NAME
