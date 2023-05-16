@@ -1,10 +1,10 @@
 import requests
+import Log
+import Configuration
 
-class Email:
-    def __init__(self, url = 'https://da897d59ec3093f998d930d05ceb60e4.m.pipedream.net'):
-        self.url = url
-        super(self)
+conf = Configuration.conf
+log = Log.logger
 
-    def send_from_url(self, message):
-        msg = {'message': message}
-        requests.post(self.url, data=msg)
+def send_from_url(message):
+    msg = {'message': message}
+    requests.post(conf["PIPEDREAM_MAIL_WF"], data=msg)

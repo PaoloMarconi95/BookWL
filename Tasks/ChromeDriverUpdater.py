@@ -1,8 +1,8 @@
 import requests
 from zipfile import ZipFile
 import os
-from Log import Log
-Log = Log.get_instance()
+import Log
+log = Log.logger
 
 BASE_ZIP_PATH = 'https://chromedriver.storage.googleapis.com/'
 ZIP_FILE_NAME = 'chromedriver_win32.zip'

@@ -1,9 +1,16 @@
-from Tasks.Setup import setup
-from Tasks.SignIn import signin
+from Tasks.LogIn import login
+from Tasks.BookClassByName import book_class
+
+from Tasks import Configuration
+import Log
+bookings = Configuration.bookings
+log = Log.logger
 
 def main():
-    driver = setup()
-    signin(driver)
+    login()
+    for book in bookings:
+        book_class(book)
+
 
 
 

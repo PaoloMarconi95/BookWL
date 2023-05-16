@@ -1,10 +1,7 @@
 import datetime as dt
 from datetime import datetime
 
-
 class Log:
-    instance = None
-
     def __init__(self):
         # initialize a log file, named after the date in which it was created
         self.file = open('./Logs/' + str(dt.date.today()) + '_' + 'BookWL' + '.txt', 'w+')
@@ -27,8 +24,4 @@ class Log:
         self.file.write(str(datetime.now().time()) + ' - ' + severity.upper() + ": " + msg + '\n')
         self.file.close()
 
-    @staticmethod
-    def get_instance():
-        if Log.instance is None:
-            Log.instance = Log()
-        return Log.instance
+logger = Log()
