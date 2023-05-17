@@ -5,6 +5,7 @@ from datetime import datetime
 import Log
 log = Log.logger
 
+# Polling frequency in seconds
 def wait_until(correct_dt, polling_frequency=10):
     time_to_start = False
     while not time_to_start:

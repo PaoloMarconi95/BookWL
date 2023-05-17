@@ -69,13 +69,13 @@ def get_closer_date_with_weekday(week_day):
         raise ValueError("Week Day " + str(week_day) + "Invalid!")
     else:
         today_week_day = datetime.today().weekday()
-        delta = 7 - (today_week_day + (week_day - today_week_day))
-        return datetime.today() + dt.timedelta(days=delta)
+        delta = 7 + (week_day - today_week_day)
+        final_date = datetime.today() + dt.timedelta(days=delta)
+        return datetime.strftime(final_date, "%d-%m-%Y")
 
 class Booking:
 
     def __init__(self, class_name, week_day):
-        log.info('Starting booking setup')
         self.class_name = class_name
         self.date = get_closer_date_with_weekday(week_day)
 
@@ -89,7 +89,6 @@ class Config:
         self.signin_url = json_data["SIGNIN_URL"]
         self.calendar_url = json_data["CALENDAR_URL"]
         self.pipedream_mail_wf = json_data["PIPEDREAM_MAIL_WF"]
-
         # Bookings Creation
         self.bookings = []
         class_bookings = json_data["BOOKINGS"]
