@@ -8,14 +8,19 @@ log = Log.logger
 
 def main():
     login()
+    successful = []
+    unsuccessful = []
     for book in bookings:
-        book_class(book)
+        try:
+            success = book_class(book)
+            if success:
+                successful.append(book)
+        except:
+            unsuccessful.append(book)
+            log.error(f'Book {str(book.class_name)} for date {str(book.date)} did not succeeded')
 
 
 
 
 if __name__ == "__main__":
-    try:
-        main()
-    except:
-        log.error("Fatal error occurred")
+    main()

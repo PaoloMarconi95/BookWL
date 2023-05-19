@@ -7,4 +7,4 @@ log = Log.logger
 
 def send_from_url(message):
     msg = {'message': message}
-    requests.post(conf["PIPEDREAM_MAIL_WF"], data=msg)
+    requests.post(conf.pipedream_mail, data=msg)

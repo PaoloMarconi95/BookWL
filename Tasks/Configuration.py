@@ -64,7 +64,7 @@ class Configuration:
             raise GlobalVariablesNotSetException
 
 def get_closer_date_with_weekday(week_day):
-    if not(0 < week_day < 7):
+    if not(0 <= week_day <= 6):
         log.error("tried to convert " + str(week_day) + " into week day")
         raise ValueError("Week Day " + str(week_day) + "Invalid!")
     else:
@@ -75,8 +75,9 @@ def get_closer_date_with_weekday(week_day):
 
 class Booking:
 
-    def __init__(self, class_name, week_day):
+    def __init__(self, class_name, class_time, week_day):
         self.class_name = class_name
+        self.class_time = class_time
         self.date = get_closer_date_with_weekday(week_day)
 
 
@@ -88,13 +89,13 @@ class Config:
         self.password = json_data["PASSWORD"]
         self.signin_url = json_data["SIGNIN_URL"]
         self.calendar_url = json_data["CALENDAR_URL"]
-        self.pipedream_mail_wf = json_data["PIPEDREAM_MAIL_WF"]
+        self.pipedream_mail = json_data["PIPEDREAM_MAIL"]
         # Bookings Creation
         self.bookings = []
         class_bookings = json_data["BOOKINGS"]
         log.info("adding bookings to config object")
         for booking in class_bookings:
-            self.bookings.append((Booking(booking["CLASS_NAME"], booking["WEEK_DAY"])))
+            self.bookings.append((Booking(booking["CLASS_NAME"], booking["CLASS_TIME"], booking["WEEK_DAY"])))
 
 
 

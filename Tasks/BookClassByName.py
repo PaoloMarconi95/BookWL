@@ -3,16 +3,25 @@ from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.common.by import By
 
 # Standard
-from datetime import datetime
 import time
 
 # Custom
 import Log
 import Tasks.Configuration as Configuration
+from Exceptions import NoReservationFoundException
 
 log = Log.logger
 driver = Configuration.driver
 config = Configuration.conf
+
+
+def check_class_name(book, text_found):
+    class_name = book.class_name.lower()
+    class_time = book.class_time.lower()
+    text_found = text_found.lower()
+    if class_name and class_time in text_found:
+        return True
+    return False
 
 
 """
@@ -20,23 +29,32 @@ config = Configuration.conf
 :param class_name is the string representing the class name
 :return the clickable element that sends the desired reservation when clicked
 """
-def find_booking_element_by_class_name(classes, class_name):
-    class_row = list(filter(lambda daily_class: class_name in daily_class.text, classes))[0]
-    if class_row is not None:
-        booking_el = class_row.find_element(By.XPATH, ".//a[@title='Make Reservation']")
-        return booking_el
+def find_booking_row_by_book(classes, book):
+    booking_row = list(filter(lambda daily_class: check_class_name(book, daily_class.text), classes))
+    if len(booking_row) == 1:
+        booking_row = booking_row[0]
+        try:
+            # Find the Reservation Icon
+            booking_el = booking_row.find_element(By.XPATH, ".//a[@title='Make Reservation']")
+        except NoSuchElementException:
+            booking_row.find_element(By.CLASS_NAME, 'icon-ticket')
+            log.info('Reservation already made for ' + str(book.class_name) + ' at ' + str(book.date))
+            booking_el = None
+        return booking_el, booking_row
     else:
-        return None
+        raise NoReservationFoundException
 
 
-def find_ticket_icon(booked_row):
-    if booked_row is None:
-        return False
+def find_ticket_icon(book):
+    log.info('find_ticket_icon started')
     try:
-        booked_row.find_element(By.CSS_SELECTOR, '.icon.icon-ticket')
+        classes = get_all_classes_for_date(book.date)
+        _, booking_row = find_booking_row_by_book(classes, book)
+        log.info('booking row correctly retrieved')
+        booking_row.find_element(By.CLASS_NAME, 'icon-ticket')
         return True
-    except NoSuchElementException:
-        log.info('Did not find icon svg')
+    except NoSuchElementException as e:
+        log.warn('Did not find icon svg' + str(e))
         return False
 
 
@@ -49,13 +67,13 @@ def set_date(date):
 
 
 def get_all_classes_for_date(date):
-    set_date(datetime.strftime(date, '%d-%m-%y'))
+    set_date(date)
     # Waiting for site backend to render new date's data
     time.sleep(4)
 
     table_entries = driver.find_elements(By.XPATH, '//table/tbody/tr')
     # First elements is always the calendar filter
-    table_entries.pop()
+    table_entries.pop(0)
 
     daily_classes = []
     for index, el in enumerate(table_entries):
@@ -64,25 +82,26 @@ def get_all_classes_for_date(date):
             # If there's a title in first row, skip it
             continue
         elif index > 0 and el.get_attribute("style") == '':
-            # Next title reached
+            # Next title reached (day after the selected date)
             return daily_classes
         else:
             # Class row encountered, add it to daily classes
             daily_classes.append(el)
 
+
 def book_class(book):
+    booked = False
     driver.get(config.calendar_url)
     try:
         classes = get_all_classes_for_date(book.date)
         log.info("found " + str(len(classes)) + " classes for " + str(book.date))
-        booking_el = find_booking_element_by_class_name(classes, book.class_name)
+        booking_el, booking_row = find_booking_row_by_book(classes, book)
         if booking_el is not None:
             booking_el.click()
-        else:
-            log.warn("Did not find any " + str(book.class_name) + " for " + str(book.date))
-        success = find_ticket_icon(booking_el)
+            # Wait for the reservation to be sent
+            driver.refresh()
+            booked = find_ticket_icon(book)
     except NoSuchElementException:
-        success = False
         log.info('Make Reservation title not found, could be already booked or not opened yet')
 
-    return success
+    return booked

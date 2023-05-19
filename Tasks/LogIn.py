@@ -34,5 +34,5 @@ def login():
     if completed is not None:
         log.info('Successfully logged in')
     else:
-        log.error('Did not recognize successful Log in, didn\'t find AthleteTheme_wt6_block_wtMain')
+        log.error('Did not recognize successful Log in, did not find AthleteTheme_wt6_block_wtMain')
         raise NoSuchElementException('LogIn process failed, did not recognize calendar url post login')
