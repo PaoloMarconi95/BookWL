@@ -1,23 +1,25 @@
 from Tasks.LogIn import login
-from Tasks.BookClassByName import book_class
+from Tasks.Booking import book_class
 
 from Tasks import Configuration
 import Log
-bookings = Configuration.bookings
+users = Configuration.users
 log = Log.logger
 
 def main():
-    login()
-    successful = []
-    unsuccessful = []
-    for book in bookings:
-        try:
-            success = book_class(book)
-            if success:
-                successful.append(book)
-        except:
-            unsuccessful.append(book)
-            log.error(f'Book {str(book.class_name)} for date {str(book.date)} did not succeeded')
+    for user in users:
+        log.info("Starting booking process for user " + str(user.name))
+        login(user)
+        successful = []
+        unsuccessful = []
+        for book in user.bookings:
+            try:
+                success = book_class(book)
+                if success:
+                    successful.append(book)
+            except:
+                unsuccessful.append(book)
+                log.error(f'Book {str(book.class_name)} for date {str(book.date)} did not succeeded')
 
 
 

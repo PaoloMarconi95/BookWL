@@ -8,7 +8,6 @@ BASE_ZIP_PATH = 'https://chromedriver.storage.googleapis.com/'
 ZIP_FILE_NAME = 'chromedriver_win32.zip'
 CHROMEDRIVER_FOLDER = 'C:/Users/Public/Selenium/'
 
-
 def update_chromedriver():
     log.info('Updating chromedriver...')
     response = requests.get("https://chromedriver.storage.googleapis.com/LATEST_RELEASE")

@@ -2,9 +2,9 @@ import requests
 import Log
 import Configuration
 
-conf = Configuration.conf
+config = Configuration.global_config
 log = Log.logger
 
 def send_from_url(message):
     msg = {'message': message}
-    requests.post(conf.pipedream_mail, data=msg)
+    requests.post(config.pipedream_mail, data=msg)

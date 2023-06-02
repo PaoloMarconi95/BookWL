@@ -1,10 +1,12 @@
 import datetime as dt
 from datetime import datetime
+import os
 
 class Log:
     def __init__(self):
         # initialize a log file, named after the date in which it was created
-        self.file = open('./Logs/' + str(dt.date.today()) + '_' + 'BookWL' + '.txt', 'w+')
+        print('current wd:' + os.getcwd())
+        self.file = open(f'./Logs/{str(dt.date.today())}.txt', 'w+')
         self.file.close()
         super().__init__()
         Log.instance = self
