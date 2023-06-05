@@ -1,31 +1,41 @@
 import requests
 from zipfile import ZipFile
+import json
 import os
 import Log
+
 log = Log.logger
 
 BASE_ZIP_PATH = 'https://chromedriver.storage.googleapis.com/'
 ZIP_FILE_NAME = 'chromedriver_win32.zip'
-CHROMEDRIVER_FOLDER = 'C:/Users/Public/Selenium/'
 
 def update_chromedriver():
     log.info('Updating chromedriver...')
+    chromedriver_folder = get_chromedriver_folder()
     response = requests.get("https://chromedriver.storage.googleapis.com/LATEST_RELEASE")
     zip_url = BASE_ZIP_PATH + response.text + '/' + ZIP_FILE_NAME
     req = requests.get(zip_url)
 
     # If there's a previous version of chromedriver.exe, remove it
-    if os.path.isfile(CHROMEDRIVER_FOLDER + 'chromedriver.exe'):
-        os.remove(CHROMEDRIVER_FOLDER + 'chromedriver.exe')
+    if os.path.isfile(chromedriver_folder + 'chromedriver.exe'):
+        log.info('Deleting old chromedriver...')
+        os.remove(chromedriver_folder + 'chromedriver.exe')
 
     with open(get_zip_name(response.text), 'wb') as output_file:
+        log.info('Saving new chromedriver...')
         output_file.write(req.content)
-        log.info('New chromedriver saved in selected folder')
+        log.info(f'New chromedriver saved in selected folder: {get_zip_name(response.text)}')
     zf = ZipFile(get_zip_name(response.text), 'r')
-    zf.extractall(CHROMEDRIVER_FOLDER)
+    zf.extractall(chromedriver_folder)
     zf.close()
     return True
 
 
 def get_zip_name(version):
-    return CHROMEDRIVER_FOLDER + 'chromedriver_' + version + '.zip'
+    return get_chromedriver_folder() + 'chromedriver_' + version + '.zip'
+
+def get_chromedriver_folder():
+    f = open(os.getcwd() + "..\\config.json", 'r')
+    data = json.load(f)
+    f.close()
+    return data

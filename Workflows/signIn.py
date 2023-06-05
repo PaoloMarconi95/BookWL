@@ -14,13 +14,13 @@ def main():
         log.info("Starting booking process for user " + str(user.name))
         login(user)
         # Retrieve booked class for today
-        reserved_class = get_booked_class_for_current_time()
-        if reserved_class is not None:
-            # SignIn
-            sign_in(reserved_class)
-            time.sleep(5)
-
-        log_out(user.name)
+        # reserved_class = get_booked_class_for_current_time()
+        # if reserved_class is not None:
+        #     # SignIn
+        #     sign_in(reserved_class)
+        #     time.sleep(5)
+        #
+        # log_out(user.name)
 
 
 if __name__ == "__main__":
