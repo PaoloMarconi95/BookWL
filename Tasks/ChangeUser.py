@@ -13,7 +13,8 @@ log = Log.logger
 driver = Configuration.driver
 
 
-def log_out(name=None):
+def log_out(user=None):
+    name = user.name
     log.info(f"Logging out {name if name is not None else ''}")
     logout_el = WebDriverWait(driver, 5).until(
         EC.presence_of_element_located((By.XPATH, '//a[text()="Logout"]'))
