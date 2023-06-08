@@ -3,6 +3,7 @@ from zipfile import ZipFile
 import json
 import os
 import Log
+import pathlib
 
 log = Log.logger
 
@@ -35,7 +36,7 @@ def get_zip_name(version):
     return get_chromedriver_folder() + 'chromedriver_' + version + '.zip'
 
 def get_chromedriver_folder():
-    f = open(os.getcwd() + "..\\config.json", 'r')
+    f = open(os.path.join(pathlib.Path(__file__).parent.parent.resolve(), "config.json"), 'r')
     data = json.load(f)
     f.close()
-    return data
+    return data["CHROMEDRIVER_FOLDER"]

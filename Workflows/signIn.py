@@ -20,7 +20,7 @@ def main():
         #     sign_in(reserved_class)
         #     time.sleep(5)
         #
-        # log_out(user.name)
+        log_out(user.name)
 
 
 if __name__ == "__main__":

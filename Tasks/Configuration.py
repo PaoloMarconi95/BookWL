@@ -3,6 +3,7 @@ import json
 import os
 import datetime as dt
 from datetime import datetime
+import pathlib
 
 # Selenium
 from selenium import webdriver
@@ -73,7 +74,7 @@ class Configuration:
 
     @classmethod
     def __get_json_data(cls):
-        f = open(os.getcwd() + "\\config.json", 'r')
+        f = open(os.path.join(pathlib.Path(__file__).parent.parent.resolve(), "config.json"), 'r')
         data = json.load(f)
         f.close()
         return data
