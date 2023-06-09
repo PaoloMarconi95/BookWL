@@ -1,3 +1,4 @@
 /config.json
-/Workflows/Logs/*
+/Logs/*
 /prove.py
+__pycache__
