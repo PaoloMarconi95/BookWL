@@ -62,7 +62,7 @@ def set_correct_time():
     correctly_set = False
     for index, option in enumerate(all_options):
         option_text = option.get_attribute("innerText")
-        if datetime.strftime(datetime.today(), "%H") in option_text:
+        if str(int(datetime.strftime(datetime.today(), "%H")) + 1) in option_text:
             select.select_by_index(index)
             correctly_set = True
     if not correctly_set:
