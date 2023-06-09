@@ -9,7 +9,7 @@ from datetime import datetime
 # Custom
 import Log
 import Tasks.Configuration as Configuration
-from Exceptions import NoReservationFoundException, ClassNotFoundWithinDropDownException
+from Exceptions import NoReservationFoundException
 
 log = Log.logger
 driver = Configuration.driver
@@ -111,8 +111,7 @@ def get_booked_classes_for_date(date):
             try:
                 el.find_element(By.CLASS_NAME, 'icon-ticket')
                 title_el = el.find_element(By.XPATH, './/td/div/span')
-                if "11" in title_el.text:
-                #if datetime.strftime(datetime.today(), "%H") in title_el.text:
+                if str(int(datetime.strftime(datetime.today(), "%H")) + 1) in title_el.text:
                     # Class row encountered, add it to daily classes
                     return el
             except NoSuchElementException:
