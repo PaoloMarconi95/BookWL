@@ -1,10 +1,37 @@
-import requests
+import smtplib
+import ssl
 import Log
 import Configuration
+from email.message import EmailMessage
 
-config = Configuration.global_config
 log = Log.logger
+config = Configuration.global_config
 
-def send_from_url(message):
-    msg = {'message': message}
-    requests.post(config.pipedream_mail, data=msg)
+host = "smtp.gmail.com"
+port = 465
+from_address = "paolomarconi1995@gmail.com"
+password = config.gmail_key
+
+def send_email(dest, subject, body):
+    context = ssl.create_default_context()
+    msg = EmailMessage()
+    msg['Subject'] = subject
+    msg['From'] = from_address
+    msg['To'] = dest
+    msg.set_content(body)
+    log.info("email variables initialized")
+
+    try:
+        with smtplib.SMTP_SSL(host, port, context=context) as server:
+            log.info("logging into SMTP server")
+            server.login (from_address, password)
+            log.info("sending the email")
+            server.send_message(msg)
+        log.info("Email correctly sent")
+    except Exception as e:
+        log.error("Something went wrong sending the email")
+        log.error(str(e))
+
+# def send_from_url(message):
+#     msg = {'message': message}
+#     requests.post(config.pipedream_mail, data=msg)

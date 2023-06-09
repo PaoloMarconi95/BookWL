@@ -32,6 +32,7 @@ class Configuration:
             self.signin_url = json_data["SIGNIN_URL"]
             self.calendar_url = json_data["CALENDAR_URL"]
             self.pipedream_mail = json_data["PIPEDREAM_MAIL"]
+            self.gmail_key = json_data["GMAIL_KEY"]
             json_users = json_data["Users"]
             log.info("adding users to config object")
             for user in json_users:
@@ -41,7 +42,7 @@ class Configuration:
 
 
     def __initialize_driver(self):
-        start_attempts = 1
+        start_attempts = 0
         are_variables_set = False
         # Terminate the loop when variables are successfully set or max attempts are reached
         while (not are_variables_set) and (start_attempts <= Configuration.MAX_START_ATTEMPTS):
@@ -51,10 +52,11 @@ class Configuration:
             except GlobalVariablesNotSetException:
                 # Another task
                 is_chromedriver_updated = update_chromedriver()
-                log.info('set_global_variables, ' + str(Configuration.MAX_START_ATTEMPTS - start_attempts) + ' attempts remaining')
                 if is_chromedriver_updated:
                     log.info('chromedriver updated, trying to redefine global variables')
                     are_variables_set = self.__set_driver()
+                else:
+                    log.warn(f'update chromedriver attempt {str(start_attempts)} failed.')
             finally:
                 start_attempts += 1
         return are_variables_set
@@ -69,7 +71,7 @@ class Configuration:
             self.driver = webdriver.Chrome(options=options)
             return True
         except (SessionNotCreatedException, WebDriverException, FileNotFoundError):
-            log.warn('Error occurred in driver initialization. Trying to retrieve an updated version of chromedriver...')
+            log.warn('Error occurred in driver initialization. Trying to update chromedriver version...')
             raise GlobalVariablesNotSetException
 
     @classmethod

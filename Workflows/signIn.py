@@ -4,6 +4,7 @@ from Tasks.LogIn import login
 from Tasks.ChangeUser import log_out
 from Tasks.ClassSignIn import get_booked_class_for_current_time, sign_in
 from Tasks import Configuration
+from Tasks.SendEmail import send_email
 
 import Log
 users = Configuration.users
@@ -18,6 +19,11 @@ def main():
         if reserved_class is not None:
             # SignIn
             sign_in(reserved_class)
+            try:
+                send_email(user.username, "Auto SignIn", f"Ciao {user.name}, ti ho fatto il signIn automatico per la classe di {reserved_class}")
+            except Exception as e:
+                log.error("errore nella send_email")
+                log.error(str(e))
             time.sleep(5)
 
         log_out(user)
