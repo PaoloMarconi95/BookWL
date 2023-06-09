@@ -11,15 +11,15 @@ log = Log.logger
 
 def main():
     for user in users:
-        log.info("Starting booking process for user " + str(user.name))
+        log.info("Starting sign-in  process for user " + str(user.name))
         login(user)
         # Retrieve booked class for today
-        # reserved_class = get_booked_class_for_current_time()
-        # if reserved_class is not None:
-        #     # SignIn
-        #     sign_in(reserved_class)
-        #     time.sleep(5)
-        #
+        reserved_class = get_booked_class_for_current_time()
+        if reserved_class is not None:
+            # SignIn
+            sign_in(reserved_class)
+            time.sleep(5)
+
         log_out(user)
 
 
