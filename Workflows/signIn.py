@@ -7,9 +7,11 @@ import Configuration
 from Tasks.SendEmail import send_email
 
 import Log
+
 config = Configuration.get_instance()
 users = config.users
 log = Log.logger
+
 
 def main():
     for user in users:
@@ -17,12 +19,14 @@ def main():
         login(user)
         # Retrieve booked class for today
         reserved_class = get_booked_class_for_current_time()
-        #reserved_class = "WOD"
+        # reserved_class = "WOD"
         if reserved_class is not None:
             # SignIn
             sign_in(reserved_class)
             try:
-                send_email(user.username, "Auto SignIn", f"Ciao {user.name}, ti ho fatto il signIn automatico per la classe di {reserved_class}")
+                send_email(user.username, "Auto SignIn", f"Ciao {user.name}, ti ho fatto il signIn automatico per la "
+                                                         f"classe di {reserved_class}")
+                # print("a")
             except Exception as e:
                 log.error("errore nella send_email")
                 log.error(str(e))

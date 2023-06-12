@@ -35,7 +35,7 @@ class Configuration:
             log.info('Instance correctly initialized, Starting Config setup')
             self.signin_url = json_data["SIGNIN_URL"]
             self.calendar_url = json_data["CALENDAR_URL"]
-            self.pipedream_mail = json_data["PIPEDREAM_MAIL"]
+            #self.pipedream_mail = json_data["PIPEDREAM_MAIL"]
             self.gmail_key = json_data["GMAIL_KEY"]
             json_users = json_data["Users"]
             log.info("adding users to config object")

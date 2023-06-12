@@ -25,12 +25,12 @@ def is_class_name_matching(book, text_found):
     return False
 
 
-"""
-:param classes is an array of selenium WebElement
-:param class_name is the string representing the class name
-:return the clickable element that sends the desired reservation when clicked
-"""
 def find_booking_row_by_book(classes, book):
+    """
+    :param classes is an array of selenium WebElement
+    :param book is the string representing the class name
+    :return the clickable element that sends the desired reservation when clicked
+    """
     booking_row = list(filter(lambda daily_class: is_class_name_matching(book, daily_class.text), classes))
     if len(booking_row) == 1:
         booking_row = booking_row[0]
@@ -62,7 +62,8 @@ def find_ticket_icon(book):
 # Expects a string date with format dd-MM-yyyy
 def set_date(date):
     log.info('Setting date to ' + date)
-    element = driver.find_element(By.ID, "AthleteTheme_wt6_block_wtMainContent_wt9_W_Utils_UI_wt216_block_wtDateInputFrom")
+    element = driver.find_element(By.ID,
+                                  "AthleteTheme_wt6_block_wtMainContent_wt9_W_Utils_UI_wt216_block_wtDateInputFrom")
     element.clear()
     element.send_keys(date)
 
@@ -100,7 +101,7 @@ def get_booked_classes_for_date(date):
     table_entries.pop(0)
 
     string_target = str(int(datetime.strftime(datetime.today(), "%H")) + 1)
-    #string_target = "18"
+    # string_target = "18"
 
     for index, el in enumerate(table_entries):
         # Day title does not have style attribute, while class rows have it
