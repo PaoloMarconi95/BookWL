@@ -99,8 +99,8 @@ def get_booked_classes_for_date(date):
     # First elements is always the calendar filter
     table_entries.pop(0)
 
-    #string_target = str(int(datetime.strftime(datetime.today(), "%H")) + 1)
-    string_target = "18"
+    string_target = str(int(datetime.strftime(datetime.today(), "%H")) + 1)
+    #string_target = "18"
 
     for index, el in enumerate(table_entries):
         # Day title does not have style attribute, while class rows have it

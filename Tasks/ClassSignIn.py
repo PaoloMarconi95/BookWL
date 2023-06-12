@@ -61,8 +61,8 @@ def set_correct_class():
     all_options = select.options
     correctly_set = False
 
-    #string_target = str(int(datetime.strftime(datetime.today(), "%H")) + 1)
-    string_target = "18"
+    string_target = str(int(datetime.strftime(datetime.today(), "%H")) + 1)
+    #string_target = "18"
 
     for index, option in enumerate(all_options):
         option_text = option.get_attribute("innerText")
