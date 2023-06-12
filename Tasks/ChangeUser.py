@@ -7,10 +7,11 @@ import time
 
 # Custom
 import Log
-import Tasks.Configuration as Configuration
+import Configuration
 
 log = Log.logger
-driver = Configuration.driver
+config = Configuration.get_instance()
+driver = config.driver
 
 
 def log_out(user=None):

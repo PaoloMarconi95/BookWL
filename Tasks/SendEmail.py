@@ -5,7 +5,7 @@ import Configuration
 from email.message import EmailMessage
 
 log = Log.logger
-config = Configuration.global_config
+config = Configuration.get_instance()
 
 host = "smtp.gmail.com"
 port = 465

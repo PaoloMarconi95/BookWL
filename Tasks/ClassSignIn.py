@@ -10,12 +10,12 @@ from selenium.webdriver.support.ui import Select
 
 # Custom
 import Log
-import Tasks.Configuration as Configuration
+import Configuration
 from Exceptions import ClassNotFoundWithinDropDownException
 from Tasks.Booking import get_booked_classes_for_date
 
-config = Configuration.global_config
-driver = Configuration.driver
+config = Configuration.get_instance()
+driver = config.driver
 log = Log.logger
 
 
@@ -53,20 +53,24 @@ def set_correct_program(class_name):
         raise ClassNotFoundWithinDropDownException(class_name)
 
 
-def set_correct_time():
+def set_correct_class():
     time_dropdown = WebDriverWait(driver, 5).until(
         EC.presence_of_element_located((By.ID, 'AthleteTheme_wtLayout_block_wtMainContent_wtClass_Input'))
     )
     select = Select(time_dropdown)
     all_options = select.options
     correctly_set = False
+
+    string_target = str(int(datetime.strftime(datetime.today(), "%H")) + 1)
+    #string_target = "18"
+
     for index, option in enumerate(all_options):
         option_text = option.get_attribute("innerText")
-        if str(int(datetime.strftime(datetime.today(), "%H")) + 1) in option_text:
+        if string_target in option_text:
             select.select_by_index(index)
             correctly_set = True
     if not correctly_set:
-        raise ClassNotFoundWithinDropDownException(datetime.strftime(datetime.today(), "%H"))
+        raise ClassNotFoundWithinDropDownException(string_target)
 
 
 def sign_in(class_name):
@@ -74,9 +78,10 @@ def sign_in(class_name):
     log.info('Setting correct program from dropdown')
     set_correct_program(class_name)
     log.info('Setting correct time from dropdown')
-    set_correct_time()
+    set_correct_class()
     log.info('Looking for sign-in button')
     sign_in_button = WebDriverWait(driver, 5).until(
-        EC.presence_of_element_located((By.ID, 'AthleteTheme_wtLayout_block_wtSubNavigation_wtSignInButton2'))
+        EC.element_to_be_clickable((By.ID, 'AthleteTheme_wtLayout_block_wtSubNavigation_wtSignInButton2'))
     )
+    log.info('Sign in button found')
     sign_in_button.click()

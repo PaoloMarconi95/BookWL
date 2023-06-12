@@ -9,10 +9,10 @@ from selenium.common.exceptions import NoSuchElementException
 
 # Custom
 import Log
-import Tasks.Configuration as Configuration
+import Configuration
 
-config = Configuration.global_config
-driver = Configuration.driver
+config = Configuration.get_instance()
+driver = config.driver
 log = Log.logger
 
 def login(user):
