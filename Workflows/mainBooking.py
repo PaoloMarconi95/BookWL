@@ -1,9 +1,10 @@
 from Tasks.LogIn import login
 from Tasks.Booking import book_class
 
-from Tasks import Configuration
+import Configuration
 import Log
-users = Configuration.users
+config = Configuration.get_instance()
+users = config.users
 log = Log.logger
 
 def main():

@@ -16,6 +16,10 @@ from Tasks.ChromeDriverUpdater import update_chromedriver
 import Log
 log = Log.logger
 
+
+# Exported members
+global_config = None
+
 class Configuration:
     MAX_START_ATTEMPTS = 3
 
@@ -65,7 +69,7 @@ class Configuration:
     def __set_driver(self):
         options = Options()
         # set it to True only in prod mode, hides the browser window and perform every operation in background
-        options.headless = True
+        options.headless = False
         try:
             # Go to main booking page
             self.driver = webdriver.Chrome(options=options)
@@ -115,8 +119,11 @@ def get_closer_date_with_weekday(week_day):
 
 
 
-
-# Exported members
-global_config = Configuration()
-driver = global_config.driver
-users = global_config.users
+def get_instance():
+    global global_config
+    if global_config is None:
+        # Exported members
+        global_config = Configuration()
+        return global_config
+    else:
+        return global_config

@@ -12,6 +12,7 @@ class Log:
         super().__init__()
         Log.instance = self
 
+
     def __initialize_log_directory(self):
         log_folder = os.path.join(pathlib.Path(__file__).parent.resolve(), 'Logs')
         if not os.path.exists(log_folder):

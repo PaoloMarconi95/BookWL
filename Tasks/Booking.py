@@ -8,12 +8,12 @@ from datetime import datetime
 
 # Custom
 import Log
-import Tasks.Configuration as Configuration
+import Configuration
 from Exceptions import NoReservationFoundException
 
 log = Log.logger
-driver = Configuration.driver
-config = Configuration.global_config
+config = Configuration.get_instance()
+driver = config.driver
 
 
 def is_class_name_matching(book, text_found):
@@ -99,6 +99,9 @@ def get_booked_classes_for_date(date):
     # First elements is always the calendar filter
     table_entries.pop(0)
 
+    #string_target = str(int(datetime.strftime(datetime.today(), "%H")) + 1)
+    string_target = "18"
+
     for index, el in enumerate(table_entries):
         # Day title does not have style attribute, while class rows have it
         if index == 0 and el.get_attribute("style") == '':
@@ -111,7 +114,7 @@ def get_booked_classes_for_date(date):
             try:
                 el.find_element(By.CLASS_NAME, 'icon-ticket')
                 title_el = el.find_element(By.XPATH, './/td/div/span')
-                if str(int(datetime.strftime(datetime.today(), "%H")) + 1) in title_el.text:
+                if string_target in title_el.text:
                     # Class row encountered, add it to daily classes
                     return el
             except NoSuchElementException:
