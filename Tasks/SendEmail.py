@@ -12,6 +12,7 @@ port = 465
 from_address = "paolomarconi1995@gmail.com"
 password = config.gmail_key
 
+
 def send_email(dest, subject, body):
     context = ssl.create_default_context()
     msg = EmailMessage()
@@ -24,7 +25,7 @@ def send_email(dest, subject, body):
     try:
         with smtplib.SMTP_SSL(host, port, context=context) as server:
             log.info("logging into SMTP server")
-            server.login (from_address, password)
+            server.login(from_address, password)
             log.info("sending the email")
             server.send_message(msg)
         log.info("Email correctly sent")
