@@ -20,7 +20,7 @@ def is_class_name_matching(book, text_found):
     class_name = book.class_name.lower()
     class_time = book.class_time.lower()
     text_found = text_found.lower()
-    if class_name and class_time in text_found:
+    if class_name in text_found and class_time in text_found:
         return True
     return False
 
@@ -90,7 +90,7 @@ def get_all_classes_for_date(date):
             daily_classes.append(el)
 
 
-def get_booked_classes_for_date(date):
+def get_booked_class_and_program_for_date(date):
     set_date(date)
     # Waiting for site backend to render new date's data
     time.sleep(4)
@@ -100,7 +100,7 @@ def get_booked_classes_for_date(date):
     table_entries.pop(0)
 
     string_target = str(int(datetime.strftime(datetime.today(), "%H")) + 1)
-    #string_target = "18"
+    # string_target = "19"
 
     for index, el in enumerate(table_entries):
         # Day title does not have style attribute, while class rows have it
@@ -115,7 +115,6 @@ def get_booked_classes_for_date(date):
                 el.find_element(By.CLASS_NAME, 'icon-ticket')
                 title_el = el.find_element(By.XPATH, './/td/div/span')
                 if string_target in title_el.text:
-                    # Class row encountered, add it to daily classes
                     return el
             except NoSuchElementException:
                 # Class may be not booked or concerns another hour

@@ -113,7 +113,7 @@ def get_closer_date_with_weekday(week_day):
         raise ValueError("Week Day " + str(week_day) + "Invalid!")
     else:
         today_week_day = datetime.today().weekday()
-        delta = 7 + (week_day - today_week_day)
+        delta = 14 + (week_day - today_week_day)
         final_date = datetime.today() + dt.timedelta(days=delta)
         return datetime.strftime(final_date, "%d-%m-%Y")
 
