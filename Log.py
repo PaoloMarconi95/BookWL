@@ -29,7 +29,7 @@ class Log:
         self.__write(msg, 'error')
 
     def __write(self, msg, severity):
-        print(str(datetime.now().time()) + ' - ' + severity.upper() + ": " + msg)
+        print(str(datetime.now().strftime("%d-%m %H:%M:%S")) + ' - ' + severity.upper() + ": " + msg)
         self.file = open(self.file.name, 'a')
         self.file.write(str(datetime.now().time()) + ' - ' + severity.upper() + ": " + msg + '\n')
         self.file.close()
