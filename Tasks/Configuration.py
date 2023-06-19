@@ -68,7 +68,7 @@ class Configuration:
 
     def __set_driver(self):
         options = Options()
-        # set it to True only in prod mode, hides the browser window and perform every operation in background
+        # set it to True only in prod mode (Linux), hides browser window and perform every operation in background
         options.headless = True
         try:
             # Go to main booking page
