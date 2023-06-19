@@ -43,9 +43,9 @@ def main():
                     successful.append(book)
                 else:
                     already_booked.append(book)
-            except:
+            except Exception as innerException:
                 unsuccessful.append(book)
-                log.error(f'Book {str(book.class_name)} for date {str(book.date)} did not succeeded')
+                log.error(f'Book {str(book.class_name)} for date {str(book.date)} did not succeeded: {str(innerException)}')
 
         send_email(user.username, "Auto Booking", generate_email_summary(successful, already_booked, unsuccessful))
         log_out(user)
