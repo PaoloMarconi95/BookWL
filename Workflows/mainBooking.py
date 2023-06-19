@@ -10,20 +10,21 @@ config = Configuration.get_instance()
 users = config.users
 log = Log.logger
 
-def generate_email_summary(success, already_booked, unsuccess):
+def extract_array_summary(array):
+    text = "".join([f"{cl.class_name} on {cl.date}, " for cl in array])
+    return text[:len(text)-2] + "\n\n"
+
+def generate_email_summary(success, already_booked, unsuccessful):
     text = ""
     if len(success) > 0:
-        text += f"Succesfully booked {len(success)} classes: "
-        text += "".join([f"{cl.class_name} for {cl.date}, " for cl in success])
-        text = text[:len(text)-2] + "\n"
+        text += f"Succesfully booked {len(success)} classes: \n"
+        text += extract_array_summary(success)
     if len(already_booked) > 0:
-        text += f"Found that {len(already_booked)} classes were already booked: "
-        text += "".join([f"{cl.class_name} for {cl.date}, " for cl in already_booked])
-        text = text[:len(text)-2] + "\n"
-    if len(unsuccess) > 0:
-        text += f"Could not book {len(unsuccess)} classes: "
-        text += "".join([f"{cl.class_name} for {cl.date}, " for cl in unsuccess])
-        text = text[:len(text)-2] + "\n"
+        text += f"Found that {len(already_booked)} classes were already booked: \n"
+        text += extract_array_summary(already_booked)
+    if len(unsuccessful) > 0:
+        text += f"Could not book {len(unsuccessful)} classes: \n"
+        text += extract_array_summary(unsuccessful)
     return text
 
 

@@ -69,7 +69,7 @@ class Configuration:
     def __set_driver(self):
         options = Options()
         # set it to True only in prod mode, hides the browser window and perform every operation in background
-        options.headless = False
+        options.headless = True
         try:
             # Go to main booking page
             self.driver = webdriver.Chrome(options=options)
@@ -113,7 +113,7 @@ def get_closer_date_with_weekday(week_day):
         raise ValueError("Week Day " + str(week_day) + "Invalid!")
     else:
         today_week_day = datetime.today().weekday()
-        delta = 14 + (week_day - today_week_day)
+        delta = 7 + (week_day - today_week_day)
         final_date = datetime.today() + dt.timedelta(days=delta)
         return datetime.strftime(final_date, "%d-%m-%Y")
 

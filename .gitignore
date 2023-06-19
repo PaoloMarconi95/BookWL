@@ -2,3 +2,4 @@
 /Logs/*
 /prove.py
 __pycache__
+.idea
