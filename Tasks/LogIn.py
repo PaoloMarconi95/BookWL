@@ -17,7 +17,7 @@ log = Log.logger
 
 def login(user):
     driver.get(config.calendar_url)
-    login_el = WebDriverWait(driver, 5).until(
+    login_el = WebDriverWait(driver, 10).until(
         EC.presence_of_element_located((By.ID, 'FormLogin'))
     )
     log.info("Logging in at " + str(datetime.now().time()))
