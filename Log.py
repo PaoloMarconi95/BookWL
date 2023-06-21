@@ -30,7 +30,7 @@ class Log:
 
     def __write(self, msg, severity):
         final_message = str(datetime.now().strftime("%d/%m %H:%M:%S")) + ' - ' + severity.upper() + ": " + msg + '\n'
-        print(final_message)
+        print(final_message, end="")
         self.file = open(self.file.name, 'a')
         self.file.write(final_message)
         self.file.close()
