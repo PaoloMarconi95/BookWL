@@ -64,9 +64,12 @@ def sign_in(class_name, class_program):
     driver.get(config.signin_url)
     log.info('Setting correct program from dropdown')
     set_correct_program(class_program)
+    time.sleep(2)
     log.info('Setting correct time from dropdown')
     set_correct_class(class_name)
     log.info('Looking for sign-in button')
+    driver.refresh()
+    time.sleep(2)
     sign_in_button = WebDriverWait(driver, 5).until(
         EC.element_to_be_clickable((By.ID, 'AthleteTheme_wtLayout_block_wtSubNavigation_wtSignInButton2'))
     )
