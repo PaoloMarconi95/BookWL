@@ -62,6 +62,7 @@ def set_correct_class(class_name):
 
 def sign_in(class_name, class_program):
     driver.get(config.signin_url)
+    time.sleep(2)
     log.info('Setting correct program from dropdown')
     set_correct_program(class_program)
     time.sleep(2)
