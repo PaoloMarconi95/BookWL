@@ -35,6 +35,8 @@ if __name__ == "__main__":
     try:
         main()
     except Exception as e:
+        log.error(f"FATAL")
+        log.error(e)
         send_email("paolomarconi1995@gmail.com", "Auto SignIn Error", str(e))
     finally:
         config.driver.quit()

@@ -1,4 +1,5 @@
 # Standard
+import time
 from datetime import datetime
 
 # Selenium
@@ -16,22 +17,27 @@ driver = config.driver
 log = Log.logger
 
 def login(user):
-    driver.get(config.calendar_url)
-    login_el = WebDriverWait(driver, 10).until(
-        EC.presence_of_element_located((By.ID, 'FormLogin'))
-    )
-    log.info("Logging in at " + str(datetime.now().time()))
-    username_el = login_el.find_element(By.ID, 'Input_UserName')
-    username_el.send_keys(user.username)
-    pwd_el = login_el.find_element(By.ID, 'Input_Password')
-    pwd_el.send_keys(user.pwd)
-    submit_el = login_el.find_element(By.TAG_NAME, 'button')
-    submit_el.click()
-    completed = WebDriverWait(driver, 5).until(
-        EC.presence_of_element_located((By.ID, 'AthleteTheme_wt6_block_wtMain'))
-    )
-    if completed is not None:
-        log.info('Successfully logged in')
-    else:
-        log.error('Did not recognize successful Log in, did not find AthleteTheme_wt6_block_wtMain')
-        raise NoSuchElementException('LogIn process failed, did not recognize calendar url post login')
+    try:
+        driver.get(config.calendar_url)
+        time.sleep(2)
+        login_el = WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.ID, 'FormLogin'))
+        )
+        log.info("Logging in at " + str(datetime.now().time()))
+        username_el = login_el.find_element(By.ID, 'Input_UserName')
+        username_el.send_keys(user.username)
+        pwd_el = login_el.find_element(By.ID, 'Input_Password')
+        pwd_el.send_keys(user.pwd)
+        submit_el = login_el.find_element(By.TAG_NAME, 'button')
+        submit_el.click()
+        completed = WebDriverWait(driver, 5).until(
+            EC.presence_of_element_located((By.ID, 'AthleteTheme_wt6_block_wtMain'))
+        )
+        if completed is not None:
+            log.info('Successfully logged in')
+        else:
+            log.error('Did not recognize successful Log in, did not find AthleteTheme_wt6_block_wtMain')
+            raise NoSuchElementException('LogIn process failed, did not recognize calendar url post login')
+    except Exception as e:
+        log.error(f"Error during log in function: {str(e)}")
+        raise e
