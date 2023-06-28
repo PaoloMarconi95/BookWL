@@ -33,12 +33,12 @@ def get_booked_class_and_program_for_current_time():
 
 def set_correct_program(class_name):
     settings_accordion = WebDriverWait(driver, 5).until(
-        EC.presence_of_element_located((By.ID, 'settingsCollapsibleHeader'))
+        EC.staleness_of((By.ID, 'settingsCollapsibleHeader'))
     )
     settings_accordion.click()
     time.sleep(1)
     program_dropdown = WebDriverWait(driver, 5).until(
-        EC.presence_of_element_located((By.ID, 'AthleteTheme_wtLayout_block_wtSubNavigation_wtProgram_Input'))
+        EC.staleness_of((By.ID, 'AthleteTheme_wtLayout_block_wtSubNavigation_wtProgram_Input'))
     )
     select = Select(program_dropdown)
     all_options = select.options
@@ -54,7 +54,7 @@ def set_correct_program(class_name):
 
 def set_correct_class(class_name):
     time_dropdown = WebDriverWait(driver, 5).until(
-        EC.presence_of_element_located((By.ID, 'AthleteTheme_wtLayout_block_wtMainContent_wtClass_Input'))
+        EC.staleness_of((By.ID, 'AthleteTheme_wtLayout_block_wtMainContent_wtClass_Input'))
     )
     select = Select(time_dropdown)
     select.select_by_visible_text(class_name)
