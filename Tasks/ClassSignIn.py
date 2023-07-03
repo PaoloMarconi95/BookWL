@@ -54,8 +54,12 @@ def set_correct_program(class_name):
 
 def set_correct_class(class_name):
     time_dropdown = WebDriverWait(driver, 5).until(
-        EC.staleness_of((By.ID, 'AthleteTheme_wtLayout_block_wtMainContent_wtClass_Input'))
+        EC.presence_of_element_located((By.ID, 'AthleteTheme_wtLayout_block_wtMainContent_wtClass_Input'))
     )
+    # while EC.staleness_of(time_dropdown):
+    #     time_dropdown = WebDriverWait(driver, 5).until(
+    #         EC.presence_of_element_located((By.ID, 'AthleteTheme_wtLayout_block_wtMainContent_wtClass_Input'))
+    #     )
     select = Select(time_dropdown)
     select.select_by_visible_text(class_name)
 
