@@ -18,7 +18,7 @@ def main():
         if logged_in:
             # Retrieve booked class for today
             reserved_class, reserved_program = get_booked_class_and_program_for_current_time()
-            #reserved_class = "WOD"
+            # reserved_class = "WOD"
             if reserved_class is not None:
                 # SignIn
                 sign_in(reserved_class, reserved_program)
