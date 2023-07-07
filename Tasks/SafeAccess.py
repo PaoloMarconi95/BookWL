@@ -6,15 +6,22 @@ from selenium.webdriver.support.wait import WebDriverWait
 import Log
 log = Log.logger
 
-def safe_access_by_id(element, driver, max_attempts=5):
+def safe_access_by_id(driver, id_string, max_attempts=5):
+    # First retrieval attempt
+    element = WebDriverWait(driver, 5).until(
+        EC.presence_of_element_located((By.ID, id_string))
+    )
+
     attempts = 0
     while not EC.staleness_of(element) and attempts < max_attempts:
-        element = WebDriverWait(driver, 8).until(
-            EC.presence_of_element_located((By.ID, 'FormLogin'))
+        log.warn('stale element found, trying to re-define it')
+        element = WebDriverWait(driver, 5).until(
+            EC.presence_of_element_located((By.ID, id_string))
         )
         attempts += 1
 
     if attempts < max_attempts:
-        return True
+        return element
     else:
-        return False
+        log.error(f'Safe access to element {id_string} failed')
+        return None

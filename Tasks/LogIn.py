@@ -20,12 +20,7 @@ def login(user):
     logged_id = False
     driver.get(config.calendar_url)
     time.sleep(2)
-    login_el = WebDriverWait(driver, 5).until(
-        EC.presence_of_element_located((By.ID, 'FormLogin'))
-    )
-
-    safe_access_by_id(login_el, driver)
-
+    login_el = safe_access_by_id(driver, 'FormLogin')
     log.info("Logging in at " + str(datetime.now().time()))
     username_el = login_el.find_element(By.ID, 'Input_UserName')
     username_el.send_keys(user.username)

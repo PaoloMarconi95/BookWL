@@ -19,6 +19,11 @@ config = Configuration.get_instance()
 driver = config.driver
 log = Log.logger
 
+TIME_DROPDOWN_ID = 'AthleteTheme_wtLayout_block_wtMainContent_wtClass_Input'
+PROGRAM_DROPDOWN_ID = 'AthleteTheme_wtLayout_block_wtSubNavigation_wtProgram_Input'
+SIGNIN_BUTTON_ID = 'AthleteTheme_wtLayout_block_wtSubNavigation_wtSignInButton2'
+SETTINGS_ACCORDION_ID = 'settingsCollapsibleHeader'
+
 
 def get_booked_class_and_program_for_current_time():
     booked_class_el = get_booked_class_and_program_for_date(datetime.strftime(datetime.today(), "%d-%m-%Y"))
@@ -34,15 +39,10 @@ def get_booked_class_and_program_for_current_time():
 
 
 def set_correct_program(class_name):
-    settings_accordion = WebDriverWait(driver, 5).until(
-        EC.presence_of_element_located((By.ID, 'settingsCollapsibleHeader'))
-    )
+    settings_accordion = safe_access_by_id(driver, SETTINGS_ACCORDION_ID)
     settings_accordion.click()
     time.sleep(1)
-    program_dropdown = WebDriverWait(driver, 5).until(
-        EC.presence_of_element_located((By.ID, 'AthleteTheme_wtLayout_block_wtSubNavigation_wtProgram_Input'))
-    )
-    safe_access_by_id(program_dropdown, driver)
+    program_dropdown = safe_access_by_id(driver, PROGRAM_DROPDOWN_ID)
     select = Select(program_dropdown)
     all_options = select.options
     correctly_set = False
@@ -56,10 +56,7 @@ def set_correct_program(class_name):
 
 
 def set_correct_class(class_name):
-    time_dropdown = WebDriverWait(driver, 5).until(
-        EC.presence_of_element_located((By.ID, 'AthleteTheme_wtLayout_block_wtMainContent_wtClass_Input'))
-    )
-    safe_access_by_id(time_dropdown, driver)
+    time_dropdown = safe_access_by_id(driver, TIME_DROPDOWN_ID)
     select = Select(time_dropdown)
     select.select_by_visible_text(class_name)
 
@@ -75,10 +72,7 @@ def sign_in(class_name, class_program):
     log.info('Looking for sign-in button')
     driver.refresh()
     time.sleep(1)
-    sign_in_button = WebDriverWait(driver, 5).until(
-        EC.element_to_be_clickable((By.ID, 'AthleteTheme_wtLayout_block_wtSubNavigation_wtSignInButton2'))
-    )
-    safe_access_by_id(sign_in_button, driver)
+    sign_in_button = safe_access_by_id(driver, SIGNIN_BUTTON_ID)
     log.info('Sign in button found')
     sign_in_button.click()
     log.info('And clicked!')

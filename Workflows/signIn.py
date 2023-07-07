@@ -42,4 +42,6 @@ if __name__ == "__main__":
         log.error(e)
         send_email("paolomarconi1995@gmail.com", "Auto SignIn Error", str(e))
     finally:
+        log.info('Process completed, ending chromedriver task...')
         config.driver.quit()
+        log.info('Program terminated')
