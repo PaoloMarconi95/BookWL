@@ -1,6 +1,9 @@
 # Selenium
 from selenium.common.exceptions import NoSuchElementException
+from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
+from selenium.webdriver.support.wait import WebDriverWait
+from selenium.common.exceptions import TimeoutException
 
 # Standard
 import time
@@ -10,6 +13,7 @@ from datetime import datetime
 import Log
 import Configuration
 from Exceptions import NoReservationFoundException
+from Enum.BookingResult import BookingResult
 
 log = Log.logger
 config = Configuration.get_instance()
@@ -36,10 +40,11 @@ def find_booking_row_by_book(classes, book):
         booking_row = booking_row[0]
         try:
             # Find the Reservation Icon
-            booking_el = booking_row.find_element(By.XPATH, ".//a[@title='Make Reservation']")
-        except NoSuchElementException:
-            booking_row.find_element(By.CLASS_NAME, 'icon-ticket')
-            log.info('Reservation already made for ' + str(book.class_name) + ' at ' + str(book.date))
+            booking_el = WebDriverWait(booking_row, 2).until(
+                EC.element_to_be_clickable((By.CSS_SELECTOR, "svg[class='icon icon-calendar']")))
+        except (NoSuchElementException, TimeoutException):
+            booking_row.find_element(By.CLASS_NAME, 'icon-forbidden')
+            log.info('Reservation found for ' + str(book.class_name) + ' at ' + str(book.date))
             booking_el = None
         return booking_el, booking_row
     else:
@@ -57,6 +62,15 @@ def find_ticket_icon(book):
     except NoSuchElementException as e:
         log.warn('Did not find icon svg' + str(e))
         return False
+
+def is_icon_present_in_row(booking_row, css_class):
+    # css class should be either icon-ticket or icon-forbidden
+    try:
+        booking_row.find_element(By.CLASS_NAME, css_class)
+        return True
+    except NoSuchElementException:
+        return False
+
 
 
 # Expects a string date with format dd-MM-yyyy
@@ -121,8 +135,22 @@ def get_booked_class_and_program_for_date(date):
                 continue
 
 
+def analyze_booking_result(booking_row):
+    if booking_row is None:
+        return BookingResult.FAIL
+
+    icon_present = is_icon_present_in_row(booking_row, 'icon-ticket')
+    forbidden_present = is_icon_present_in_row(booking_row, 'icon-forbidden')
+
+    if icon_present and forbidden_present:
+        return BookingResult.SUCCESS
+    if not icon_present and forbidden_present:
+        return BookingResult.WAITLIST
+
+    return BookingResult.FAIL
+
 def book_class(book):
-    success = False
+    result = None
     driver.get(config.calendar_url)
     try:
         classes = get_all_classes_for_date(book.date)
@@ -132,8 +160,10 @@ def book_class(book):
             booking_el.click()
             # Wait for the reservation to be sent
             driver.refresh()
-            success = find_ticket_icon(book)
+            classes = get_all_classes_for_date(book.date)
+            _, booking_row = find_booking_row_by_book(classes, book)
+            result = analyze_booking_result(booking_row)
     except NoSuchElementException:
         log.info('Make Reservation title not found, could be already booked or not opened yet')
 
-    return success
+    return result
