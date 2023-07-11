@@ -7,6 +7,8 @@ from Enum.BookingResult import BookingResult
 import Configuration
 import Log
 
+import traceback
+
 config = Configuration.get_instance()
 users = config.users
 log = Log.logger
@@ -59,6 +61,7 @@ if __name__ == "__main__":
     try:
         main()
     except Exception as e:
+        traceback.print_exc()
         send_email("paolomarconi1995@gmail.com", "Auto SignIn Error", str(e))
     finally:
         config.driver.quit()
