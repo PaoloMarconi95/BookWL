@@ -9,7 +9,7 @@ config = Configuration.get_instance()
 
 host = "smtp.gmail.com"
 port = 465
-from_address = "paolomarconi1995@gmail.com"
+from_address = "smartbotfit@gmail.com"
 password = config.gmail_key
 
 
@@ -32,7 +32,3 @@ def send_email(dest, subject, body):
     except Exception as e:
         log.error("Something went wrong sending the email")
         log.error(str(e))
-
-# def send_from_url(message):
-#     msg = {'message': message}
-#     requests.post(config.pipedream_mail, data=msg)
