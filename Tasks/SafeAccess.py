@@ -12,14 +12,11 @@ from SendEmail import send_email
 
 log = Log.logger
 
-def safe_access_by_id(driver, id_string, max_attempts=5):
-    # First retrieval attempt
-    element = WebDriverWait(driver, 5).until(
-        EC.presence_of_element_located((By.ID, id_string))
-    )
 
+def safe_access_by_id(driver, id_string, max_attempts=5):
+    element = None
     attempts = 0
-    while not EC.staleness_of(element) and attempts < max_attempts:
+    while attempts == 0 or (not EC.staleness_of(element) and attempts < max_attempts):
         try:
             log.warn('stale element found, trying to re-define it')
             element = WebDriverWait(driver, 5).until(

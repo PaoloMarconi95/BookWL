@@ -16,7 +16,7 @@ config = Configuration.get_instance()
 driver = config.driver
 log = Log.logger
 
-TIME_DROPDOWN_ID = 'AthleteTheme_wtLayout_block_wtMainContent_wtClass_Input'
+TIME_DROPDOWN_ID = 'AthleteTheme_wtLayout_block_wtMainContent_wtClass_Input' # AthleteTheme_wtLayout_block_wtMainContent_wtDoesClassExist ?
 PROGRAM_DROPDOWN_ID = 'AthleteTheme_wtLayout_block_wtSubNavigation_wtProgram_Input'
 SIGNIN_BUTTON_ID = 'AthleteTheme_wtLayout_block_wtSubNavigation_wtSignInButton2'
 SETTINGS_ACCORDION_ID = 'settingsCollapsibleHeader'
