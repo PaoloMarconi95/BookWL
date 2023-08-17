@@ -50,7 +50,7 @@ def main():
                     unsuccessful.append(book)
             except Exception as innerException:
                 unsuccessful.append(book)
-                log.error(f'Book {str(book.class_name)} for date {str(book.date)} did not succeeded: {str(innerException)}')
+                log.error(f'Book {str(book.class_name)} for date {str(book.date)} did not succeed: {str(innerException)}')
 
         summary = generate_email_summary(successful, waitlist, unsuccessful)
         send_email(user.username, "Auto Booking", summary)

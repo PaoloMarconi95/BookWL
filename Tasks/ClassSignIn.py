@@ -16,7 +16,7 @@ config = Configuration.get_instance()
 driver = config.driver
 log = Log.logger
 
-TIME_DROPDOWN_ID = 'AthleteTheme_wtLayout_block_wtMainContent_wtClass_Input' # AthleteTheme_wtLayout_block_wtMainContent_wtDoesClassExist ?
+TIME_DROPDOWN_ID = 'AthleteTheme_wtLayout_block_wtMainContent_wtClass_Input'
 PROGRAM_DROPDOWN_ID = 'AthleteTheme_wtLayout_block_wtSubNavigation_wtProgram_Input'
 SIGNIN_BUTTON_ID = 'AthleteTheme_wtLayout_block_wtSubNavigation_wtSignInButton2'
 SETTINGS_ACCORDION_ID = 'settingsCollapsibleHeader'
@@ -60,15 +60,15 @@ def set_correct_class(class_name):
 
 def sign_in(class_name, class_program):
     driver.get(config.signin_url)
-    time.sleep(1)
+    #time.sleep(1)
     log.info('Setting correct program from dropdown')
     set_correct_program(class_program)
-    time.sleep(1)
+    #time.sleep(1)
     log.info('Setting correct time from dropdown')
     set_correct_class(class_name)
     log.info('Looking for sign-in button')
     driver.refresh()
-    time.sleep(1)
+    #time.sleep(1)
     sign_in_button = safe_access_by_id(driver, SIGNIN_BUTTON_ID)
     log.info('Sign in button found')
     sign_in_button.click()

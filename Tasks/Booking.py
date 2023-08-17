@@ -84,7 +84,7 @@ def set_date(date):
 def get_all_classes_for_date(date):
     set_date(date)
     # Waiting for site backend to render new date's data
-    time.sleep(4)
+    time.sleep(3)
 
     table_entries = driver.find_elements(By.XPATH, '//table/tbody/tr')
     # First elements is always the calendar filter
@@ -107,7 +107,7 @@ def get_all_classes_for_date(date):
 def get_booked_class_and_program_for_date(date):
     set_date(date)
     # Waiting for site backend to render new date's data
-    time.sleep(4)
+    time.sleep(3)
 
     table_entries = driver.find_elements(By.XPATH, '//table/tbody/tr')
     # First elements is always the calendar filter

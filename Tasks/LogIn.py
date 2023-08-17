@@ -18,7 +18,7 @@ def login(user):
     logged_id = False
     driver.get(config.calendar_url)
     log.info("Logging in at " + str(datetime.now().time()))
-    time.sleep(2)
+    #time.sleep(2)
     login_el = safe_access_by_id(driver, 'FormLogin')
     log.info("Log in element found")
     username_el = login_el.find_element(By.ID, 'Input_UserName')

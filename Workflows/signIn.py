@@ -31,7 +31,7 @@ def main():
             except Exception as e:
                 log.error("errore nella send_email")
                 log.error(str(e))
-            time.sleep(2)
+            #time.sleep(2)
 
         log_out(user)
 

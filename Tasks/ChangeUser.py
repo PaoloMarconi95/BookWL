@@ -21,5 +21,5 @@ def log_out(user=None):
         EC.presence_of_element_located((By.XPATH, '//a[text()="Logout"]'))
     )
     logout_el.click()
-    time.sleep(3)
+    #time.sleep(3)
     log.info(f"Log out for {name if name is not None else ''} completed")
