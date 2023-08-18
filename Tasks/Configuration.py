@@ -57,7 +57,7 @@ class Configuration:
                 # Another task
                 is_chromedriver_updated = update_chromedriver()
                 if is_chromedriver_updated:
-                    log.info('chromedriver updated, trying to redefine global variables')
+                    log.info('chromedriver updated, trying to set main driver again')
                     are_variables_set = self.__set_driver()
                 else:
                     log.warn(f'update chromedriver attempt {str(start_attempts)} failed.')
@@ -69,13 +69,13 @@ class Configuration:
     def __set_driver(self):
         options = Options()
         # set it to True only in prod mode (Linux), hides browser window and perform every operation in background
-        options.headless = False
+        options.headless = True
         try:
             # Go to main booking page
             self.driver = webdriver.Chrome(options=options)
             return True
         except (SessionNotCreatedException, WebDriverException, FileNotFoundError):
-            log.warn('Error occurred in driver initialization. Trying to update chromedriver version...')
+            log.warn('Error occurred in driver initialization')
             raise GlobalVariablesNotSetException
 
     @classmethod

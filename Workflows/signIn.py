@@ -1,5 +1,3 @@
-import time
-
 from Tasks.LogIn import login
 from Tasks.ChangeUser import log_out
 from Tasks.ClassSignIn import get_booked_class_and_program_for_current_time, sign_in
@@ -39,11 +37,11 @@ def main():
 if __name__ == "__main__":
     try:
         main()
-    except Exception as e:
+    except Exception as main_exception:
         log.error(f"FATAL")
-        log.error(e)
+        log.error(main_exception)
         traceback.print_exc()
-        send_email("paolomarconi1995@gmail.com", "Auto SignIn Error", str(e))
+        send_email("paolomarconi1995@gmail.com", "Auto SignIn Error", str(main_exception))
     finally:
         log.info('Process completed, ending chromedriver task...')
         config.driver.quit()
