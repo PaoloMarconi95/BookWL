@@ -110,10 +110,10 @@ def get_booked_class_and_program_for_date(date):
     time.sleep(3)
 
     table_entries = driver.find_elements(By.XPATH, '//table/tbody/tr')
-    # First elements is always the calendar filter
+    # First elements is always the calendar filter, so discard it
     table_entries.pop(0)
 
-    string_target = str(int(datetime.strftime(datetime.today(), "%H")) + 1)
+    string_target = str(int(datetime.strftime(datetime.today(), "%-H")) + 1)
     # string_target = "19"
 
     for index, el in enumerate(table_entries):
