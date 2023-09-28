@@ -68,7 +68,11 @@ class Configuration:
     def __set_driver(self):
         options = Options()
         # set it to True only in prod mode (Linux), hides browser window and perform every operation in background
-        options.headless = False
+        if os.name == 'nt':
+            options.headless = False
+        else:
+            options.headless = True
+
         try:
             # Go to main booking page
             self.driver = webdriver.Chrome(options=options)
