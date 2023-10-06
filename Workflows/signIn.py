@@ -31,7 +31,8 @@ def main():
         if reserved_class is not None:
             # SignIn
             sign_in(reserved_class, reserved_program)
-            send_email(user.username, "Auto SignIn", f"Ciao {user.name}, ti ho fatto il signIn automatico per la classe di {reserved_class}")
+            send_email(user.username, "Auto SignIn", f"Ciao {user.name}, ti ho fatto il signIn automatico per la "
+                                                     f"classe di {reserved_class}")
 
         log_out(user)
 
