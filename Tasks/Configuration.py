@@ -27,7 +27,6 @@ class Configuration:
         log.info('Starting config setup')
         self.signin_url = None
         self.calendar_url = None
-        self.pipedream_mail = None
         self.users = []
         # Try to initialize global variables
         if self.__initialize_driver():

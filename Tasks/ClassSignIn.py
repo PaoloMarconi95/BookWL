@@ -49,6 +49,7 @@ def set_correct_program(class_name):
             select.select_by_index(index)
             correctly_set = True
     if not correctly_set:
+        warnings.warn('sdss')
         raise ClassNotFoundWithinDropDownException(class_name)
 
 

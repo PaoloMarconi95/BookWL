@@ -1,8 +1,10 @@
 class NoReservationFoundException(Exception):
     pass
 
+
 class GlobalVariablesNotSetException(Exception):
     pass
+
 
 class ClassNotFoundWithinDropDownException(Exception):
 

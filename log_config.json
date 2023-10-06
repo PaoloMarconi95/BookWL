@@ -1,0 +1,42 @@
+{
+	"version": 1,
+	"root": {
+		"level": "INFO",
+		"handlers": [
+			"console",
+			"file",
+			"smtp"
+		]
+	},
+	"handlers": {
+		"console": {
+			"class": "logging.StreamHandler",
+			"level": "INFO",
+			"formatter": "detailed",
+			"stream": "ext://sys.stdout"
+		},
+		"file": {
+			"class": "logging.FileHandler",
+			"level": "INFO",
+			"formatter": "detailed",
+			"filename": "prova.log"
+		},
+		"smtp": {
+			"class": "logging.handlers.SMTPHandler",
+			"level": "ERROR",
+			"formatter": "email",
+			"mailhost": "relay.dufenergy.com",
+			"fromaddr": "smartbotfit@gmail.com",
+			"toaddrs": "paolomarconi1995@gmail.com",
+			"subject": "FATAL ERROR"
+		}
+	},
+	"formatters": {
+		"detailed": {
+			"format": "%(asctime)s %(module)-17s line:%(lineno)-4d %(levelname)-8s %(message)s"
+		},
+		"email": {
+			"format": "Timestamp: %(asctime)s\nModule: %(module)s\n Line: %(lineno)d\nMessage: %(message)s"
+		}
+	}
+}
