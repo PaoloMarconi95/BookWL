@@ -38,7 +38,7 @@ def main():
         else:
             log.error(f'Login for user {user.name} failed!')
             send_email(user.username, "Login Fallito!",
-                       f"Ciao, il tuo login ({user.name}) è fallito. Contatta il paolino")
+                       f"Ciao {user.name}, il tuo login è fallito. Contatta il paolino")
 
 
 if __name__ == "__main__":
