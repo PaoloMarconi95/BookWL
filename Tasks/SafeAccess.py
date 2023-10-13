@@ -24,7 +24,6 @@ def safe_access_by_id(driver, id_string, max_attempts=5):
             )
         except (NoSuchElementException, StaleElementReferenceException, TimeoutException) as e:
             traceback.print_exc()
-            send_email("paolomarconi1995@gmail.com", "Eccezione Verificata! Controlla Il log", str(e))
             log.warn(f"{id_string} retrieval failed, I'm going to refresh driver and wait for 2 seconds.")
             driver.refresh()
             time.sleep(2)
