@@ -3,11 +3,11 @@ from Tasks.LogIn import login
 from Tasks.Booking import book_class
 from Tasks.SendEmail import send_email
 from Enum.BookingResult import BookingResult
-
 import Configuration
 import Log
-
 import traceback
+from WebDriver import get_driver
+from threading import Thread
 
 config = Configuration.get_instance()
 users = config.users
@@ -31,17 +31,25 @@ def generate_email_summary(success, waitlist, unsuccessful):
     return text
 
 
+def main_thread_work(user, webdriver):
+    log.info("Starting booking process for user " + str(user.name))
+    logged_in = False
+    attempts = 0
+    while not logged_in and attempts < config.MAX_LOGIN_ATTEMPTS:
+        try:
+            logged_in = login(user, webdriver)
+        except AttributeError as e:
+            log.error(f'Login for user {user.name} failed ({e}). Trying again...')
+        finally:
+            attempts += 1
 
-def main():
-    for user in users:
-        log.info("Starting booking process for user " + str(user.name))
-        login(user)
+    if logged_in:
         successful = []
         unsuccessful = []
         waitlist = []
         for book in user.bookings:
             try:
-                success = book_class(book)
+                success = book_class(book, webdriver)
                 if success == BookingResult.SUCCESS:
                     successful.append(book)
                 elif success == BookingResult.WAITLIST:
@@ -54,7 +62,26 @@ def main():
 
         summary = generate_email_summary(successful, waitlist, unsuccessful)
         send_email(user.username, "Auto Booking", summary)
-        log_out(user)
+        log_out(user, webdriver)
+    else:
+        log.error(f'Login for user {user.name} failed!')
+        send_email(user.username, "Login Fallito!",
+                   f"Ciao {user.name}, il tuo login è fallito. Contatta il paolino")
+
+
+
+def main():
+    threads = []
+    for user in users:
+        webdriver = get_driver()
+        t = Thread(target=main_thread_work, args=(user, webdriver))
+        t.start()
+        threads.append((t, webdriver))
+
+    for t, wb in threads:
+        t.join()
+        wb.close()
+
 
 
 if __name__ == "__main__":

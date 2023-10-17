@@ -17,7 +17,6 @@ from Enum.BookingResult import BookingResult
 
 log = Log.logger
 config = Configuration.get_instance()
-driver = config.driver
 
 
 def is_class_name_matching(book, text_found):
@@ -74,19 +73,19 @@ def is_icon_present_in_row(booking_row, css_class):
 
 
 # Expects a string date with format dd-MM-yyyy
-def set_date(date):
+def set_date(date, wd):
     log.info('Setting date to ' + date)
-    element = driver.find_element(By.ID, "AthleteTheme_wt6_block_wtMainContent_wt9_W_Utils_UI_wt216_block_wtDateInputFrom")
+    element = wd.find_element(By.ID, "AthleteTheme_wt6_block_wtMainContent_wt9_W_Utils_UI_wt216_block_wtDateInputFrom")
     element.clear()
     element.send_keys(date)
 
 
-def get_all_classes_for_date(date):
-    set_date(date)
+def get_all_classes_for_date(date, wd):
+    set_date(date, wd)
     # Waiting for site backend to render new date's data
     time.sleep(3)
 
-    table_entries = driver.find_elements(By.XPATH, '//table/tbody/tr')
+    table_entries = wd.find_elements(By.XPATH, '//table/tbody/tr')
     # First elements is always the calendar filter
     table_entries.pop(0)
 
@@ -104,16 +103,16 @@ def get_all_classes_for_date(date):
             daily_classes.append(el)
 
 
-def get_booked_class_and_program_for_date(date):
-    set_date(date)
+def get_booked_class_and_program_for_date(date, wd):
+    set_date(date, wd)
     # Waiting for site backend to render new date's data
     time.sleep(3)
 
-    table_entries = driver.find_elements(By.XPATH, '//table/tbody/tr')
+    table_entries = wd.find_elements(By.XPATH, '//table/tbody/tr')
     # First elements is always the calendar filter, so discard it
     table_entries.pop(0)
 
-    string_target = str(int(datetime.strftime(datetime.today(), "%-H")) + 1)
+    string_target = str(int(datetime.strftime(datetime.today(), "%H")) + 1)
     # string_target = "19"
 
     for index, el in enumerate(table_entries):
@@ -149,18 +148,18 @@ def analyze_booking_result(booking_row):
 
     return BookingResult.FAIL
 
-def book_class(book):
+def book_class(book, wd):
     result = None
-    driver.get(config.calendar_url)
+    wd.get(config.calendar_url)
     try:
-        classes = get_all_classes_for_date(book.date)
+        classes = get_all_classes_for_date(book.date, wd)
         log.info("found " + str(len(classes)) + " classes for " + str(book.date))
         booking_el, booking_row = find_booking_row_by_book(classes, book)
         if booking_el is not None:
             booking_el.click()
             # Wait for the reservation to be sent
-            driver.refresh()
-            classes = get_all_classes_for_date(book.date)
+            wd.refresh()
+            classes = get_all_classes_for_date(book.date, wd)
             _, booking_row = find_booking_row_by_book(classes, book)
             result = analyze_booking_result(booking_row)
     except NoSuchElementException:
