@@ -44,6 +44,8 @@ def main_thread_work(user, webdriver):
         successful = []
         unsuccessful = []
         waitlist = []
+        not_found = []
+        already_booked = []
         for book in user.bookings:
             try:
                 success = book_class(book, webdriver)
@@ -51,8 +53,12 @@ def main_thread_work(user, webdriver):
                     successful.append(book)
                 elif success == BookingResult.WAITLIST:
                     waitlist.append(book)
-                else:
+                elif success == BookingResult.FAIL:
                     unsuccessful.append(book)
+                elif success == BookingResult.NOT_FOUND:
+                    not_found.append(book)
+                elif success == BookingResult.ALREADY_BOOKED:
+                    already_booked.append(book)
             except Exception as innerException:
                 unsuccessful.append(book)
                 LOGGER.error(f'Book {str(book.class_name)} for date {str(book.date)} did not succeed: {str(innerException)}')
@@ -69,10 +75,12 @@ def main_thread_work(user, webdriver):
 def main():
     threads = []
     for user in CONFIG.users:
-        webdriver = WEBDRIVERFACTORY.get_driver()
-        t = Thread(target=main_thread_work, args=(user, webdriver))
-        t.start()
-        threads.append((t, webdriver))
+        if user.name == 'Paolo':
+            webdriver = WEBDRIVERFACTORY.get_driver()
+            main_thread_work(user, webdriver)
+        # t = Thread(target=main_thread_work, args=(user, webdriver))
+        # t.start()
+        # threads.append((t, webdriver))
 
     for t, wb in threads:
         t.join()

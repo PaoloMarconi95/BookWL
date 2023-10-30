@@ -17,9 +17,9 @@ from Enum.BookingResult import BookingResult
 
 def is_class_name_matching(book, text_found):
     class_name = book.class_name.lower()
-    class_time = book.class_time.lower()
+    class_time = book.class_time
     text_found = text_found.lower()
-    if class_name in text_found and class_time in text_found:
+    if class_name in text_found and str(class_time) in text_found:
         return True
     return False
 
@@ -39,7 +39,7 @@ def find_booking_row_by_book(classes, book):
                 EC.element_to_be_clickable((By.CSS_SELECTOR, "svg[class='icon icon-calendar']")))
         except (NoSuchElementException, TimeoutException):
             booking_row.find_element(By.CLASS_NAME, 'icon-forbidden')
-            LOGGER.info('Reservation found for ' + str(book.class_name) + ' at ' + str(book.date))
+            LOGGER.info('No icon calendar found for ' + str(book.class_name) + ' at ' + str(book.date))
             booking_el = None
         return booking_el, booking_row
     else:
@@ -158,7 +158,11 @@ def book_class(book, wd):
             classes = get_all_classes_for_date(book.date, wd)
             _, booking_row = find_booking_row_by_book(classes, book)
             result = analyze_booking_result(booking_row)
+        else:
+            return BookingResult.ALREADY_BOOKED
     except NoSuchElementException:
         LOGGER.info('Make Reservation title not found, could be already booked or not opened yet')
+    except NoReservationFoundException:
+        return BookingResult.NOT_FOUND
 
     return result
