@@ -1,16 +1,12 @@
 import smtplib
 import ssl
-import Log
-import Configuration
+from Config import CONFIG, LOGGER
 from email.message import EmailMessage
-
-log = Log.logger
-config = Configuration.get_instance()
 
 host = "smtp.gmail.com"
 port = 465
 from_address = "smartbotfit@gmail.com"
-password = config.gmail_key
+password = CONFIG.gmail_key
 
 
 def send_email(dest, subject, body):
@@ -20,12 +16,12 @@ def send_email(dest, subject, body):
     msg['From'] = from_address
     msg['To'] = dest
     msg.set_content(body)
-    log.info(f"sending email: {subject}")
+    LOGGER.info(f"sending email: {subject}")
 
     try:
         with smtplib.SMTP_SSL(host, port, context=context) as server:
             server.login(from_address, password)
             server.send_message(msg)
     except Exception as e:
-        log.error("Something went wrong sending the email")
-        log.error(str(e))
+        LOGGER.error("Something went wrong sending the email")
+        LOGGER.error(str(e))

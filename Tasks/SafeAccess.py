@@ -8,11 +8,7 @@ from selenium.common.exceptions import NoSuchElementException, StaleElementRefer
 import traceback
 
 # Custom
-import Log
-from SendEmail import send_email
-
-log = Log.logger
-
+from Config import LOGGER
 
 def safe_access_by_id(driver, id_string, max_attempts=5):
     element = None
@@ -24,7 +20,7 @@ def safe_access_by_id(driver, id_string, max_attempts=5):
             )
         except (NoSuchElementException, StaleElementReferenceException, TimeoutException) as e:
             traceback.print_exc()
-            log.warn(f"{id_string} retrieval failed, I'm going to refresh driver and wait for 2 seconds.")
+            LOGGER.warn(f"{id_string} retrieval failed, I'm going to refresh driver and wait for 2 seconds.")
             driver.refresh()
             time.sleep(2)
         finally:
@@ -33,5 +29,5 @@ def safe_access_by_id(driver, id_string, max_attempts=5):
     if attempts < max_attempts and element is not None:
         return element
     else:
-        log.error(f'Safe access to element {id_string} failed')
+        LOGGER.error(f'Safe access to element {id_string} failed')
         return None

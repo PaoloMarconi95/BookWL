@@ -1,27 +1,21 @@
 from Tasks.LogIn import login
 from Tasks.ChangeUser import log_out
 from Tasks.ClassSignIn import get_booked_class_and_program_for_current_time, sign_in
-import Configuration
 from Tasks.SendEmail import send_email
 import traceback
 from threading import Thread
-from WebDriver import get_driver
-
-import Log
-config = Configuration.get_instance()
-users = config.users
-log = Log.logger
-
+from Config import CONFIG, LOGGER
+from Workflows import WEBDRIVERFACTORY
 
 def main_thread_work(user, webdriver):
-    log.info("Starting sign-in process for user " + str(user.name))
+    LOGGER.info("Starting sign-in process for user " + str(user.name))
     logged_in = False
     attempts = 0
-    while not logged_in and attempts < config.MAX_LOGIN_ATTEMPTS:
+    while not logged_in and attempts < CONFIG.max_login_attempts:
         try:
             logged_in = login(user, webdriver)
         except AttributeError as e:
-            log.error(f'Login for user {user.name} failed! Trying again...')
+            LOGGER.error(f'Login for user {user.name} failed! ({e}) Trying again...')
         finally:
             attempts += 1
 
@@ -37,14 +31,14 @@ def main_thread_work(user, webdriver):
 
         log_out(user, webdriver)
     else:
-        log.error(f'Login for user {user.name} failed!')
+        LOGGER.error(f'Login for user {user.name} failed!')
         send_email(user.username, "Login Fallito!",
                    f"Ciao {user.name}, il tuo login è fallito. Contatta il paolino")
 
 def main():
     threads = []
-    for user in users:
-        webdriver = get_driver()
+    for user in CONFIG.users:
+        webdriver = WEBDRIVERFACTORY.get_driver()
         t = Thread(target=main_thread_work, args=(user, webdriver))
         t.start()
         threads.append((t, webdriver))
@@ -58,9 +52,9 @@ if __name__ == "__main__":
     try:
         main()
     except Exception as main_exception:
-        log.error(f"FATAL")
-        log.error(main_exception)
+        LOGGER.error(f"FATAL")
+        LOGGER.error(main_exception)
         traceback.print_exc()
         send_email("paolomarconi1995@gmail.com", "Auto SignIn Error", str(main_exception))
     finally:
-        log.info('Program terminated')
+        LOGGER.info('Program terminated')

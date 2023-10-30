@@ -6,14 +6,10 @@ import time
 from selenium.webdriver.support.ui import Select
 
 # Custom
-import Log
-import Configuration
+from Config import CONFIG, LOGGER
 from Exceptions import ClassNotFoundWithinDropDownException
 from Tasks.SafeAccess import safe_access_by_id
 from Tasks.Booking import get_booked_class_and_program_for_date
-
-config = Configuration.get_instance()
-log = Log.logger
 
 TIME_DROPDOWN_ID = 'AthleteTheme_wtLayout_block_wtMainContent_wtClass_Input'
 PROGRAM_DROPDOWN_ID = 'AthleteTheme_wtLayout_block_wtSubNavigation_wtProgram_Input'
@@ -27,10 +23,10 @@ def get_booked_class_and_program_for_current_time(wd):
         # Parse the element text
         booked_class = booked_class_el.text.split('\n')[0]
         booked_program = booked_class_el.text.split('\n')[3]
-        log.info(f'Found that class {booked_class} was booked for current datetime')
+        LOGGER.info(f'Found that class {booked_class} was booked for current datetime')
         return booked_class, booked_program
     else:
-        log.info('No class found for current datetime')
+        LOGGER.info('No class found for current datetime')
         return None, None
 
 
@@ -58,15 +54,15 @@ def set_correct_class(class_name, wd):
 
 
 def sign_in(class_name, class_program, wd):
-    wd.get(config.signin_url)
-    log.info('Setting correct program from dropdown')
+    wd.get(CONFIG.signin_url)
+    LOGGER.info('Setting correct program from dropdown')
     set_correct_program(class_program, wd)
     time.sleep(1)
-    log.info('Setting correct time from dropdown')
+    LOGGER.info('Setting correct time from dropdown')
     set_correct_class(class_name, wd)
-    log.info('Looking for sign-in button')
+    LOGGER.info('Looking for sign-in button')
     wd.refresh()
     sign_in_button = safe_access_by_id(wd, SIGNIN_BUTTON_ID)
-    log.info('Sign in button found')
+    LOGGER.info('Sign in button found')
     sign_in_button.click()
-    log.info('And clicked!')
+    LOGGER.info('And clicked!')

@@ -5,17 +5,16 @@ import os
 import pathlib
 
 
-class Log:
+class Logger:
     def __init__(self):
         # initialize a log file, named after the date in which it was created
         folder = self.__initialize_log_directory()
         self.file = open(os.path.join(folder, (str(dt.date.today()) + '.log')), 'a')
         self.file.close()
         super().__init__()
-        Log.instance = self
 
     def __initialize_log_directory(self):
-        log_folder = os.path.join(pathlib.Path(__file__).parent.resolve(), 'Logs')
+        log_folder = os.path.join(pathlib.Path(__file__).parent.resolve(), '../Logs')
         if not os.path.exists(log_folder):
             os.mkdir(log_folder)
         return log_folder
@@ -36,5 +35,3 @@ class Log:
         self.file.write(final_message)
         self.file.close()
 
-
-logger = Log()

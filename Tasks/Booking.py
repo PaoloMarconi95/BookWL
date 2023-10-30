@@ -10,13 +10,9 @@ import time
 from datetime import datetime
 
 # Custom
-import Log
-import Configuration
+from Config import CONFIG, LOGGER
 from Exceptions import NoReservationFoundException
 from Enum.BookingResult import BookingResult
-
-log = Log.logger
-config = Configuration.get_instance()
 
 
 def is_class_name_matching(book, text_found):
@@ -43,24 +39,24 @@ def find_booking_row_by_book(classes, book):
                 EC.element_to_be_clickable((By.CSS_SELECTOR, "svg[class='icon icon-calendar']")))
         except (NoSuchElementException, TimeoutException):
             booking_row.find_element(By.CLASS_NAME, 'icon-forbidden')
-            log.info('Reservation found for ' + str(book.class_name) + ' at ' + str(book.date))
+            LOGGER.info('Reservation found for ' + str(book.class_name) + ' at ' + str(book.date))
             booking_el = None
         return booking_el, booking_row
     else:
         raise NoReservationFoundException
 
 
-def find_ticket_icon(book):
-    log.info('find_ticket_icon started')
-    try:
-        classes = get_all_classes_for_date(book.date)
-        _, booking_row = find_booking_row_by_book(classes, book)
-        log.info('booking row correctly retrieved')
-        booking_row.find_element(By.CLASS_NAME, 'icon-ticket')
-        return True
-    except NoSuchElementException as e:
-        log.warn('Did not find icon svg' + str(e))
-        return False
+# def find_ticket_icon(book, wd):
+#     LOGGER.info('find_ticket_icon started')
+#     try:
+#         classes = get_all_classes_for_date(book.date, wd)
+#         _, booking_row = find_booking_row_by_book(classes, book)
+#         LOGGER.info('booking row correctly retrieved')
+#         booking_row.find_element(By.CLASS_NAME, 'icon-ticket')
+#         return True
+#     except NoSuchElementException as e:
+#         LOGGER.warn('Did not find icon svg' + str(e))
+#         return False
 
 def is_icon_present_in_row(booking_row, css_class):
     # css class should be either icon-ticket or icon-forbidden
@@ -74,7 +70,7 @@ def is_icon_present_in_row(booking_row, css_class):
 
 # Expects a string date with format dd-MM-yyyy
 def set_date(date, wd):
-    log.info('Setting date to ' + date)
+    LOGGER.info('Setting date to ' + date)
     element = wd.find_element(By.ID, "AthleteTheme_wt6_block_wtMainContent_wt9_W_Utils_UI_wt216_block_wtDateInputFrom")
     element.clear()
     element.send_keys(date)
@@ -150,10 +146,10 @@ def analyze_booking_result(booking_row):
 
 def book_class(book, wd):
     result = None
-    wd.get(config.calendar_url)
+    wd.get(CONFIG.calendar_url)
     try:
         classes = get_all_classes_for_date(book.date, wd)
-        log.info("found " + str(len(classes)) + " classes for " + str(book.date))
+        LOGGER.info("found " + str(len(classes)) + " classes for " + str(book.date))
         booking_el, booking_row = find_booking_row_by_book(classes, book)
         if booking_el is not None:
             booking_el.click()
@@ -163,6 +159,6 @@ def book_class(book, wd):
             _, booking_row = find_booking_row_by_book(classes, book)
             result = analyze_booking_result(booking_row)
     except NoSuchElementException:
-        log.info('Make Reservation title not found, could be already booked or not opened yet')
+        LOGGER.info('Make Reservation title not found, could be already booked or not opened yet')
 
     return result

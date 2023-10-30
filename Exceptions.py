@@ -2,7 +2,7 @@ class NoReservationFoundException(Exception):
     pass
 
 
-class GlobalVariablesNotSetException(Exception):
+class DriverNotInitializedException(Exception):
     pass
 
 

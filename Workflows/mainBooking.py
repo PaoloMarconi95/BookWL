@@ -3,15 +3,11 @@ from Tasks.LogIn import login
 from Tasks.Booking import book_class
 from Tasks.SendEmail import send_email
 from Enum.BookingResult import BookingResult
-import Configuration
-import Log
+from Config import CONFIG, LOGGER
 import traceback
-from WebDriver import get_driver
 from threading import Thread
+from Workflows import WEBDRIVERFACTORY
 
-config = Configuration.get_instance()
-users = config.users
-log = Log.logger
 
 def extract_class_array_summary(class_array):
     text = "".join([f"{cls.class_name} on {cls.date}, " for cls in class_array])
@@ -32,14 +28,14 @@ def generate_email_summary(success, waitlist, unsuccessful):
 
 
 def main_thread_work(user, webdriver):
-    log.info("Starting booking process for user " + str(user.name))
+    LOGGER.info("Starting booking process for user " + str(user.name))
     logged_in = False
     attempts = 0
-    while not logged_in and attempts < config.MAX_LOGIN_ATTEMPTS:
+    while not logged_in and attempts < CONFIG.max_login_attempts:
         try:
             logged_in = login(user, webdriver)
         except AttributeError as e:
-            log.error(f'Login for user {user.name} failed ({e}). Trying again...')
+            LOGGER.error(f'Login for user {user.name} failed ({e}). Trying again...')
         finally:
             attempts += 1
 
@@ -58,13 +54,13 @@ def main_thread_work(user, webdriver):
                     unsuccessful.append(book)
             except Exception as innerException:
                 unsuccessful.append(book)
-                log.error(f'Book {str(book.class_name)} for date {str(book.date)} did not succeed: {str(innerException)}')
+                LOGGER.error(f'Book {str(book.class_name)} for date {str(book.date)} did not succeed: {str(innerException)}')
 
         summary = generate_email_summary(successful, waitlist, unsuccessful)
         send_email(user.username, "Auto Booking", summary)
         log_out(user, webdriver)
     else:
-        log.error(f'Login for user {user.name} failed!')
+        LOGGER.error(f'Login for user {user.name} failed!')
         send_email(user.username, "Login Fallito!",
                    f"Ciao {user.name}, il tuo login è fallito. Contatta il paolino")
 
@@ -72,8 +68,8 @@ def main_thread_work(user, webdriver):
 
 def main():
     threads = []
-    for user in users:
-        webdriver = get_driver()
+    for user in CONFIG.users:
+        webdriver = WEBDRIVERFACTORY.get_driver()
         t = Thread(target=main_thread_work, args=(user, webdriver))
         t.start()
         threads.append((t, webdriver))
@@ -90,5 +86,3 @@ if __name__ == "__main__":
     except Exception as e:
         traceback.print_exc()
         send_email("paolomarconi1995@gmail.com", "Auto SignIn Error", str(e))
-    finally:
-        config.driver.quit()

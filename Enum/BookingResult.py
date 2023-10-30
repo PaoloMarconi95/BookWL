@@ -5,3 +5,4 @@ class BookingResult(Enum):
     WAITLIST = 2
     ALREADY_BOOKED = 3
     FAIL = 4
+    NOT_FOUND = 5
