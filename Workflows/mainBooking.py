@@ -13,6 +13,7 @@ def extract_class_array_summary(class_array):
     text = "".join([f"{cls.class_name} on {cls.date}, " for cls in class_array])
     return text[:len(text)-2] + "\n\n"
 
+
 def generate_email_summary(success, waitlist, unsuccessful):
     text = ""
     if len(success) > 0:
@@ -65,7 +66,6 @@ def main_thread_work(user, webdriver):
                    f"Ciao {user.name}, il tuo login è fallito. Contatta il paolino")
 
 
-
 def main():
     threads = []
     for user in CONFIG.users:
@@ -77,7 +77,6 @@ def main():
     for t, wb in threads:
         t.join()
         wb.close()
-
 
 
 if __name__ == "__main__":

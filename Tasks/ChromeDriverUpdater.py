@@ -36,7 +36,7 @@ def update_chromedriver():
     # Move main chromedriver.exe to main CHROMEDRIVER_FOLDER
     LOGGER.info('Moving zip to main folder...')
     os.rename(os.path.join(get_unzipped_folder_name(stable_version), f"chromedriver-{CONFIG.platform}/chromedriver.exe"),
-              os.path.join(CONFIG.chromedriver_folder, 'chromedriver.exe'), )
+              os.path.join(CONFIG.chromedriver_folder, 'chromedriver.exe' if os.name == 'nt' else 'chromedriver'), )
     return True
 
 
