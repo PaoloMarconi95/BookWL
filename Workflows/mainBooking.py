@@ -75,12 +75,10 @@ def main_thread_work(user, webdriver):
 def main():
     threads = []
     for user in CONFIG.users:
-        if user.name == 'Paolo':
-            webdriver = WEBDRIVERFACTORY.get_driver()
-            main_thread_work(user, webdriver)
-        # t = Thread(target=main_thread_work, args=(user, webdriver))
-        # t.start()
-        # threads.append((t, webdriver))
+        webdriver = WEBDRIVERFACTORY.get_driver()
+        t = Thread(target=main_thread_work, args=(user, webdriver))
+        t.start()
+        threads.append((t, webdriver))
 
     for t, wb in threads:
         t.join()
