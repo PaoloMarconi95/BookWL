@@ -46,18 +46,6 @@ def find_booking_row_by_book(classes, book):
         raise NoReservationFoundException
 
 
-# def find_ticket_icon(book, wd):
-#     LOGGER.info('find_ticket_icon started')
-#     try:
-#         classes = get_all_classes_for_date(book.date, wd)
-#         _, booking_row = find_booking_row_by_book(classes, book)
-#         LOGGER.info('booking row correctly retrieved')
-#         booking_row.find_element(By.CLASS_NAME, 'icon-ticket')
-#         return True
-#     except NoSuchElementException as e:
-#         LOGGER.warn('Did not find icon svg' + str(e))
-#         return False
-
 def is_icon_present_in_row(booking_row, css_class):
     # css class should be either icon-ticket or icon-forbidden
     try:

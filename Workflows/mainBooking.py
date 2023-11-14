@@ -14,7 +14,7 @@ def extract_class_array_summary(class_array):
     return text[:len(text)-2] + "\n\n"
 
 
-def generate_email_summary(success, waitlist, unsuccessful):
+def generate_email_summary(success, waitlist, unsuccessful, not_found, already_booked):
     text = ""
     if len(success) > 0:
         text += f"Succesfully booked {len(success)} classes: \n"
@@ -25,6 +25,12 @@ def generate_email_summary(success, waitlist, unsuccessful):
     if len(unsuccessful) > 0:
         text += f"Could not book {len(unsuccessful)} classes: \n"
         text += extract_class_array_summary(unsuccessful)
+    if len(not_found) > 0:
+        text += f"Didn't found {len(not_found)} classes: \n"
+        text += extract_class_array_summary(not_found)
+    if len(already_booked) > 0:
+        text += f"Found that you already booked {len(already_booked)} classes: \n"
+        text += extract_class_array_summary(already_booked)
     return text
 
 
@@ -63,7 +69,7 @@ def main_thread_work(user, webdriver):
                 unsuccessful.append(book)
                 LOGGER.error(f'Book {str(book.class_name)} for date {str(book.date)} did not succeed: {str(innerException)}')
 
-        summary = generate_email_summary(successful, waitlist, unsuccessful)
+        summary = generate_email_summary(successful, waitlist, unsuccessful, not_found, already_booked)
         send_email(user.username, "Auto Booking", summary)
         log_out(user, webdriver)
     else:
