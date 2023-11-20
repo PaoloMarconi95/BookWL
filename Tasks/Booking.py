@@ -59,7 +59,7 @@ def is_icon_present_in_row(booking_row, css_class):
 # Expects a string date with format dd-MM-yyyy
 def set_date(date, wd):
     LOGGER.info('Setting date to ' + date)
-    element = wd.find_element(By.ID, "AthleteTheme_wt6_block_wtMainContent_wt9_W_Utils_UI_wt216_block_wtDateInputFrom")
+    element = wd.find_element(By.ID, CONFIG.calendar_el_id)
     element.clear()
     element.send_keys(date)
 

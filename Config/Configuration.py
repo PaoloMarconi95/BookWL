@@ -38,6 +38,8 @@ class Configuration(YamlDataClassConfig):
     users: Optional[List[User]] = field(default_factory=list)
     gmail_key: str = None
     max_login_attempts: int = 3
+    html_file_path: str = None
+    calendar_el_id: str = None
     FILE_PATH: Path = create_file_path_field(os.path.join(Path(__file__).parent, 'configuration.yaml'))
 
 

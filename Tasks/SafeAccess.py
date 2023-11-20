@@ -1,5 +1,6 @@
 # Standard
 import time
+import os
 
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
@@ -8,7 +9,7 @@ from selenium.common.exceptions import NoSuchElementException, StaleElementRefer
 import traceback
 
 # Custom
-from Config import LOGGER
+from Config import LOGGER, CONFIG
 
 def safe_access_by_id(driver, id_string, max_attempts=5):
     element = None
@@ -20,9 +21,17 @@ def safe_access_by_id(driver, id_string, max_attempts=5):
             )
         except (NoSuchElementException, StaleElementReferenceException, TimeoutException) as e:
             traceback.print_exc()
-            LOGGER.warn(f"{id_string} retrieval failed, I'm going to refresh driver and wait for 2 seconds.")
+            LOGGER.warn(f"{id_string} retrieval failed, I'm going to refresh driver and wait for 10 seconds.")
+
+            html_file_name = f"{id_string}_{attempts}.html"
+            html_file_path = os.path.join(CONFIG.html_file_path, html_file_name)
+            with open(html_file_path, 'w+') as html_file:
+                LOGGER.info(f'printing html to file {html_file_path}')
+                html_file.write(driver.page_source)
+
+            time.sleep(5)
             driver.refresh()
-            time.sleep(2)
+            time.sleep(5)
         finally:
             attempts += 1
 
