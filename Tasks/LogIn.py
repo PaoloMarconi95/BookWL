@@ -31,12 +31,12 @@ def login(user, wd):
 
     calendar_el = None
     try:
-        calendar_el = safe_access_by_id(wd, 'AthleteTheme_wt6_block_wtMain')
+        calendar_el = safe_access_by_id(wd, CONFIG.calendar_el_id)
     except Exception as e:
         LOGGER.error(str(e))
 
     if calendar_el is not None:
-        LOGGER.info('Successfully logged in')
+        LOGGER.info(f'User {user.name} successfully logged in!')
         logged_id = True
     return logged_id
 

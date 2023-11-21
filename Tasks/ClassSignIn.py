@@ -17,8 +17,8 @@ SIGNIN_BUTTON_ID = 'AthleteTheme_wtLayout_block_wtSubNavigation_wtSignInButton2'
 SETTINGS_ACCORDION_ID = 'settingsCollapsibleHeader'
 
 
-def get_booked_class_and_program_for_current_time(wd):
-    booked_class_el = get_booked_class_and_program_for_date(datetime.strftime(datetime.today(), "%d-%m-%Y"), wd)
+def get_booked_class_and_program_for_current_time(wd, hour=None, minute=None):
+    booked_class_el = get_booked_class_and_program_for_date(wd, datetime.strftime(datetime.today(), "%d-%m-%Y"), hour, minute)
     if booked_class_el is not None:
         # Parse the element text
         booked_class = booked_class_el.text.split('\n')[0]

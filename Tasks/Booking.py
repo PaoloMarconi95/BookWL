@@ -87,7 +87,7 @@ def get_all_classes_for_date(date, wd):
             daily_classes.append(el)
 
 
-def get_booked_class_and_program_for_date(date, wd):
+def get_booked_class_and_program_for_date(wd, date, hour=None, minute=None):
     set_date(date, wd)
     # Waiting for site backend to render new date's data
     time.sleep(3)
@@ -96,8 +96,11 @@ def get_booked_class_and_program_for_date(date, wd):
     # First elements is always the calendar filter, so discard it
     table_entries.pop(0)
 
-    string_target = str(int(datetime.strftime(datetime.today(), "%H")) + 1)
     # string_target = "19"
+    string_target = str(int(datetime.strftime(datetime.today(), "%H")) + 1)
+    if hour is not None and minute is not None:
+        # string_target = "19:00"
+        string_target = f"{hour}:{minute}"
 
     for index, el in enumerate(table_entries):
         # Day title does not have style attribute, while class rows have it
