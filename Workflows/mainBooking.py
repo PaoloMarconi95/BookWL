@@ -70,11 +70,11 @@ def main_thread_work(user, webdriver):
                 LOGGER.error(f'Book {str(book.class_name)} for date {str(book.date)} did not succeed: {str(innerException)}')
 
         summary = generate_email_summary(successful, waitlist, unsuccessful, not_found, already_booked)
-        send_email(user.username, "Auto Booking", summary)
+        send_email(user.name, "Auto Booking", summary)
         log_out(user, webdriver)
     else:
         LOGGER.error(f'Login for user {user.name} failed!')
-        send_email(user.username, "Login Fallito!",
+        send_email(user.name, "Login Fallito!",
                    f"Ciao {user.name}, il tuo login è fallito. Contatta il paolino")
 
 

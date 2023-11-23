@@ -14,8 +14,6 @@ class WebDriverFactory:
 
     def __init__(self):
         LOGGER.info('New instance of WebDriverFactory requested, checking if chromedriver is updated...')
-        if not self.__is_driver_updated():
-            update_chromedriver()
 
 
     def __is_driver_updated(self):

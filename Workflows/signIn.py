@@ -26,13 +26,13 @@ def main_thread_work(user, webdriver):
         if reserved_class is not None:
             # SignIn
             sign_in(reserved_class, reserved_program, webdriver)
-            send_email(user.username, "Auto SignIn", f"Ciao {user.name}, ti ho fatto il signIn automatico per la "
+            send_email(user.name, "Auto SignIn", f"Ciao {user.name}, ti ho fatto il signIn automatico per la "
                                                      f"classe di {reserved_class}")
 
         log_out(user, webdriver)
     else:
         LOGGER.error(f'Login for user {user.name} failed!')
-        send_email(user.username, "Login Fallito!",
+        send_email(user.name, "Login Fallito!",
                    f"Ciao {user.name}, il tuo login è fallito. Contatta il paolino")
 
 def main():

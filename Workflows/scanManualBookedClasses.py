@@ -1,15 +1,15 @@
-from DB.Entities.User import User
 from Tasks.LogIn import login
 from Tasks.ChangeUser import log_out
-from Tasks.ClassSignIn import get_booked_class_and_program_for_current_datetime, sign_in
+from Tasks.ClassSignIn import get_booked_class_and_program_for_current_time, sign_in
 from Tasks.SendEmail import send_email
 import traceback
 from threading import Thread
 from Config import CONFIG, LOGGER
 from Workflows import WEBDRIVERFACTORY
-from DB.Database import Database
+from DB.Entities.Booking import Booking
+from DB.Entities.User import User
+from DB.Entities.CrossFitClass import CrossFitClass
 
-db = Database('/home/paolo.marconi/CrossFit.db')
 
 def main_thread_work(user, webdriver):
     LOGGER.info("Starting sign-in process for user " + str(user.name))
@@ -25,13 +25,14 @@ def main_thread_work(user, webdriver):
 
     if logged_in:
         # Retrieve booked class for NOW
-        reserved_class, reserved_program = get_booked_class_and_program_for_current_date(webdriver, a, b)
-        if reserved_class is not None:
-            sign_in(reserved_class, reserved_program, webdriver)
+        crossfit_class = get_booked_class_and_program_for_current_time(webdriver)
+        if crossfit_class is not None:
+            crossfit_class_id = CrossFitClass.create_crossfit_class(crossfit_class)
+            Booking.create_booking(Booking(user_id=user.id, class_id=crossfit_class_id, is_signed_in=False))
         log_out(user, webdriver)
     else:
         LOGGER.error(f'Login for user {user.name} failed!')
-        send_email(user.username, "Login Fallito!",
+        send_email(user.name, "Login Fallito!",
                    f"Ciao {user.name}, il tuo login è fallito. Contatta il paolino")
 
 def main():
@@ -46,15 +47,12 @@ def main():
         t.join()
         wb.close() """
     
-    webdriver = WEBDRIVERFACTORY.get_driver()
-    users_cursor = db.execute_query(User.get_users_query())
-
-    users = []
-    for user in users_cursor:
-        users.append(User.map_query_to_class(user))
+    users = User.get_every_users()
 
     for user in users:
-        main_thread_work(user, webdriver)
+        if user.name == 'Paolo':
+            webdriver = WEBDRIVERFACTORY.get_driver()
+            main_thread_work(user, webdriver)
 
 
 if __name__ == "__main__":

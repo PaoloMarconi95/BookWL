@@ -102,6 +102,8 @@ def get_booked_class_and_program_for_date(wd, date, hour=None, minute=None):
         # string_target = "19:00"
         string_target = f"{hour}:{minute}"
 
+    string_target = '11:00'
+
     for index, el in enumerate(table_entries):
         # Day title does not have style attribute, while class rows have it
         if index == 0 and el.get_attribute("style") == '':
@@ -112,7 +114,7 @@ def get_booked_class_and_program_for_date(wd, date, hour=None, minute=None):
             return None
         else:
             try:
-                el.find_element(By.CLASS_NAME, 'icon-ticket')
+                #el.find_element(By.CLASS_NAME, 'icon-ticket')
                 title_el = el.find_element(By.XPATH, './/td/div/span')
                 if string_target in title_el.text:
                     return el

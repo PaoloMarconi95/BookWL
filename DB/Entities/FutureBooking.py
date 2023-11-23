@@ -1,4 +1,5 @@
 from Enum import WeekDay
+from DB.Entities import DB
 
 class FutureBooking:
     def __init__(self, user_id, class_name, class_time, week_day):
@@ -14,24 +15,40 @@ class FutureBooking:
     
     def __repr__(self):
         return self.__str__()
+    
+    @classmethod
+    def get_future_booking_by_user_id(cls, user_id):
+        query = cls._get_future_booking_by_user_id_query(user_id)
+        result = DB.execute_query(query)
+        return cls._map_query_to_class(result)
+    
+    @classmethod
+    def create_future_booking(cls, future_booking):
+        query = cls._get_create_future_booking_query(future_booking)
+        DB.execute_query(query)
+        return DB.cur.lastrowid
 
     @classmethod
-    def get_create_future_booking_query(cls, name, mail, password):
-        return f"INSERT INTO FUTURE_BOOKING (name, mail, password) VALUES ({name}, {mail}, {password})"
+    def _get_create_future_booking_query(cls, future_booking):
+        return f"INSERT INTO FUTURE_BOOKING (class_name, class_program, class_time, week_day) VALUES \
+            {future_booking.class_name}, {future_booking.class_program}, {future_booking.class_time}, {future_booking.week_day}"
 
     @classmethod
-    def get_future_bookings_query(cls):
+    def _get_future_bookings_query(cls):
         return f"SELECT * FROM FUTURE_BOOKING"
 
     @classmethod
-    def get_future_booking_by_id_query(cls, user_id):
+    def _get_future_booking_by_user_id_query(cls, user_id):
         return f"SELECT * FROM FUTURE_BOOKING WHERE id = {user_id}"
 
     @classmethod
-    def map_query_to_class(cls, query_output):
-        if len(query_output) != 4:
-            raise Exception(f'Cannot map object {query_output} to class FutureBooking')
-        
-        return cls(query_output[0], query_output[1], query_output[2])
+    def _map_query_to_class(cls, query_output):
+        parsed_objects = []
+        for output in query_output:
+            if len(output) != 4:
+                raise Exception(f'Cannot map object {output} to class FutureBooking')
+            parsed_objects.append(cls(output[0], output[1], output[2], output[3]))
+            
+        return parsed_objects
     
 

@@ -10,6 +10,7 @@ from Config import CONFIG, LOGGER
 from Exceptions import ClassNotFoundWithinDropDownException
 from Tasks.SafeAccess import safe_access_by_id
 from Tasks.Booking import get_booked_class_and_program_for_date
+from DB.Entities.CrossFitClass import CrossFitClass
 
 TIME_DROPDOWN_ID = 'AthleteTheme_wtLayout_block_wtMainContent_wtClass_Input'
 PROGRAM_DROPDOWN_ID = 'AthleteTheme_wtLayout_block_wtSubNavigation_wtProgram_Input'
@@ -18,13 +19,18 @@ SETTINGS_ACCORDION_ID = 'settingsCollapsibleHeader'
 
 
 def get_booked_class_and_program_for_current_time(wd, hour=None, minute=None):
-    booked_class_el = get_booked_class_and_program_for_date(wd, datetime.strftime(datetime.today(), "%d-%m-%Y"), hour, minute)
+    current_date = datetime.strftime(datetime.today(), "%d-%m-%Y")
+    booked_class_el = get_booked_class_and_program_for_date(wd, current_date, hour, minute)
     if booked_class_el is not None:
         # Parse the element text
-        booked_class = booked_class_el.text.split('\n')[0]
-        booked_program = booked_class_el.text.split('\n')[3]
-        LOGGER.info(f'Found that class {booked_class} was booked for current datetime')
-        return booked_class, booked_program
+        class_name = booked_class_el.text.split('\n')[0]
+        class_program = booked_class_el.text.split('\n')[3]
+        class_time = booked_class_el.text.split('\n')[4]
+
+        crossfit_class = CrossFitClass(date=current_date, name=class_name, program=class_program, time=class_time)
+        
+        LOGGER.info(f'Found that class {crossfit_class} was booked for current datetime')
+        return crossfit_class
     else:
         LOGGER.info('No class found for current datetime')
         return None, None
