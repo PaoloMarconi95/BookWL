@@ -1,6 +1,6 @@
 from Tasks.LogIn import login
 from Tasks.ChangeUser import log_out
-from Tasks.ClassSignIn import get_booked_class_and_program_for_current_time, sign_in
+from Tasks.ClassSignIn import sign_in
 from Tasks.SendEmail import send_email
 import traceback
 from threading import Thread
@@ -47,6 +47,8 @@ def main():
                 t = Thread(target=booking_sign_in, args=(bookings, webdriver))
                 t.start()
                 threads.append((t, webdriver))
+        else:
+            LOGGER.info(f'No active booking found for user {user.name}')
 
     for t, wb in threads:
         t.join()
