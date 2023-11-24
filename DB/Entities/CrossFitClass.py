@@ -1,4 +1,4 @@
-from DB.Entities import DB
+from DB.Database import Database
 
 class CrossFitClass:
     def __init__(self, name, date, time, program, id=None):
@@ -15,26 +15,51 @@ class CrossFitClass:
         return self.__str__()
     
 
+    def exists(self):
+        query = self._get_crossfit_class_by_crossfit_class(self)
+        result = Database.execute_query(query)
+        if len(result) == 1:
+            return True
+        elif len(result) == 0:
+            return False
+        else:
+            raise Exception(f"Tried to retrieva max 1 CrossFitClass for exists() method but i got {str(len(result))} results")    
+
     @classmethod
     def get_every_crossfit_class_by_user_id(cls, user_id):
         query = cls._get_crossfit_class_by_user_id_query(user_id)
-        result = DB.execute_query(query)
+        result = Database.execute_query(query)
         return cls._map_query_to_class(result)
 
     @classmethod
     def create_crossfit_class(cls, crossfit_class):
         query = cls._get_create_crossfit_class_query(crossfit_class)
-        DB.execute_query(query)
-        return DB.cur.lastrowid
+        id = Database.execute_create_query(query)
+        return id
+    
+    @classmethod
+    def get_crossfit_class_by_id(cls, class_id):
+        query = cls._get_crossfit_class_by_id_query(class_id)
+        result = Database.execute_query(query)
+        return cls._map_query_to_class(result)
 
     @classmethod
     def _get_create_crossfit_class_query(cls, crossfit_class):
         return f"INSERT INTO CROSSFIT_CLASS (name, program, date, time) VALUES  \
-            ('{crossfit_class.name}', '{crossfit_class.program}', {DB.convert_date(crossfit_class.date)}, '{crossfit_class.time}')"
+            ('{crossfit_class.name}', '{crossfit_class.program}', {Database.convert_date(crossfit_class.date)}, '{crossfit_class.time}')"
 
     @classmethod
     def _get_crossfit_class_by_user_id_query(cls, user_id):
         return f"SELECT * FROM CROSSFIT_CLASS WHERE user_id = {user_id}"
+
+    @classmethod
+    def _get_crossfit_class_by_id_query(cls, class_id):
+        return f"SELECT * FROM CROSSFIT_CLASS WHERE id = {class_id}"
+    
+    @classmethod
+    def _get_crossfit_class_by_crossfit_class(cls, crossfit_class):
+        return f"SELECT * FROM CROSSFIT_CLASS WHERE name = '{crossfit_class.name}' and date = {Database.convert_date(crossfit_class.date)} \
+            and time = '{crossfit_class.time}' AND program = '{crossfit_class.program}'"
 
     @classmethod
     def _get_crossfit_classes_query(cls):

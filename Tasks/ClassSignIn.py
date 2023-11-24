@@ -18,9 +18,9 @@ SIGNIN_BUTTON_ID = 'AthleteTheme_wtLayout_block_wtSubNavigation_wtSignInButton2'
 SETTINGS_ACCORDION_ID = 'settingsCollapsibleHeader'
 
 
-def get_booked_class_and_program_for_current_time(wd, hour=None, minute=None):
+def get_crossfit_class_for_time(wd, hour) -> CrossFitClass:
     current_date = datetime.strftime(datetime.today(), "%d-%m-%Y")
-    booked_class_el = get_booked_class_and_program_for_date(wd, current_date, hour, minute)
+    booked_class_el = get_booked_class_and_program_for_date(wd, current_date, hour)
     if booked_class_el is not None:
         # Parse the element text
         class_name = booked_class_el.text.split('\n')[0]
@@ -33,7 +33,7 @@ def get_booked_class_and_program_for_current_time(wd, hour=None, minute=None):
         return crossfit_class
     else:
         LOGGER.info('No class found for current datetime')
-        return None, None
+        return
 
 
 def set_correct_program(class_name, wd):

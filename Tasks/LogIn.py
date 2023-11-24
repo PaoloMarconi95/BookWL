@@ -7,8 +7,9 @@ from selenium.webdriver.common.by import By
 # Custom
 from Config import CONFIG, LOGGER
 from Tasks.SafeAccess import safe_access_by_id
+from DB.Entities.User import User
 
-def login(user, wd):
+def login(user: User, wd):
     logged_id = False
     wd.get(CONFIG.calendar_url)
     LOGGER.info("Logging in at " + str(datetime.now().time()))

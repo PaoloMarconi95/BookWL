@@ -10,10 +10,22 @@ class Database:
         self.instance = self
 
     
-    def execute_query(self, query):
-        result = self.cur.execute(query).fetchall()
-        self.conn.commit()
+    @classmethod
+    def execute_query(cls, query, commit=False):
+        db = Database(CONFIG.db_path)
+        result = db.cur.execute(query).fetchall()
+        if commit:
+            db.conn.commit()
+        db.conn.close()
         return result
+    
+    @classmethod
+    def execute_create_query(cls, query) -> int:
+        db = Database(CONFIG.db_path)
+        db.cur.execute(query).fetchall()
+        db.conn.commit()
+        db.conn.close()
+        return db.cur.lastrowid
     
     @classmethod
     def get_db(cls):

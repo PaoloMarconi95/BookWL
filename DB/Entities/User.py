@@ -1,4 +1,4 @@
-from DB.Entities import DB
+from DB.Database import Database
 
 class User:
     def __init__(self, id, name, mail, password):
@@ -16,7 +16,19 @@ class User:
     @classmethod
     def get_every_users(cls):
         query = cls._get_users_query()
-        result = DB.execute_query(query)
+        result = Database.execute_query(query)
+        return cls._map_query_to_class(result)
+    
+    @classmethod
+    def get_user_by_id(cls, user_id):
+        query = cls._get_user_by_id_query(user_id)
+        result = Database.execute_query(query)
+        return cls._map_query_to_class(result)
+    
+    @classmethod
+    def get_every_users(cls):
+        query = cls._get_users_query()
+        result = Database.execute_query(query)
         return cls._map_query_to_class(result)
 
     @classmethod

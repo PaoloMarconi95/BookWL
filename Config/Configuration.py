@@ -1,11 +1,8 @@
-from datetime import datetime, timedelta
-from dataclasses_json import dataclass_json
 from pathlib import Path
-from typing import List, Optional
 from yamldataclassconfig.config import YamlDataClassConfig
 from yamldataclassconfig import create_file_path_field
 import os
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 
 
 @dataclass()
@@ -19,4 +16,5 @@ class Configuration(YamlDataClassConfig):
     calendar_el_id: str = None
     db_path: str = None
     max_login_attempts: int = 3
+    sign_in_delta: int = 10
     FILE_PATH: Path = create_file_path_field(os.path.join(Path(__file__).parent, 'configuration.yaml'))

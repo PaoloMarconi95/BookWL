@@ -1,6 +1,6 @@
 from Tasks.LogIn import login
 from Tasks.ChangeUser import log_out
-from Tasks.ClassSignIn import get_booked_class_and_program_for_current_time, sign_in
+from Tasks.ClassSignIn import get_crossfit_class_for_time
 from Tasks.SendEmail import send_email
 import traceback
 from threading import Thread
@@ -9,9 +9,10 @@ from Workflows import WEBDRIVERFACTORY
 from DB.Entities.Booking import Booking
 from DB.Entities.User import User
 from DB.Entities.CrossFitClass import CrossFitClass
+from datetime import timedelta, datetime
 
 
-def main_thread_work(user, webdriver):
+def main_thread_work(user: User, webdriver):
     LOGGER.info("Starting sign-in process for user " + str(user.name))
     logged_in = False
     attempts = 0
@@ -24,11 +25,21 @@ def main_thread_work(user, webdriver):
             attempts += 1
 
     if logged_in:
-        # Retrieve booked class for NOW
-        crossfit_class = get_booked_class_and_program_for_current_time(webdriver)
-        if crossfit_class is not None:
-            crossfit_class_id = CrossFitClass.create_crossfit_class(crossfit_class)
-            Booking.create_booking(Booking(user_id=user.id, class_id=crossfit_class_id, is_signed_in=False))
+        current_hour = str(int(datetime.strftime(datetime.today(), "%H")))
+        classes = []
+        classes.append(get_crossfit_class_for_time(webdriver, current_hour))
+        classes.append(get_crossfit_class_for_time(webdriver, str(int(current_hour) + 1)))
+        for crossfit_class in classes:
+            if crossfit_class is not None and not crossfit_class.exists():
+                LOGGER.info(f"Found that class {crossfit_class} does not exists! inserting it...")
+                crossfit_class_id = CrossFitClass.create_crossfit_class(crossfit_class)
+                booking_time = - timedelta(hours=int(crossfit_class.time.split(':')[0]), minutes=int(crossfit_class.time.split(':')[1]), ) \
+                        - timedelta(minutes=CONFIG.sign_in_delta)
+                # [:-3] to transform from 00:10:00 to 00:10
+                Booking.create_booking(Booking(
+                    user_id=user.id, class_id=crossfit_class_id, 
+                    time=str(booking_time)[:-3], is_signed_in=False))
+                LOGGER.info(f"Class {crossfit_class} succesfully inserted!")
         log_out(user, webdriver)
     else:
         LOGGER.error(f'Login for user {user.name} failed!')
@@ -36,8 +47,9 @@ def main_thread_work(user, webdriver):
                    f"Ciao {user.name}, il tuo login è fallito. Contatta il paolino")
 
 def main():
-    """ threads = []
-    for user in CONFIG.users:
+    users = User.get_every_users()
+    threads = []
+    for user in users:
         webdriver = WEBDRIVERFACTORY.get_driver()
         t = Thread(target=main_thread_work, args=(user, webdriver))
         t.start()
@@ -45,14 +57,7 @@ def main():
 
     for t, wb in threads:
         t.join()
-        wb.close() """
-    
-    users = User.get_every_users()
-
-    for user in users:
-        if user.name == 'Paolo':
-            webdriver = WEBDRIVERFACTORY.get_driver()
-            main_thread_work(user, webdriver)
+        wb.close()
 
 
 if __name__ == "__main__":
