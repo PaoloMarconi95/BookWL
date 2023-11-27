@@ -22,6 +22,7 @@ class Database:
     @classmethod
     def execute_create_query(cls, query) -> int:
         db = Database(CONFIG.db_path)
+        LOGGER.info(f"Creating object with following query:\n{query}")
         db.cur.execute(query).fetchall()
         db.conn.commit()
         db.conn.close()

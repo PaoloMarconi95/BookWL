@@ -40,7 +40,7 @@ def main():
     users = User.get_every_users()
     threads = []
     for user in users:
-        bookings = Booking.get_every_active_booking_by_user_id(user.id)
+        bookings = Booking.get_active_booking_by_user_id_for_current_time(user.id)
         if len(bookings) > 0:
             if len(bookings) == 1:
                 webdriver = WEBDRIVERFACTORY.get_driver()

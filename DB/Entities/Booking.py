@@ -1,4 +1,5 @@
 from DB.Database import Database
+from datetime import datetime
 
 class Booking:
     def __init__(self, user_id, class_id, is_signed_in, time):
@@ -24,6 +25,14 @@ class Booking:
         query = cls._get_active_booking_by_user_id_query(user_id)
         result = Database.execute_query(query)
         return cls._map_query_to_class(result)
+    
+    
+    @classmethod
+    def get_active_booking_by_user_id_for_current_time(cls, user_id):
+        query = cls._get_active_booking_by_user_id_query_for_current_time(user_id)
+        result = Database.execute_query(query)
+        return cls._map_query_to_class(result)
+    
 
     @classmethod
     def create_booking(cls, booking):
@@ -43,6 +52,10 @@ class Booking:
     @classmethod
     def _get_active_booking_by_user_id_query(cls, user_id):
         return f"SELECT * FROM BOOKING WHERE user_id = {user_id} and is_signed_in = 0"
+
+    @classmethod
+    def _get_active_booking_by_user_id_query_for_current_time(cls, user_id):
+        return f"SELECT * FROM BOOKING WHERE user_id = {user_id} and is_signed_in = 0 and time like '{datetime.now().strftime('%H:%M')[:-1]}%' "
     
         
     @classmethod

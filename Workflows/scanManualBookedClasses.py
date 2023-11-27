@@ -31,7 +31,7 @@ def main_thread_work(user: User, webdriver):
         classes.append(get_crossfit_class_for_time(webdriver, str(int(current_hour) + 1)))
         for crossfit_class in classes:
             if crossfit_class is not None and not crossfit_class.exists():
-                LOGGER.info(f"Found that class {crossfit_class} does not exists! inserting it...")
+                LOGGER.info(f"Found that class {crossfit_class} does not exists within db! inserting it...")
                 crossfit_class_id = CrossFitClass.create_crossfit_class(crossfit_class)
                 booking_time = - timedelta(hours=int(crossfit_class.time.split(':')[0]), minutes=int(crossfit_class.time.split(':')[1]), ) \
                         - timedelta(minutes=CONFIG.sign_in_delta)
