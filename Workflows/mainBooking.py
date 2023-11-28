@@ -14,7 +14,7 @@ from DB.Entities.User import User
 
 
 def extract_class_array_summary(class_array):
-    text = "".join([f"{cls.class_name} on {cls.date}, " for cls in class_array])
+    text = "".join([f"{cfls.class_name} on {cfls.class_date}, " for cfls in class_array])
     return text[:len(text)-2] + "\n\n"
 
 

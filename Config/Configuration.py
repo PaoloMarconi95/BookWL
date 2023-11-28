@@ -17,4 +17,4 @@ class Configuration(YamlDataClassConfig):
     db_path: str = None
     max_login_attempts: int = 3
     sign_in_delta: int = 10
-    FILE_PATH: Path = create_file_path_field(os.path.join(Path(__file__).parent, 'configuration.yaml'))
+    FILE_PATH: Path = create_file_path_field(os.path.join(Path(__file__).parent, 'configuration_new.yaml'))
