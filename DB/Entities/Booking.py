@@ -58,7 +58,7 @@ class Booking:
     def _get_active_booking_by_user_id_query_for_current_time(cls, user_id):
         time_strings = []
         for i in range(0, CONFIG.sign_in_delta):
-            time_strings.append(f"'{datetime.now().strftime('%H:%M') - timedelta(minutes=i)}'")
+            time_strings.append(f"'{(datetime.now() + timedelta(minutes=i)).strftime('%H:%M')}'")
         
         time_string = ','.join(time_strings)
         LOGGER.info(f"looking for bookable class within these time: {time_string} ")
