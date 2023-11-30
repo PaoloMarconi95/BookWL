@@ -87,8 +87,8 @@ def get_booked_class_and_program_for_date(wd, date, hour):
     # First elements is always the calendar filter, so discard it
     table_entries.pop(0)
 
-    # string_target = "19:"
-    string_target = f"{hour}:"
+    #string_target = "18"
+    string_target = f"{hour}"
 
     for index, el in enumerate(table_entries):
         # Day title does not have style attribute, while class rows have it

@@ -1,5 +1,6 @@
 from DB.Database import Database
-from datetime import datetime
+from datetime import datetime, timedelta
+from Config import CONFIG, LOGGER
 
 class Booking:
     def __init__(self, user_id, class_id, is_signed_in, time):
@@ -42,8 +43,8 @@ class Booking:
 
     @classmethod
     def _get_create_booking_query(cls, booking):
-        return f"INSERT INTO BOOKING (user_id, class_id, is_signed_in) VALUES \
-            ({booking.user_id}, {booking.class_id}, {Database.convert_boolean(booking.is_signed_in)})"
+        return f"INSERT INTO BOOKING (user_id, class_id, is_signed_in, time) VALUES \
+            ({booking.user_id}, {booking.class_id}, {Database.convert_boolean(booking.is_signed_in)}, '{booking.time}')"
 
     @classmethod
     def _get_bookings_query(cls):
@@ -55,7 +56,13 @@ class Booking:
 
     @classmethod
     def _get_active_booking_by_user_id_query_for_current_time(cls, user_id):
-        return f"SELECT * FROM BOOKING WHERE user_id = {user_id} and is_signed_in = 0 and time like '{datetime.now().strftime('%H:%M')[:-1]}%' "
+        time_strings = []
+        for i in range(0, CONFIG.sign_in_delta):
+            time_strings.append(f"'{datetime.now().strftime('%H:%M') - timedelta(minutes=i)}'")
+        
+        time_string = ','.join(time_strings)
+        LOGGER.info(f"looking for bookable class within these time: {time_string} ")
+        return f"SELECT * FROM BOOKING WHERE user_id = {user_id} and is_signed_in = 0 and time in({time_string})"
     
         
     @classmethod

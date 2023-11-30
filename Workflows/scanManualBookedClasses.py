@@ -28,17 +28,13 @@ def main_thread_work(user: User, webdriver):
         current_hour = str(int(datetime.strftime(datetime.today(), "%H")))
         classes = []
         classes.append(get_crossfit_class_for_time(webdriver, current_hour))
-        classes.append(get_crossfit_class_for_time(webdriver, str(int(current_hour) + 1)))
         for crossfit_class in classes:
             if crossfit_class is not None and not crossfit_class.exists():
                 LOGGER.info(f"Found that class {crossfit_class} does not exists within db! inserting it...")
                 crossfit_class_id = CrossFitClass.create_crossfit_class(crossfit_class)
-                booking_time = - timedelta(hours=int(crossfit_class.time.split(':')[0]), minutes=int(crossfit_class.time.split(':')[1]), ) \
-                        - timedelta(minutes=CONFIG.sign_in_delta)
-                # [:-3] to transform from 00:10:00 to 00:10
                 Booking.create_booking(Booking(
-                    user_id=user.id, class_id=crossfit_class_id, 
-                    time=str(booking_time)[:-3], is_signed_in=False))
+                    user_id=user.id, class_id=crossfit_class_id, time=crossfit_class.time, is_signed_in=False)
+                    )
                 LOGGER.info(f"Class {crossfit_class} succesfully inserted!")
         log_out(user, webdriver)
     else:
