@@ -23,7 +23,15 @@ class CrossFitClass:
         elif len(result) == 0:
             return False
         else:
-            raise Exception(f"Tried to retrieva max 1 CrossFitClass for exists() method but i got {str(len(result))} results")    
+            raise Exception(f"Tried to retrieva max 1 CrossFitClass for exists() method but i got {str(len(result))} results")  
+
+    def retrive_id_if_existing(self):
+        if self.exists():
+            query = self._get_crossfit_class_by_crossfit_class(self)
+            result = Database.execute_query(query)
+            return CrossFitClass._map_query_to_class(result)[0].id
+        else:
+            return None
 
     @classmethod
     def get_every_crossfit_class_by_user_id(cls, user_id):

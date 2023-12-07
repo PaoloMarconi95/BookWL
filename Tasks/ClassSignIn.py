@@ -59,13 +59,13 @@ def set_correct_class(class_name, wd):
     select.select_by_visible_text(class_name)
 
 
-def sign_in(class_name, class_program, wd):
+def sign_in(crossfit_class: CrossFitClass, wd):
     wd.get(CONFIG.signin_url)
     LOGGER.info('Setting correct program from dropdown')
-    set_correct_program(class_program, wd)
+    set_correct_program(crossfit_class.program, wd)
     time.sleep(1)
     LOGGER.info('Setting correct time from dropdown')
-    set_correct_class(class_name, wd)
+    set_correct_class(crossfit_class.name, wd)
     LOGGER.info('Looking for sign-in button')
     wd.refresh()
     sign_in_button = safe_access_by_id(wd, SIGNIN_BUTTON_ID)

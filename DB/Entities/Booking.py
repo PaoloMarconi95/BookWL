@@ -20,6 +20,16 @@ class Booking:
         Database.execute_query(query, commit=True)
         self.is_signed_in = True
 
+    def exists(self):
+        query = self._get_booking_by_booking(self)
+        result = Database.execute_query(query)
+        if len(result) == 1:
+            return True
+        elif len(result) == 0:
+            return False
+        else:
+            raise Exception(f"Tried to retrieva max 1 CrossFitClass for exists() method but i got {str(len(result))} results") 
+
     
     @classmethod
     def get_every_active_booking_by_user_id(cls, user_id):
@@ -55,6 +65,11 @@ class Booking:
         return f"SELECT * FROM BOOKING WHERE user_id = {user_id} and is_signed_in = 0"
 
     @classmethod
+    def _get_booking_by_booking(cls, booking):
+        return f"SELECT * FROM BOOKING WHERE user_id = {booking.user_id} and is_signed_in = {Database.convert_boolean(booking.is_signed_in)}"\
+                f" and class_id = {booking.class_id} and time = '{booking.time}'"
+
+    @classmethod
     def _get_active_booking_by_user_id_query_for_current_time(cls, user_id):
         time_strings = []
         for i in range(0, CONFIG.sign_in_delta):
@@ -67,8 +82,8 @@ class Booking:
         
     @classmethod
     def _get_update_signed_in_crossfit_class_query(cls, booking):
-        return f"UPDATE CROSSFIT_CLASS SET is_signed_in = {Database.convert_boolean(booking.is_signed_in)} \
-            WHERE class_id = {booking.class_id} and user_id = {booking.user_id}"
+        return f"UPDATE CROSSFIT_CLASS SET is_signed_in = {Database.convert_boolean(booking.is_signed_in)}"\
+            " WHERE class_id = {booking.class_id} and user_id = {booking.user_id}"
 
     @classmethod
     def _map_query_to_class(cls, query_output):

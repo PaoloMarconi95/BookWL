@@ -23,7 +23,13 @@ class User:
     def get_user_by_id(cls, user_id):
         query = cls._get_user_by_id_query(user_id)
         result = Database.execute_query(query)
-        return cls._map_query_to_class(result)
+        user = cls._map_query_to_class(result)
+        if len(user) == 1:
+            return user[0]
+        elif len(user) > 1:
+            raise Exception(f"More than 1 user found for id {user_id}!")
+        else:
+            return None
     
     @classmethod
     def get_every_users(cls):
