@@ -9,7 +9,12 @@ from Workflows import WEBDRIVERFACTORY
 from DB.Entities.Booking import Booking
 from DB.Entities.User import User
 from DB.Entities.CrossFitClass import CrossFitClass
-from datetime import timedelta, datetime
+from datetime import datetime
+from multiprocessing.pool import ThreadPool
+
+def error_handler(ex):
+    LOGGER.error(f"An error occurred in booking_sign_in thread.\n{str(ex)}")
+    send_email("paolomarconi1995@gmail.com", "Auto SignIn Error", str(ex))
 
 
 def main_thread_work(user: User, webdriver):
@@ -25,10 +30,13 @@ def main_thread_work(user: User, webdriver):
             attempts += 1
 
     if logged_in:
-        current_hour = str(int(datetime.strftime(datetime.today(), "%H")))
+        current_hour = int(datetime.strftime(datetime.today(), "%H"))
         classes = []
-        classes.append(get_crossfit_class_for_time(webdriver, current_hour))
-        for crossfit_class in classes:
+        # See If there's a class in current hour (it's 8 and class at 8:15 for example, rarely happens)
+        classes.append(get_crossfit_class_for_time(webdriver, str(current_hour)))
+        # See If there's a class in current hour (it's 17 and class at 18)
+        classes.append(get_crossfit_class_for_time(webdriver, str(current_hour + 1)))
+        for crossfit_class in [c_class for c_class in classes if c_class is not None]:
             crossfit_class_id = crossfit_class.retrive_id_if_existing()
             if crossfit_class is not None and crossfit_class_id is None:
                 LOGGER.info(f"Found that class {crossfit_class} does not exists within db! inserting it...")
@@ -46,16 +54,17 @@ def main_thread_work(user: User, webdriver):
                    f"Ciao {user.name}, il tuo login è fallito. Contatta il paolino")
 
 def main():
+    webdriver_to_be_closed = []
     users = User.get_every_users()
-    threads = []
-    for user in users:
-        webdriver = WEBDRIVERFACTORY.get_driver()
-        t = Thread(target=main_thread_work, args=(user, webdriver))
-        t.start()
-        threads.append((t, webdriver))
-
-    for t, wb in threads:
-        t.join()
+    with ThreadPool() as pool:
+        for user in users:
+            webdriver = WEBDRIVERFACTORY.get_driver()
+            webdriver_to_be_closed.append(webdriver)
+            pool.apply_async(main_thread_work, args=(user, webdriver), error_callback=error_handler)
+        pool.close()
+        pool.join()
+    
+    for wb in webdriver_to_be_closed:
         wb.close()
 
 

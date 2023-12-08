@@ -24,8 +24,8 @@ def get_crossfit_class_for_time(wd, hour) -> CrossFitClass:
     if booked_class_el is not None:
         # Parse the element text
         class_name = booked_class_el.text.split('\n')[0]
-        class_program = booked_class_el.text.split('\n')[3]
-        class_time = booked_class_el.text.split('\n')[4]
+        class_program = booked_class_el.text.split('\n')[2]
+        class_time = booked_class_el.text.split('\n')[3]
 
         crossfit_class = CrossFitClass(date=current_date, name=class_name, program=class_program, time=class_time)
         
@@ -33,7 +33,7 @@ def get_crossfit_class_for_time(wd, hour) -> CrossFitClass:
         return crossfit_class
     else:
         LOGGER.info('No class found for current datetime')
-        return
+        return None
 
 
 def set_correct_program(class_name, wd):

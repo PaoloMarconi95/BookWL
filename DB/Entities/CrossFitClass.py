@@ -58,15 +58,15 @@ class CrossFitClass:
 
     @classmethod
     def _get_crossfit_class_by_user_id_query(cls, user_id):
-        return f"SELECT * FROM CROSSFIT_CLASS WHERE user_id = {user_id}"
+        return f"SELECT name, date, time, program, id FROM CROSSFIT_CLASS WHERE user_id = {user_id}"
 
     @classmethod
     def _get_crossfit_class_by_id_query(cls, class_id):
-        return f"SELECT * FROM CROSSFIT_CLASS WHERE id = {class_id}"
+        return f"SELECT name, date, time, program, id FROM CROSSFIT_CLASS WHERE id = {class_id}"
     
     @classmethod
     def _get_crossfit_class_by_crossfit_class(cls, crossfit_class):
-        return f"SELECT * FROM CROSSFIT_CLASS WHERE name = '{crossfit_class.name}' and date = {Database.convert_date(crossfit_class.date)} \
+        return f"SELECT name, date, time, program, id FROM CROSSFIT_CLASS WHERE name = '{crossfit_class.name}' and date = {Database.convert_date(crossfit_class.date)} \
             and time = '{crossfit_class.time}' AND program = '{crossfit_class.program}'"
 
     @classmethod
