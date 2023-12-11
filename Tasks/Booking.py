@@ -111,16 +111,18 @@ def get_booked_class_and_program_for_date(wd, date, hour):
 
 def analyze_booking_result(booking_row):
     if booking_row is None:
+        LOGGER.warn("Booking row is none, failed to book current class")
         return BookingResult.FAIL
 
-    icon_present = is_icon_present_in_row(booking_row, 'icon-ticket')
+    ticket_present = is_icon_present_in_row(booking_row, 'icon-ticket')
     forbidden_present = is_icon_present_in_row(booking_row, 'icon-forbidden')
 
-    if icon_present and forbidden_present:
+    if ticket_present and forbidden_present:
         return BookingResult.SUCCESS
-    if not icon_present and forbidden_present:
+    if not ticket_present and forbidden_present:
         return BookingResult.WAITLIST
 
+    LOGGER.warn(f"Failed to book current class, ticket: {ticket_present}, forbidden_present: {forbidden_present}")
     return BookingResult.FAIL
 
 def book_class(book: FutureBooking, wd):
@@ -129,9 +131,9 @@ def book_class(book: FutureBooking, wd):
     try:
         classes = get_all_classes_for_date(book.class_date, wd)
         LOGGER.info("found " + str(len(classes)) + " classes for " + str(book.class_date))
-        booking_el, booking_row = find_booking_row_by_book(classes, book)
-        if booking_el is not None:
-            booking_el.click()
+        booking_button, booking_row = find_booking_row_by_book(classes, book)
+        if booking_button is not None:
+            booking_button.click()
             # Wait for the reservation to be sent
             wd.refresh()
             classes = get_all_classes_for_date(book.class_date, wd)
