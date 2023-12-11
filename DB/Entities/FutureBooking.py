@@ -37,10 +37,6 @@ class FutureBooking:
             {future_booking.class_name}, {future_booking.class_program}, {future_booking.class_time}, {future_booking.week_day}"
 
     @classmethod
-    def _get_future_bookings_query(cls):
-        return f"SELECT user_id, class_name, class_program, class_time, week_day FROM FUTURE_BOOKING"
-
-    @classmethod
     def _get_future_booking_by_user_id_query(cls, user_id):
         return f"SELECT user_id, class_name, class_program, class_time, week_day FROM FUTURE_BOOKING WHERE user_id = {user_id}"
 

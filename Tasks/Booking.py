@@ -11,6 +11,7 @@ from datetime import datetime
 
 # Custom
 from Config import CONFIG, LOGGER
+from DB.Entities.CrossFitClass import CrossFitClass
 from Exceptions import NoReservationFoundException
 from Enum.BookingResult import BookingResult
 from DB.Entities.FutureBooking import FutureBooking
@@ -20,8 +21,8 @@ from DB.Entities.FutureBooking import FutureBooking
 :param class_name is the string representing the class name
 :return the clickable element that sends the desired reservation when clicked
 """
-def find_booking_row_by_book(classes, book: FutureBooking):
-    booking_row = list(filter(lambda daily_class: book.class_name in daily_class.text, classes))
+def find_booking_row_by_class_name(classes, class_name):
+    booking_row = list(filter(lambda daily_class: class_name in daily_class.text, classes))
     if len(booking_row) == 1:
         booking_row = booking_row[0]
         try:
@@ -30,7 +31,7 @@ def find_booking_row_by_book(classes, book: FutureBooking):
                 EC.element_to_be_clickable((By.CSS_SELECTOR, "svg[class='icon icon-calendar']")))
         except (NoSuchElementException, TimeoutException):
             booking_row.find_element(By.CLASS_NAME, 'icon-forbidden')
-            LOGGER.info('No icon calendar found for ' + str(book.class_name) + ' at ' + str(book.class_date))
+            LOGGER.info('No icon calendar found for ' + str(class_name))
             booking_el = None
         return booking_el, booking_row
     else:
@@ -49,16 +50,16 @@ def is_icon_present_in_row(booking_row, css_class):
 
 # Expects a string date with format dd-MM-yyyy
 def set_date(date, wd):
-    LOGGER.info('Setting date to ' + date)
     element = wd.find_element(By.ID, "AthleteTheme_wt6_block_wtMainContent_wt9_W_Utils_UI_wt216_block_wtDateInputFrom")
-    element.clear()
-    element.send_keys(date)
+    if element.get_attribute('value') != date:
+        LOGGER.info('Setting date to ' + date)
+        element.clear()
+        element.send_keys(date)
+        time.sleep(3)
 
 
 def get_all_classes_for_date(date, wd):
     set_date(date, wd)
-    # Waiting for site backend to render new date's data
-    time.sleep(3)
 
     table_entries = wd.find_elements(By.XPATH, '//table/tbody/tr')
     # First elements is always the calendar filter
@@ -80,8 +81,6 @@ def get_all_classes_for_date(date, wd):
 
 def get_booked_class_and_program_for_date(wd, date, hour):
     set_date(date, wd)
-    # Waiting for site backend to render new date's data
-    time.sleep(3)
 
     table_entries = wd.find_elements(By.XPATH, '//table/tbody/tr')
     # First elements is always the calendar filter, so discard it
@@ -125,19 +124,20 @@ def analyze_booking_result(booking_row):
     LOGGER.warn(f"Failed to book current class, ticket: {ticket_present}, forbidden_present: {forbidden_present}")
     return BookingResult.FAIL
 
+
 def book_class(book: FutureBooking, wd):
     result = None
     wd.get(CONFIG.calendar_url)
     try:
         classes = get_all_classes_for_date(book.class_date, wd)
         LOGGER.info("found " + str(len(classes)) + " classes for " + str(book.class_date))
-        booking_button, booking_row = find_booking_row_by_book(classes, book)
+        booking_button, booking_row = find_booking_row_by_class_name(classes, book.class_name)
         if booking_button is not None:
             booking_button.click()
             # Wait for the reservation to be sent
             wd.refresh()
             classes = get_all_classes_for_date(book.class_date, wd)
-            _, booking_row = find_booking_row_by_book(classes, book)
+            _, booking_row = find_booking_row_by_class_name(classes, book.class_name)
             result = analyze_booking_result(booking_row)
         else:
             return BookingResult.ALREADY_BOOKED
@@ -147,3 +147,13 @@ def book_class(book: FutureBooking, wd):
         return BookingResult.NOT_FOUND
 
     return result
+
+
+def is_still_booked(crossfit_class: CrossFitClass, wd) -> bool:
+    classes = get_all_classes_for_date(crossfit_class.date, wd)
+    _, booking_row = find_booking_row_by_class_name(classes, crossfit_class.name)
+    if is_icon_present_in_row(booking_row, 'icon-ticket'):
+        return True
+    else:
+        return False
+    

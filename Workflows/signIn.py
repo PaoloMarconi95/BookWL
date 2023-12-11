@@ -1,6 +1,7 @@
 from Tasks.LogIn import login
 from Tasks.ChangeUser import log_out
 from Tasks.ClassSignIn import sign_in
+from Tasks.Booking import is_still_booked
 from Tasks.SendEmail import send_email
 import traceback
 from multiprocessing.pool import ThreadPool
@@ -14,7 +15,7 @@ import traceback
 
 
 def error_handler(ex):
-    exception = traceback.format_exc()
+    exception = traceback.print_exception(type(ex), ex, ex.__traceback__)
     LOGGER.error(f"An error occurred in booking_sign_in thread.\n{str(ex)}\n{exception}")
     send_email("paolomarconi1995@gmail.com", "Auto SignIn Error", f"{str(ex)}\n{exception}")
 
@@ -30,25 +31,21 @@ def booking_sign_in(booked_class: BookedClass, webdriver):
     booking: Booking = Booking.get_booking_by_user_and_class_id(user.id, crossfit_class.id)
     LOGGER.info(f"Booking correctly retrieved")
 
-    logged_in = False
-    attempts = 0
-    while not logged_in and attempts < CONFIG.max_login_attempts:
-        try:
-            logged_in = login(user, webdriver)
-        except AttributeError as e:
-            LOGGER.error(f'Login for user {user.name} failed! ({e}) Trying again...')
-        finally:
-            attempts += 1
+    logged_in = login(user, webdriver)
 
     if logged_in:
         try:
-            sign_in(crossfit_class, webdriver)
-            booking.set_as_signed_in()
-            send_email(user.mail, "Auto SignIn", f"Ciao {user.name}, ti ho fatto il signIn automatico per la "
-                        f"classe di {crossfit_class.name}")
+            if is_still_booked(crossfit_class):
+                sign_in(crossfit_class, webdriver)
+                booking.set_as_signed_in()
+                send_email(user.mail, "Auto SignIn", f"Ciao {user.name}, ti ho fatto il signIn automatico per la "
+                            f"classe di {crossfit_class.name}")
+            else:
+                send_email(user.mail, "Auto SignIn", f"Ciao {user.name}, NON ti ho fatto il signIn automatico per la "
+                            f"classe di {crossfit_class.name}")
         except Exception as e:
             send_email(user.mail, "Auto SignIn", f"Ciao {user.name}, il tuo signIn automatico per la "
-            f"classe di {crossfit_class.name} è fallito :)\nCausa: {str(e)}\n\n\n\nmannaggia la mad***a :) ")
+                        f"classe di {crossfit_class.name} è fallito :)\nCausa: {str(e)}\n\n\n\nmannaggia la mad***a :) ")
         finally:
             log_out(user, webdriver)
     else:

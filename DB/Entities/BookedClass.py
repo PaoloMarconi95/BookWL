@@ -8,7 +8,7 @@ class BookedClass:
         self.class_id = int(class_id)
 
     def __str__(self):
-        return f"Booking: user_id = {self.user_id}; class_id = {self.class_id}; is_signed_in = {self.is_signed_in};"
+        return f"BookedClass: user_id = {self.user_id}; class_id = {self.class_id}"
     
     def __repr__(self):
         return self.__str__()    
@@ -23,7 +23,7 @@ class BookedClass:
     @classmethod
     def _get_booked_class_by_user_id_query_for_current_datetime(cls, user_id):
         time_strings = []
-        for i in range(0, CONFIG.sign_in_delta):
+        for i in range(0, CONFIG.sign_in_delta + 1):
             time_strings.append(f"'{(datetime.now() + timedelta(minutes=i)).strftime('%H:%M')}'")
         
         time_string = ','.join(time_strings)
@@ -35,8 +35,8 @@ class BookedClass:
     def _map_query_to_class(cls, query_output):
         parsed_objects = []
         for output in query_output:
-            if len(output) != 4:
+            if len(output) != 2:
                 raise Exception(f'Cannot map object {output} to class BookedClass')
-            parsed_objects.append(cls(output[0], output[1], output[2], output[3]))
+            parsed_objects.append(cls(output[0], output[1]))
             
         return parsed_objects

@@ -16,7 +16,7 @@ def safe_access_by_id(driver, identifier, max_attempts=5, by=By.ID):
     attempts = 0
     while attempts == 0 or (not EC.staleness_of(element) and attempts <= max_attempts):
         try:
-            element = WebDriverWait(driver, 5).until(
+            element = WebDriverWait(driver, 10).until(
                 EC.presence_of_element_located((by, identifier))
             )
         except (NoSuchElementException, StaleElementReferenceException, TimeoutException) as e:
