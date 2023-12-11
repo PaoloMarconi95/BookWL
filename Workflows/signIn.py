@@ -9,17 +9,27 @@ from Workflows import WEBDRIVERFACTORY
 from DB.Entities.Booking import Booking
 from DB.Entities.User import User
 from DB.Entities.CrossFitClass import CrossFitClass
+from DB.Entities.BookedClass import BookedClass
+import traceback
 
 
 def error_handler(ex):
-    LOGGER.error(f"An error occurred in booking_sign_in thread.\n{str(ex)}")
-    send_email("paolomarconi1995@gmail.com", "Auto SignIn Error", str(ex))
+    exception = traceback.format_exc()
+    LOGGER.error(f"An error occurred in booking_sign_in thread.\n{str(ex)}\n{exception}")
+    send_email("paolomarconi1995@gmail.com", "Auto SignIn Error", f"{str(ex)}\n{exception}")
 
 
-def booking_sign_in(booking: Booking, webdriver):
-    user: User = User.get_user_by_id(booking.user_id)
+def booking_sign_in(booked_class: BookedClass, webdriver):
+    LOGGER.info(f"Found that I should book {booked_class}")
+    user: User = User.get_user_by_id(booked_class.user_id)
+    LOGGER.info(f"User correctly retrieved")
 
-    LOGGER.info("Starting sign-in process for user " + str(user.name))
+    crossfit_class: CrossFitClass = CrossFitClass.get_crossfit_class_by_id(booked_class.class_id)
+    LOGGER.info(f"CrossFitClass correctly retrieved")
+
+    booking: Booking = Booking.get_booking_by_user_and_class_id(user.id, crossfit_class.id)
+    LOGGER.info(f"Booking correctly retrieved")
+
     logged_in = False
     attempts = 0
     while not logged_in and attempts < CONFIG.max_login_attempts:
@@ -31,7 +41,6 @@ def booking_sign_in(booking: Booking, webdriver):
             attempts += 1
 
     if logged_in:
-        crossfit_class: CrossFitClass = CrossFitClass.get_crossfit_class_by_id(booking.class_id)
         try:
             sign_in(crossfit_class, webdriver)
             booking.set_as_signed_in()
@@ -52,11 +61,13 @@ def main():
     users = User.get_every_users()
     with ThreadPool() as pool:
         for user in users:
-            bookings = Booking.get_active_booking_by_user_id_for_current_time(user.id)
+            bookings = BookedClass.get_booked_class_by_user_id_for_current_datetime(user.id)
             if len(bookings) == 1:
                 webdriver = WEBDRIVERFACTORY.get_driver()
                 webdriver_to_be_closed.append(webdriver)
                 pool.apply_async(booking_sign_in, args=(bookings.pop(), webdriver), error_callback=error_handler)
+            else:
+                LOGGER.info('No Booked Class Found!')
         pool.close()
         pool.join()
     

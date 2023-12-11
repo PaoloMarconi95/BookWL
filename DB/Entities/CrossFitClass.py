@@ -49,7 +49,14 @@ class CrossFitClass:
     def get_crossfit_class_by_id(cls, class_id):
         query = cls._get_crossfit_class_by_id_query(class_id)
         result = Database.execute_query(query)
-        return cls._map_query_to_class(result)
+        result = cls._map_query_to_class(result)
+        if len(result) == 1:
+            return result[0]
+        elif len(result) == 0:
+            raise Exception(f"No crossfit class found for id {str(class_id)}")
+        else:
+            raise Exception(f"Too many crossfit class found for id {str(class_id)}")
+
 
     @classmethod
     def _get_create_crossfit_class_query(cls, crossfit_class):

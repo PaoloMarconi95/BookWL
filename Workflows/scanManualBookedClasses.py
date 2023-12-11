@@ -42,7 +42,7 @@ def main_thread_work(user: User, webdriver):
                 LOGGER.info(f"Found that class {crossfit_class} does not exists within db! inserting it...")
                 crossfit_class_id = CrossFitClass.create_crossfit_class(crossfit_class)
 
-            booking = Booking(user_id=user.id, class_id=crossfit_class_id, time=crossfit_class.time, is_signed_in=False)
+            booking = Booking(user_id=user.id, class_id=crossfit_class_id, is_signed_in=False)
             if not booking.exists():
                 LOGGER.info(f"Found that booking {booking} does not exists within db! inserting it...")
                 Booking.create_booking(booking)
