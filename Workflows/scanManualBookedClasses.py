@@ -37,16 +37,9 @@ def main_thread_work(user: User, webdriver):
         # See If there's a class in current hour (it's 17 and class at 18)
         classes.append(get_crossfit_class_for_time(webdriver, str(current_hour + 1)))
         for crossfit_class in [c_class for c_class in classes if c_class is not None]:
-            crossfit_class_id = crossfit_class.retrive_id_if_existing()
-            if crossfit_class is not None and crossfit_class_id is None:
-                LOGGER.info(f"Found that class {crossfit_class} does not exists within db! inserting it...")
-                crossfit_class_id = CrossFitClass.create_crossfit_class(crossfit_class)
-
+            crossfit_class_id = crossfit_class.upsert()
             booking = Booking(user_id=user.id, class_id=crossfit_class_id, is_signed_in=False)
-            if not booking.exists():
-                LOGGER.info(f"Found that booking {booking} does not exists within db! inserting it...")
-                Booking.create_booking(booking)
-
+            booking.upsert()
         log_out(user, webdriver)
     else:
         LOGGER.error(f'Login for user {user.name} failed!')

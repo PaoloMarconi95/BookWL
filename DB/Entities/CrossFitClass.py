@@ -1,4 +1,5 @@
 from DB.Database import Database
+from Config import LOGGER
 
 class CrossFitClass:
     def __init__(self, name, date, time, program, id=None):
@@ -25,13 +26,22 @@ class CrossFitClass:
         else:
             raise Exception(f"Tried to retrieva max 1 CrossFitClass for exists() method but i got {str(len(result))} results")  
 
-    def retrive_id_if_existing(self):
+    def retrive_id(self):
+        query = self._get_crossfit_class_by_crossfit_class(self)
+        result = Database.execute_query(query)
+        return CrossFitClass._map_query_to_class(result)[0].id
+
+    """
+    :params None
+    Insert the CrossFitClass if not present in the DB, 
+    :returns the CrossFitClass id if already present
+    """
+    def upsert(self):
         if self.exists():
-            query = self._get_crossfit_class_by_crossfit_class(self)
-            result = Database.execute_query(query)
-            return CrossFitClass._map_query_to_class(result)[0].id
+            return self.retrive_id()
         else:
-            return None
+            LOGGER.info(f"Found that class {self} does not exists within db! inserting it...")
+            return CrossFitClass.create_crossfit_class(self)
 
     @classmethod
     def get_every_crossfit_class_by_user_id(cls, user_id):
@@ -75,10 +85,6 @@ class CrossFitClass:
     def _get_crossfit_class_by_crossfit_class(cls, crossfit_class):
         return f"SELECT name, date, time, program, id FROM CROSSFIT_CLASS WHERE name = '{crossfit_class.name}' and date = {Database.convert_date(crossfit_class.date)} \
             and time = '{crossfit_class.time}' AND program = '{crossfit_class.program}'"
-
-    @classmethod
-    def _get_crossfit_classes_query(cls):
-        return f"SELECT name, date, time, program, id FROM CROSSFIT_CLASS"
     
 
     @classmethod

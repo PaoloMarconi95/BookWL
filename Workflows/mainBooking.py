@@ -61,18 +61,13 @@ def book_future_bookings(future_bookings, user: User, webdriver):
                 book: FutureBooking = book
                 booking_result = book_class(book, webdriver)
                 if booking_result == BookingResult.SUCCESS:
-                    crossfit_class = CrossFitClass(name=book.class_name, date=book.class_date, time=book.class_time, program=book.class_program)
-                    crossfit_class_id = crossfit_class.retrive_id_if_existing()
-                    if crossfit_class is not None and crossfit_class_id is None:
-                        LOGGER.info(f"Found that class {crossfit_class} does not exists within db! inserting it...")
-                        crossfit_class_id = CrossFitClass.create_crossfit_class(crossfit_class)
-
-                    booking = Booking(user_id=user.id, class_id=crossfit_class_id, is_signed_in=False)
-                    if not booking.exists():
-                        LOGGER.info(f"Found that booking {booking} does not exists within db! inserting it...")
-                        Booking.create_booking(booking)
-                        
                     successful.append(book)
+                    # Upsert CorssfitClass
+                    crossfit_class = CrossFitClass(name=book.class_name, date=book.class_date, time=book.class_time, program=book.class_program)
+                    crossfit_class_id = crossfit_class.upsert()
+                    # Upsert Booking
+                    booking = Booking(user_id=user.id, class_id=crossfit_class_id, is_signed_in=False)
+                    booking.upsert()                        
                 elif booking_result == BookingResult.WAITLIST:
                     waitlist.append(book)
                 elif booking_result == BookingResult.FAIL:

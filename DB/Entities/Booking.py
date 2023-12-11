@@ -1,6 +1,5 @@
 from DB.Database import Database
-from datetime import datetime, timedelta
-from Config import CONFIG, LOGGER
+from Config import LOGGER
 
 class Booking:
     def __init__(self, user_id, class_id, is_signed_in):
@@ -28,6 +27,11 @@ class Booking:
             return False
         else:
             raise Exception(f"Tried to retrieve 1 CrossFitClass for exists() method but i got {str(len(result))} results") 
+        
+    def upsert(self):
+        if not self.exists():
+            LOGGER.info(f"Found that booking {self} does not exists within db! inserting it...")
+            return Booking.create_booking(self)
 
     
     @classmethod

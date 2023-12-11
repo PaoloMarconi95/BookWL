@@ -44,10 +44,6 @@ class User:
     @classmethod
     def _get_user_by_id_query(cls, user_id):
         return f"SELECT * FROM USER WHERE id = {user_id}"
-    
-    @classmethod
-    def _get_create_user_query(cls, name, mail, password):
-        return f"INSERT INTO USER (name, mail, password) VALUES ({name}, {mail}, {password})"
 
     @classmethod
     def _map_query_to_class(cls, query_output):
