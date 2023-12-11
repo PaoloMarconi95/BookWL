@@ -53,11 +53,10 @@ def main():
     with ThreadPool() as pool:
         for user in users:
             bookings = Booking.get_active_booking_by_user_id_for_current_time(user.id)
-            if len(bookings) > 0:
-                if len(bookings) == 1:
-                    webdriver = WEBDRIVERFACTORY.get_driver()
-                    webdriver_to_be_closed.append(webdriver)
-                    pool.apply_async(booking_sign_in, args=(bookings.pop(), webdriver), error_callback=error_handler)
+            if len(bookings) == 1:
+                webdriver = WEBDRIVERFACTORY.get_driver()
+                webdriver_to_be_closed.append(webdriver)
+                pool.apply_async(booking_sign_in, args=(bookings.pop(), webdriver), error_callback=error_handler)
         pool.close()
         pool.join()
     

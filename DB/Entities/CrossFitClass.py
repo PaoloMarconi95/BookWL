@@ -71,7 +71,7 @@ class CrossFitClass:
 
     @classmethod
     def _get_crossfit_classes_query(cls):
-        return f"SELECT * FROM CROSSFIT_CLASS"
+        return f"SELECT name, date, time, program, id FROM CROSSFIT_CLASS"
     
 
     @classmethod

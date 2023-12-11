@@ -29,7 +29,7 @@ class User:
         elif len(user) > 1:
             raise Exception(f"More than 1 user found for id {user_id}!")
         else:
-            return None
+            raise Exception(f"No user found for id {user_id}!")
     
     @classmethod
     def get_every_users(cls):

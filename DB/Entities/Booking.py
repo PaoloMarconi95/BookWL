@@ -62,11 +62,12 @@ class Booking:
 
     @classmethod
     def _get_active_booking_by_user_id_query(cls, user_id):
-        return f"SELECT * FROM BOOKING WHERE user_id = {user_id} and is_signed_in = 0"
+        return f"SELECT user_id, class_id,is_signed_in, time FROM BOOKING WHERE user_id = {user_id} and is_signed_in = 0"
 
     @classmethod
     def _get_booking_by_booking(cls, booking):
-        return f"SELECT * FROM BOOKING WHERE user_id = {booking.user_id} and is_signed_in = {Database.convert_boolean(booking.is_signed_in)}"\
+        return f"SELECT user_id, class_id, is_signed_in, time FROM BOOKING WHERE user_id = {booking.user_id} and " \
+                f" is_signed_in = {Database.convert_boolean(booking.is_signed_in)}" \
                 f" and class_id = {booking.class_id} and time = '{booking.time}'"
 
     @classmethod
@@ -77,7 +78,7 @@ class Booking:
         
         time_string = ','.join(time_strings)
         LOGGER.info(f"looking for bookable class within these time: {time_string} ")
-        return f"SELECT * FROM BOOKING WHERE user_id = {user_id} and is_signed_in = 0 and time in({time_string})"
+        return f"SELECT user_id, class_id, is_signed_in, time FROM BOOKING WHERE user_id = {user_id} and is_signed_in = 0 and time in({time_string})"
     
         
     @classmethod
