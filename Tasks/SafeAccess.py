@@ -1,7 +1,7 @@
 # Standard
 import time
+from datetime import datetime
 import os
-
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.wait import WebDriverWait
@@ -11,19 +11,21 @@ import traceback
 # Custom
 from Config import LOGGER, CONFIG
 
-def safe_access_by_id(driver, identifyier, max_attempts=5, by=By.ID):
+def safe_access_by_id(driver, identifier, max_attempts=5, by=By.ID):
     element = None
     attempts = 0
     while attempts == 0 or (not EC.staleness_of(element) and attempts <= max_attempts):
         try:
             element = WebDriverWait(driver, 5).until(
-                EC.presence_of_element_located((by, identifyier))
+                EC.presence_of_element_located((by, identifier))
             )
         except (NoSuchElementException, StaleElementReferenceException, TimeoutException) as e:
-            with open(os.path.join(CONFIG.html_file_path, f'debug_{attempts}.html'), 'w+') as f:
+            now = datetime.now()
+            id = f"{now.day}{now.month}_{now.hour}:{now.minute}_a{attempts}"
+            with open(os.path.join(CONFIG.html_file_path, f'debug_{id}.html'), 'w+') as f:
                 f.write(driver.page_source)
             traceback.print_exc()
-            LOGGER.warn(f"{identifyier} retrieval failed, I'm going to refresh driver and wait for 2 seconds.")
+            LOGGER.warn(f"{identifier} retrieval failed, I'm going to refresh driver and wait for 2 seconds.")
             driver.refresh()
             time.sleep(2)
         finally:
@@ -32,5 +34,5 @@ def safe_access_by_id(driver, identifyier, max_attempts=5, by=By.ID):
     if attempts < max_attempts and element is not None:
         return element
     else:
-        LOGGER.error(f'Safe access to element {identifyier} failed')
+        LOGGER.error(f'Safe access to element {identifier} failed')
         return None
