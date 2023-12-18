@@ -153,7 +153,9 @@ def is_still_booked(crossfit_class: CrossFitClass, wd) -> bool:
     classes = get_all_classes_for_date(crossfit_class.date, wd)
     _, booking_row = find_booking_row_by_class_name(classes, crossfit_class.name)
     if is_icon_present_in_row(booking_row, 'icon-ticket'):
+        LOGGER.info(f'crossfit class {crossfit_class} still booked! signin in..')
         return True
     else:
+        LOGGER.info(f'crossfit class {crossfit_class} not booked anymore! Avoiding the sign-in')
         return False
     

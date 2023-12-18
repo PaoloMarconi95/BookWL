@@ -35,8 +35,8 @@ def main_thread_work(user: User, webdriver):
         log_out(user, webdriver)
     else:
         LOGGER.error(f'Login for user {user.name} failed!')
-        """ send_email(user.mail, "Login Fallito!",
-                   f"Ciao {user.name}, il tuo login è fallito. Contatta il paolino") """
+        send_email(user.mail, "Login Fallito!",
+                   f"Ciao {user.name}, il tuo login è fallito. Contatta il paolino")
 
 def main():
     webdriver_to_be_closed = []

@@ -35,11 +35,11 @@ def booking_sign_in(booked_class: BookedClass, webdriver):
 
     if logged_in:
         try:
-            if is_still_booked(crossfit_class):
+            if is_still_booked(crossfit_class, webdriver):
                 sign_in(crossfit_class, webdriver)
-                booking.set_as_signed_in()
                 send_email(user.mail, "Auto SignIn", f"Ciao {user.name}, ti ho fatto il signIn automatico per la "
                             f"classe di {crossfit_class.name}")
+                booking.set_as_signed_in()
             else:
                 send_email(user.mail, "Auto SignIn", f"Ciao {user.name}, NON ti ho fatto il signIn automatico per la "
                             f"classe di {crossfit_class.name}")

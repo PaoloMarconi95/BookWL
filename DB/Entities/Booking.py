@@ -46,10 +46,9 @@ class Booking:
         query = cls._get_booking_by_user_and_class_id_query(user_id, class_id)
         result = Database.execute_query(query)
         if len(result) == 1:
-            cls._map_query_to_class(result)[0]
+            return cls._map_query_to_class(result)[0]
         else:
             raise Exception(f"More than one booking found for class id {class_id} and user {user_id}")
-        return cls._map_query_to_class(result)
     
 
     @classmethod
