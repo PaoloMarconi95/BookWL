@@ -72,3 +72,4 @@ def sign_in(crossfit_class: CrossFitClass, wd):
     LOGGER.info('Sign in button found')
     sign_in_button.click()
     LOGGER.info('And clicked!')
+    crossfit_class.is_signed_in = True

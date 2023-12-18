@@ -79,7 +79,7 @@ class Booking:
         
     @classmethod
     def _get_update_booking_query(cls, booking):
-        return f"UPDATE BOOKIN SET is_signed_in = {Database.convert_boolean(booking.is_signed_in)}" \
+        return f"UPDATE BOOKING SET is_signed_in = {Database.convert_boolean(booking.is_signed_in)}" \
             f" WHERE class_id = {booking.class_id} and user_id = {booking.user_id}"
 
     @classmethod

@@ -23,23 +23,19 @@ def error_handler(ex):
 def booking_sign_in(booked_class: BookedClass, webdriver):
     LOGGER.info(f"Found that I should book {booked_class}")
     user: User = User.get_user_by_id(booked_class.user_id)
-    LOGGER.info(f"User correctly retrieved")
-
     crossfit_class: CrossFitClass = CrossFitClass.get_crossfit_class_by_id(booked_class.class_id)
-    LOGGER.info(f"CrossFitClass correctly retrieved")
-
     booking: Booking = Booking.get_booking_by_user_and_class_id(user.id, crossfit_class.id)
-    LOGGER.info(f"Booking correctly retrieved")
 
-    logged_in = login(user, webdriver)
+    is_logged_in = login(user, webdriver)
+    is_signed_in = False
 
-    if logged_in:
+    if is_logged_in:
         try:
             if is_still_booked(crossfit_class, webdriver):
                 sign_in(crossfit_class, webdriver)
                 send_email(user.mail, "Auto SignIn", f"Ciao {user.name}, ti ho fatto il signIn automatico per la "
                             f"classe di {crossfit_class.name}")
-                booking.set_as_signed_in()
+                is_signed_in = True
             else:
                 send_email(user.mail, "Auto SignIn", f"Ciao {user.name}, NON ti ho fatto il signIn automatico per la "
                             f"classe di {crossfit_class.name}")
@@ -48,6 +44,8 @@ def booking_sign_in(booked_class: BookedClass, webdriver):
                         f"classe di {crossfit_class.name} è fallito :)\nCausa: {str(e)}\n\n\n\nmannaggia la mad***a :) ")
         finally:
             log_out(user, webdriver)
+            if is_signed_in:
+                booking.set_as_signed_in()
     else:
         LOGGER.error(f'Login for user {user.name} failed!')
         send_email(user.mail, "Login Fallito!",
