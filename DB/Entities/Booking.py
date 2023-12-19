@@ -26,7 +26,7 @@ class Booking:
         elif len(result) == 0:
             return False
         else:
-            raise Exception(f"Tried to retrieve 1 CrossFitClass for exists() method but i got {str(len(result))} results") 
+            raise Exception(f"Tried to retrieve 1 Booking for exists() method but i got {str(len(result))} results") 
         
     def upsert(self):
         if not self.exists():

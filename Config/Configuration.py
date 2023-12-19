@@ -10,7 +10,6 @@ class Configuration(YamlDataClassConfig):
     signin_url: str = None
     calendar_url: str = None
     chromedriver_folder: str = None
-    platform: str = None
     gmail_key: str = None
     html_file_path: str = None
     calendar_el_id: str = None
