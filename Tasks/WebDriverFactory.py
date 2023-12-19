@@ -1,8 +1,6 @@
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.common.exceptions import SessionNotCreatedException, WebDriverException
-
-# Custom
 from Exceptions import DriverNotInitializedException
 from Config import LOGGER
 import os
