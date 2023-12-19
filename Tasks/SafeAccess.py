@@ -27,7 +27,7 @@ def safe_access_by_id(driver, identifier, max_attempts=5, by=By.ID):
             traceback.print_exc()
             LOGGER.warn(f"{identifier} retrieval failed, I'm going to refresh driver and wait for 2 seconds.")
             driver.refresh()
-            time.sleep(2)
+            time.sleep(5)
         finally:
             attempts += 1
 

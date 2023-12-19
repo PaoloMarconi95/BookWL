@@ -21,6 +21,7 @@ def login(user: User, wd) -> bool:
     return logged_in
 
 
+
 def perform_login(user: User, wd):
     wd.get(CONFIG.calendar_url)
     login_el = safe_access_by_id(wd, 'FormLogin')
@@ -38,8 +39,10 @@ def perform_login(user: User, wd):
     except Exception as e:
         LOGGER.error(str(e))
 
+    logged_id = False
     if calendar_el is not None:
         LOGGER.info(f'User {user.name} successfully logged in!')
         return True
     return False
+
 
