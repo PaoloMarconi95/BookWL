@@ -27,29 +27,26 @@ def booking_sign_in(booked_class: BookedClass, webdriver):
     booking: Booking = Booking.get_booking_by_user_and_class_id(user.id, crossfit_class.id)
 
     is_logged_in = login(user, webdriver)
-    is_signed_in = False
 
     if is_logged_in:
         try:
             if is_still_booked(crossfit_class, webdriver):
                 sign_in(crossfit_class, webdriver)
-                send_email(user.mail, "Auto SignIn", f"Ciao {user.name}, ti ho fatto il signIn automatico per la "
-                            f"classe di {crossfit_class.name}")
-                is_signed_in = True
+                message = f"Ciao {user.name}, ti ho fatto il signIn automatico per la classe di {crossfit_class.name}"
+                booking.is_signed_in = True
             else:
-                send_email(user.mail, "Auto SignIn", f"Ciao {user.name}, NON ti ho fatto il signIn automatico per la "
-                            f"classe di {crossfit_class.name}")
+                message = f"Ciao {user.name}, NON ti ho fatto il signIn automatico per la classe di {crossfit_class.name}"
         except Exception as e:
-            send_email(user.mail, "Auto SignIn", f"Ciao {user.name}, il tuo signIn automatico per la "
-                        f"classe di {crossfit_class.name} è fallito :)\nCausa: {str(e)}\n\n\n\nmannaggia la mad***a :) ")
+            message = f"Ciao {user.name}, il tuo signIn automatico per la classe di {crossfit_class.name} è fallito :)\nCausa: {str(e)}\n\n\n\nmannaggia la mad***a :)"
         finally:
             log_out(user, webdriver)
-            if is_signed_in:
+            if booking.is_signed_in:
                 booking.set_as_signed_in()
     else:
         LOGGER.error(f'Login for user {user.name} failed!')
-        send_email(user.mail, "Login Fallito!",
-                   f"Ciao {user.name}, il tuo login è fallito. Contatta il paolino")
+        message = f"Ciao {user.name}, il tuo login è fallito. Contatta il paolino"
+    
+    send_email(user.mail, "Auto SignIn", message)
 
 def main():
     webdriver_to_be_closed = []

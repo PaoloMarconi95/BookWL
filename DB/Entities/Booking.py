@@ -14,9 +14,9 @@ class Booking:
         return self.__str__()
     
     def set_as_signed_in(self):
+        self.is_signed_in = True
         query = self._get_update_booking_query(self)
         Database.execute_query(query, commit=True)
-        self.is_signed_in = True
 
     def exists(self):
         query = self._get_booking_by_booking(self)
