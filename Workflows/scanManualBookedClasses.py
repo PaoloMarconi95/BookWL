@@ -2,18 +2,18 @@ from Tasks.LogIn import login
 from Tasks.ChangeUser import log_out
 from Tasks.ClassSignIn import get_crossfit_class_for_time
 from Tasks.SendEmail import send_email
-import traceback
-from Config import CONFIG, LOGGER
+from Config import LOGGER
 from Workflows import WEBDRIVERFACTORY
 from DB.Entities.Booking import Booking
 from DB.Entities.User import User
 from datetime import datetime, timedelta
 from multiprocessing.pool import ThreadPool
+import traceback
 
 def error_handler(ex: Exception):
     exception = traceback.print_exception(type(ex), ex, ex.__traceback__)
-    LOGGER.error(f"An error occurred in booking_sign_in thread.\n{str(exception)}")
-    send_email("paolomarconi1995@gmail.com", "Scan booked class Error", str(exception))
+    LOGGER.error(f"An error occurred in booking_sign_in thread.\n{str(ex)}")
+    send_email("paolomarconi1995@gmail.com", "Scan booked class Error", f"Exception: {str(ex)}\nTraceback:\n{str(exception)}")
 
 
 def main_thread_work(user: User, webdriver):
@@ -30,7 +30,7 @@ def main_thread_work(user: User, webdriver):
         classes.append(get_crossfit_class_for_time(webdriver, next_hour))
         for crossfit_class in [c_class for c_class in classes if c_class is not None]:
             crossfit_class_id = crossfit_class.upsert()
-            booking = Booking(user_id=user.id, class_id=crossfit_class_id, is_signed_in=False)
+            booking = Booking(user_id=user.id, class_id=crossfit_class_id)
             booking.upsert()
         log_out(user, webdriver)
     else:

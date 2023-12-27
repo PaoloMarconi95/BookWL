@@ -136,6 +136,7 @@ def book_class(book: FutureBooking, wd):
             booking_button.click()
             # Wait for the reservation to be sent
             wd.refresh()
+            time.sleep(1)
             classes = get_all_classes_for_date(book.class_date, wd)
             _, booking_row = find_booking_row_by_class_name(classes, book.class_name)
             result = analyze_booking_result(booking_row)

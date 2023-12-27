@@ -3,9 +3,8 @@ from Tasks.ChangeUser import log_out
 from Tasks.ClassSignIn import sign_in
 from Tasks.Booking import is_still_booked
 from Tasks.SendEmail import send_email
-import traceback
 from multiprocessing.pool import ThreadPool
-from Config import CONFIG, LOGGER
+from Config import LOGGER
 from Workflows import WEBDRIVERFACTORY
 from DB.Entities.Booking import Booking
 from DB.Entities.User import User
@@ -16,8 +15,8 @@ import traceback
 
 def error_handler(ex):
     exception = traceback.print_exception(type(ex), ex, ex.__traceback__)
-    LOGGER.error(f"An error occurred in booking_sign_in thread.\n{str(ex)}\n{exception}")
-    send_email("paolomarconi1995@gmail.com", "Auto SignIn Error", f"{str(ex)}\n{exception}")
+    LOGGER.error(f"An error occurred in booking_sign_in thread.\n{str(ex)}")
+    send_email("paolomarconi1995@gmail.com", "Auto SignIn Error", f"Exception: {str(ex)}\nTraceback:\n{str(exception)}")
 
 
 def booking_sign_in(booked_class: BookedClass, webdriver):

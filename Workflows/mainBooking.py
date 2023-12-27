@@ -18,11 +18,11 @@ def extract_class_array_summary(class_array):
     return text[:len(text)-2] + "\n\n"
 
 
-def generate_email_summary(success, waitlist, unsuccessful, not_found, already_booked):
+def generate_email_summary(successful, waitlist, unsuccessful, not_found, already_booked):
     text = ""
-    if len(success) > 0:
-        text += f"Succesfully booked {len(success)} classes: \n"
-        text += extract_class_array_summary(success)
+    if len(successful) > 0:
+        text += f"Succesfully booked {len(successful)} classes: \n"
+        text += extract_class_array_summary(successful)
     if len(waitlist) > 0:
         text += f"Waitlisted {len(waitlist)} classes: \n"
         text += extract_class_array_summary(waitlist)
