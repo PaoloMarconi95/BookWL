@@ -2,7 +2,7 @@ from DB.Database import Database
 from Config import LOGGER
 
 class Booking:
-    def __init__(self, user_id, class_id, is_signed_in):
+    def __init__(self, user_id, class_id, is_signed_in=False):
         self.user_id = int(user_id)
         self.class_id = int(class_id)
         self.is_signed_in = True if is_signed_in == 1 else 0
@@ -30,7 +30,7 @@ class Booking:
         
     def upsert(self):
         if not self.exists():
-            LOGGER.info(f"Found that booking {self} does not exists within db! inserting it...")
+            LOGGER.info(f"Found that booking {self} does not exist within db! inserting it...")
             return Booking.create_booking(self)
 
     
@@ -72,8 +72,7 @@ class Booking:
 
     @classmethod
     def _get_booking_by_booking(cls, booking):
-        return f"SELECT user_id, class_id, is_signed_in FROM BOOKING WHERE user_id = {booking.user_id} and " \
-                f" is_signed_in = {Database.convert_boolean(booking.is_signed_in)}" \
+        return f"SELECT user_id, class_id, is_signed_in FROM BOOKING WHERE user_id = {booking.user_id}  and" \
                 f" and class_id = {booking.class_id}"
         
         
