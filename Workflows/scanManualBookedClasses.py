@@ -18,9 +18,9 @@ def error_handler(ex: Exception):
 
 def main_thread_work(user: User, webdriver):
     LOGGER.info("Starting sign-in process for user " + str(user.name))
-    logged_in = login(user, webdriver)
+    user.login(webdriver)
 
-    if logged_in:
+    if user.is_logged_in:
         current_hour = datetime.strftime(datetime.today(), "%H")
         next_hour = datetime.strftime(datetime.today() + timedelta(hours=1), "%H")
         classes = []
@@ -32,7 +32,7 @@ def main_thread_work(user: User, webdriver):
             crossfit_class_id = crossfit_class.upsert()
             booking = Booking(user_id=user.id, class_id=crossfit_class_id)
             booking.upsert()
-        log_out(user, webdriver)
+        user.log_out(webdriver)
     else:
         LOGGER.error(f'Login for user {user.name} failed!')
         send_email(user.mail, "Login Fallito!",

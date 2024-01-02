@@ -25,9 +25,9 @@ def booking_sign_in(booked_class: BookedClass, webdriver):
     crossfit_class: CrossFitClass = CrossFitClass.get_crossfit_class_by_id(booked_class.class_id)
     booking: Booking = Booking.get_booking_by_user_and_class_id(user.id, crossfit_class.id)
 
-    is_logged_in = login(user, webdriver)
+    user.login(webdriver)
 
-    if is_logged_in:
+    if user.is_logged_in:
         try:
             if is_still_booked(crossfit_class, webdriver):
                 sign_in(crossfit_class, webdriver)
@@ -35,10 +35,12 @@ def booking_sign_in(booked_class: BookedClass, webdriver):
                 booking.is_signed_in = True
             else:
                 message = f"Ciao {user.name}, NON ti ho fatto il signIn automatico per la classe di {crossfit_class.name}"
-        except Exception as e:
-            message = f"Ciao {user.name}, il tuo signIn automatico per la classe di {crossfit_class.name} è fallito :)\nCausa: {str(e)}\n\n\n\nmannaggia la mad***a :)"
+        except Exception as ex:
+            exception = traceback.print_exception(type(ex), ex, ex.__traceback__)
+            message = f"Ciao {user.name}, il tuo signIn automatico per la classe di {crossfit_class.name} è fallito :) " \
+                f"\nCausa: {str(ex)},\n\n stack: {str(exception)}\n\n\n\nmannaggia la mad***a :)"
         finally:
-            log_out(user, webdriver)
+            user.log_out(webdriver)
             if booking.is_signed_in:
                 booking.set_as_signed_in()
     else:

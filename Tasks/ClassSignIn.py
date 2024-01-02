@@ -8,7 +8,7 @@ from selenium.webdriver.support.ui import Select
 # Custom
 from Config import CONFIG, LOGGER
 from Exceptions import ClassNotFoundWithinDropDownException
-from Tasks.SafeAccess import safe_access_by_id
+from Tasks.SafeAccess import safe_access
 from Tasks.Booking import get_booked_class_and_program_for_date
 from DB.Entities.CrossFitClass import CrossFitClass
 
@@ -37,10 +37,10 @@ def get_crossfit_class_for_time(wd, hour) -> CrossFitClass:
 
 
 def set_correct_program(class_name, wd):
-    settings_accordion = safe_access_by_id(wd, SETTINGS_ACCORDION_ID)
+    settings_accordion = safe_access(wd, SETTINGS_ACCORDION_ID)
     settings_accordion.click()
     time.sleep(1)
-    program_dropdown = safe_access_by_id(wd, PROGRAM_DROPDOWN_ID)
+    program_dropdown = safe_access(wd, PROGRAM_DROPDOWN_ID)
     select = Select(program_dropdown)
     all_options = select.options
     correctly_set = False
@@ -54,7 +54,7 @@ def set_correct_program(class_name, wd):
 
 
 def set_correct_class(class_name, wd):
-    time_dropdown = safe_access_by_id(wd, TIME_DROPDOWN_ID)
+    time_dropdown = safe_access(wd, TIME_DROPDOWN_ID)
     select = Select(time_dropdown)
     select.select_by_visible_text(class_name)
 
@@ -68,7 +68,7 @@ def sign_in(crossfit_class: CrossFitClass, wd):
     set_correct_class(crossfit_class.name, wd)
     LOGGER.info('Looking for sign-in button')
     time.sleep(2)
-    sign_in_button = safe_access_by_id(wd, SIGNIN_BUTTON_ID)
+    sign_in_button = safe_access(wd, SIGNIN_BUTTON_ID)
     LOGGER.info('Sign in button found')
     sign_in_button.click()
     LOGGER.info('And clicked!')

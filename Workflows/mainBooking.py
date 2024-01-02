@@ -1,5 +1,4 @@
 from ChangeUser import log_out
-from Tasks.LogIn import login
 from Tasks.Booking import book_class
 from Tasks.SendEmail import send_email
 from Enum.BookingResult import BookingResult
@@ -40,9 +39,9 @@ def generate_email_summary(successful, waitlist, unsuccessful, not_found, alread
 
 def book_future_bookings(future_bookings, user: User, webdriver):
     LOGGER.info("Starting booking process for user " + str(user.name))
-    logged_in = login(user, webdriver)
+    user.login(webdriver)
 
-    if logged_in:
+    if user.is_logged_in:
         successful = []
         unsuccessful = []
         waitlist = []
@@ -74,7 +73,7 @@ def book_future_bookings(future_bookings, user: User, webdriver):
 
         summary = generate_email_summary(successful, waitlist, unsuccessful, not_found, already_booked)
         send_email(user.mail, "Auto Booking", summary)
-        log_out(user, webdriver)
+        user.log_out(webdriver)
     else:
         LOGGER.error(f'Login for user {user.name} failed!')
         send_email(user.mail, "Login Fallito!",

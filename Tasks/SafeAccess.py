@@ -11,7 +11,7 @@ import traceback
 # Custom
 from Config import LOGGER, CONFIG
 
-def safe_access_by_id(driver, identifier, max_attempts=5, by=By.ID):
+def safe_access(driver, identifier, max_attempts=5, by=By.ID):
     element = None
     attempts = 0
     while attempts == 0 or (not EC.staleness_of(element) and attempts <= max_attempts):

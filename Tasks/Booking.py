@@ -31,7 +31,7 @@ def find_booking_row_by_class_name(classes, class_name):
                 EC.element_to_be_clickable((By.CSS_SELECTOR, "svg[class='icon icon-calendar']")))
         except (NoSuchElementException, TimeoutException):
             booking_row.find_element(By.CLASS_NAME, 'icon-forbidden')
-            LOGGER.info('No icon calendar found for ' + str(class_name))
+            LOGGER.info(f'{class_name} is booked or waitlisted')
             booking_el = None
         return booking_el, booking_row
     else:
@@ -60,6 +60,16 @@ def set_date(date, wd):
 
 def get_all_classes_for_date(date, wd):
     set_date(date, wd)
+
+    try:
+        title = WebDriverWait(wd, 5).until(
+            EC.presence_of_element_located((By.CSS_SELECTOR, "span[class='h3']")))
+        if date not in title.text:
+            LOGGER.error(f"No date {date} found within title {title.text}!")
+            return []            
+    except NoSuchElementException:
+        LOGGER.error(f"No title found for date {date}!")
+        return []
 
     table_entries = wd.find_elements(By.XPATH, '//table/tbody/tr')
     # First elements is always the calendar filter
@@ -130,6 +140,8 @@ def book_class(book: FutureBooking, wd):
     wd.get(CONFIG.calendar_url)
     try:
         classes = get_all_classes_for_date(book.class_date, wd)
+        if len(classes) == 0:
+            return BookingResult.NOT_FOUND
         LOGGER.info("found " + str(len(classes)) + " classes for " + str(book.class_date))
         booking_button, booking_row = find_booking_row_by_class_name(classes, book.class_name)
         if booking_button is not None:
