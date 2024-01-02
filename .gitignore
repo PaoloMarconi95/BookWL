@@ -5,4 +5,4 @@ __pycache__
 .idea
 /.idea/*
 */configuration*.yaml
-/html_debug/
+/debug_html/
