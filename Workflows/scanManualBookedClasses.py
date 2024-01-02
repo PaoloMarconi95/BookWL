@@ -1,5 +1,3 @@
-from Tasks.LogIn import login
-from Tasks.ChangeUser import log_out
 from Tasks.ClassSignIn import get_crossfit_class_for_time
 from Tasks.SendEmail import send_email
 from Config import LOGGER

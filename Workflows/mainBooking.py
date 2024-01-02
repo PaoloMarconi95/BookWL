@@ -1,4 +1,3 @@
-from ChangeUser import log_out
 from Tasks.Booking import book_class
 from Tasks.SendEmail import send_email
 from Enum.BookingResult import BookingResult

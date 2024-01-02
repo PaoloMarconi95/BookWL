@@ -1,5 +1,3 @@
-from Tasks.LogIn import login
-from Tasks.ChangeUser import log_out
 from Tasks.ClassSignIn import sign_in
 from Tasks.Booking import is_still_booked
 from Tasks.SendEmail import send_email

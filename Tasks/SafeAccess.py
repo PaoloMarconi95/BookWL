@@ -21,7 +21,7 @@ def safe_access(driver, identifier, max_attempts=5, by=By.ID):
             )
         except (NoSuchElementException, StaleElementReferenceException, TimeoutException) as e:
             now = datetime.now()
-            id = f"{now.day}{now.month}_{now.hour}:{now.minute}_a{attempts}"
+            id = f"{now.day}-{now.month}_{now.hour}:{now.minute}_a{attempts}"
             with open(os.path.join(CONFIG.html_file_path, f'debug_{id}.html'), 'w+') as f:
                 f.write(driver.page_source)
             traceback.print_exc()
