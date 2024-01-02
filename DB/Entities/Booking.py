@@ -72,7 +72,7 @@ class Booking:
 
     @classmethod
     def _get_booking_by_booking(cls, booking):
-        return f"SELECT user_id, class_id, is_signed_in FROM BOOKING WHERE user_id = {booking.user_id}  and" \
+        return f"SELECT user_id, class_id, is_signed_in FROM BOOKING WHERE user_id = {booking.user_id} " \
                 f" and class_id = {booking.class_id}"
         
         
