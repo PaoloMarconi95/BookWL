@@ -9,7 +9,7 @@ from selenium.webdriver.support.ui import Select
 from Config import CONFIG, LOGGER
 from Exceptions import ClassNotFoundWithinDropDownException
 from Tasks.SafeAccess import safe_access
-from Tasks.Booking import get_booked_class_and_program_for_date
+from Tasks.Booking import get_booked_row_for_datetime
 from DB.Entities.CrossFitClass import CrossFitClass
 
 TIME_DROPDOWN_ID = 'AthleteTheme_wtLayout_block_wtMainContent_wtClass_Input'
@@ -20,7 +20,7 @@ SETTINGS_ACCORDION_ID = 'settingsCollapsibleHeader'
 
 def get_crossfit_class_for_time(wd, hour) -> CrossFitClass:
     current_date = datetime.strftime(datetime.today(), "%d-%m-%Y")
-    booked_class_el = get_booked_class_and_program_for_date(wd, current_date, hour)
+    booked_class_el = get_booked_row_for_datetime(wd, current_date, hour)
     if booked_class_el is not None:
         # Parse the element text
         class_name = booked_class_el.text.split('\n')[0]

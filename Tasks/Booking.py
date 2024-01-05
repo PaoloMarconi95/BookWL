@@ -16,11 +16,6 @@ from Exceptions import NoReservationFoundException
 from Enum.BookingResult import BookingResult
 from DB.Entities.FutureBooking import FutureBooking
 
-"""
-:param classes is an array of selenium WebElement
-:param class_name is the string representing the class name
-:return the clickable element that sends the desired reservation when clicked
-"""
 def find_booking_row_by_class_name(classes, class_name):
     booking_row = list(filter(lambda daily_class: class_name in daily_class.text, classes))
     if len(booking_row) == 1:
@@ -30,15 +25,44 @@ def find_booking_row_by_class_name(classes, class_name):
             booking_el = WebDriverWait(booking_row, 2).until(
                 EC.element_to_be_clickable((By.CSS_SELECTOR, "svg[class='icon icon-calendar']")))
         except (NoSuchElementException, TimeoutException):
-            booking_row.find_element(By.CLASS_NAME, 'icon-forbidden')
+            booking_row.find_element(By.CSS_SELECTOR, "svg[class='icon icon-forbidden']")
             LOGGER.info(f'{class_name} is booked or waitlisted')
             booking_el = None
         return booking_el, booking_row
     else:
         raise NoReservationFoundException
+    
+
+def find_clickable_booking_element(booked_row):
+    try:
+        # Find the Reservation Icon
+        booking_el = WebDriverWait(booked_row, 2).until(
+            EC.element_to_be_clickable((By.CSS_SELECTOR, "svg[class='icon icon-calendar']")))
+    except (NoSuchElementException, TimeoutException):
+        booking_el = None
+    return booking_el
+    
+
+def find_booked_rows(classes, class_name=None) -> list:
+    booked_classes = []
+    # If crossfit_class is valorized, then filter out 
+    classes = find_row_for_class_name(classes, class_name)    
+    for cl in classes:
+        if is_icon_present_in_row(cl, 'icon-forbidden'):
+            booked_classes.append(cl)
+    return booked_classes
 
 
-def is_icon_present_in_row(booking_row, css_class):
+def find_row_for_class_name(classes, class_name) -> list:
+    if class_name is not None:
+        classes = list(filter(lambda daily_class: class_name in daily_class.text, classes))
+    if len(classes) > 1:
+        raise Exception(f"Too many booked classes found for {class_name}")
+    
+    return classes
+
+
+def is_icon_present_in_row(booking_row, css_class) -> bool:
     # css class should be either icon-ticket or icon-forbidden
     try:
         booking_row.find_element(By.CLASS_NAME, css_class)
@@ -58,13 +82,14 @@ def set_date(date, wd):
         time.sleep(3)
 
 
-def get_all_classes_for_date(date, wd):
+def get_all_classes_for_date(wd, date)-> list:
     set_date(date, wd)
 
     try:
         title = WebDriverWait(wd, 5).until(
             EC.presence_of_element_located((By.CSS_SELECTOR, "span[class='h3']")))
-        if date not in title.text:
+        formattedDate = datetime.strptime(date, '%Y-%m-%d').strftime('%d-%m-%Y')
+        if formattedDate not in title.text:
             LOGGER.error(f"No date {date} found within title {title.text}!")
             return []            
     except NoSuchElementException:
@@ -89,7 +114,7 @@ def get_all_classes_for_date(date, wd):
             daily_classes.append(el)
 
 
-def get_booked_class_and_program_for_date(wd, date, hour):
+def get_booked_row_for_datetime(wd, date, hour):
     set_date(date, wd)
 
     table_entries = wd.find_elements(By.XPATH, '//table/tbody/tr')
@@ -118,7 +143,7 @@ def get_booked_class_and_program_for_date(wd, date, hour):
                 continue
 
 
-def analyze_booking_result(booking_row):
+def analyze_booking_result(booking_row) -> BookingResult:
     if booking_row is None:
         LOGGER.warn("Booking row is none, failed to book current class")
         return BookingResult.FAIL
@@ -135,23 +160,23 @@ def analyze_booking_result(booking_row):
     return BookingResult.FAIL
 
 
-def book_class(book: FutureBooking, wd):
-    result = None
+def book_class(book: FutureBooking, wd) -> BookingResult:
     wd.get(CONFIG.calendar_url)
     try:
-        classes = get_all_classes_for_date(book.class_date, wd)
+        classes = get_all_classes_for_date(wd, book.class_date)
         if len(classes) == 0:
             return BookingResult.NOT_FOUND
         LOGGER.info("found " + str(len(classes)) + " classes for " + str(book.class_date))
-        booking_button, booking_row = find_booking_row_by_class_name(classes, book.class_name)
+        booked_row = find_booked_rows(classes, book.class_name)
+        booking_button = find_clickable_booking_element(booked_row[0])
         if booking_button is not None:
             booking_button.click()
             # Wait for the reservation to be sent
             wd.refresh()
             time.sleep(1)
-            classes = get_all_classes_for_date(book.class_date, wd)
-            _, booking_row = find_booking_row_by_class_name(classes, book.class_name)
-            result = analyze_booking_result(booking_row)
+            classes = get_all_classes_for_date(wd, book.class_date)
+            booked_row = find_row_for_class_name(classes, book.class_name)
+            result = analyze_booking_result(booked_row[0])
         else:
             return BookingResult.ALREADY_BOOKED
     except NoSuchElementException:
@@ -163,10 +188,10 @@ def book_class(book: FutureBooking, wd):
 
 
 def is_still_booked(crossfit_class: CrossFitClass, wd) -> bool:
-    classes = get_all_classes_for_date(crossfit_class.date, wd)
-    _, booking_row = find_booking_row_by_class_name(classes, crossfit_class.name)
-    if is_icon_present_in_row(booking_row, 'icon-ticket'):
-        LOGGER.info(f'crossfit class {crossfit_class} still booked! signin in..')
+    classes = get_all_classes_for_date(wd, crossfit_class.date)
+    booked_rows = find_booked_rows(classes, crossfit_class.name)
+    if len(booked_rows) == 1:
+        LOGGER.info(f'crossfit class {crossfit_class} still booked!')
         return True
     else:
         LOGGER.info(f'crossfit class {crossfit_class} not booked anymore! Avoiding the sign-in')
