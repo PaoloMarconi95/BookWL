@@ -7,7 +7,6 @@ from selenium.common.exceptions import TimeoutException
 
 # Standard
 import time
-from datetime import datetime
 
 # Custom
 from Config import CONFIG, LOGGER
@@ -15,35 +14,20 @@ from DB.Entities.CrossFitClass import CrossFitClass
 from Exceptions import NoReservationFoundException
 from Enum.BookingResult import BookingResult
 from DB.Entities.FutureBooking import FutureBooking
-
-def find_booking_row_by_class_name(classes, class_name):
-    booking_row = list(filter(lambda daily_class: class_name in daily_class.text, classes))
-    if len(booking_row) == 1:
-        booking_row = booking_row[0]
-        try:
-            # Find the Reservation Icon
-            booking_el = WebDriverWait(booking_row, 2).until(
-                EC.element_to_be_clickable((By.CSS_SELECTOR, "svg[class='icon icon-calendar']")))
-        except (NoSuchElementException, TimeoutException):
-            booking_row.find_element(By.CSS_SELECTOR, "svg[class='icon icon-forbidden']")
-            LOGGER.info(f'{class_name} is booked or waitlisted')
-            booking_el = None
-        return booking_el, booking_row
-    else:
-        raise NoReservationFoundException
+from Utils.dateUtils import get_formatted_date
     
 
-def find_clickable_booking_element(booked_row):
+def find_clickable_booking_element(booking_row):
     try:
         # Find the Reservation Icon
-        booking_el = WebDriverWait(booked_row, 2).until(
-            EC.element_to_be_clickable((By.CSS_SELECTOR, "svg[class='icon icon-calendar']")))
+        booking_el = WebDriverWait(booking_row, 2).until(
+            EC.element_to_be_clickable((By.CSS_SELECTOR, "svg[class*='icon icon-calendar']")))
     except (NoSuchElementException, TimeoutException):
         booking_el = None
     return booking_el
     
 
-def find_booked_rows(classes, class_name=None) -> list:
+def find_booked_rows(classes: list, class_name=None) -> list:
     booked_classes = []
     # If crossfit_class is valorized, then filter out 
     classes = find_row_for_class_name(classes, class_name)    
@@ -53,16 +37,18 @@ def find_booked_rows(classes, class_name=None) -> list:
     return booked_classes
 
 
-def find_row_for_class_name(classes, class_name) -> list:
+def find_row_for_class_name(classes: list, class_name: str) -> list:
     if class_name is not None:
         classes = list(filter(lambda daily_class: class_name in daily_class.text, classes))
     if len(classes) > 1:
         raise Exception(f"Too many booked classes found for {class_name}")
+    if len(classes) == 0:
+        raise NoReservationFoundException
     
     return classes
 
 
-def is_icon_present_in_row(booking_row, css_class) -> bool:
+def is_icon_present_in_row(booking_row, css_class: str) -> bool:
     # css class should be either icon-ticket or icon-forbidden
     try:
         booking_row.find_element(By.CLASS_NAME, css_class)
@@ -88,7 +74,7 @@ def get_all_classes_for_date(wd, date)-> list:
     try:
         title = WebDriverWait(wd, 5).until(
             EC.presence_of_element_located((By.CSS_SELECTOR, "span[class='h3']")))
-        formattedDate = datetime.strptime(date, '%Y-%m-%d').strftime('%d-%m-%Y')
+        formattedDate = get_formatted_date(date, '%d-%m-%Y')
         if formattedDate not in title.text:
             LOGGER.error(f"No date {date} found within title {title.text}!")
             return []            
@@ -167,7 +153,7 @@ def book_class(book: FutureBooking, wd) -> BookingResult:
         if len(classes) == 0:
             return BookingResult.NOT_FOUND
         LOGGER.info("found " + str(len(classes)) + " classes for " + str(book.class_date))
-        booked_row = find_booked_rows(classes, book.class_name)
+        booked_row = find_row_for_class_name(classes, book.class_name)
         booking_button = find_clickable_booking_element(booked_row[0])
         if booking_button is not None:
             booking_button.click()
