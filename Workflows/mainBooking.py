@@ -1,7 +1,7 @@
 from Tasks.Booking import book_class
 from Tasks.SendEmail import send_email
 from Enum.BookingResult import BookingResult
-from Config import CONFIG, LOGGER
+from Config import LOGGER
 import traceback
 from threading import Thread
 from Workflows import WEBDRIVERFACTORY
@@ -80,7 +80,8 @@ def book_future_bookings(future_bookings, user: User, webdriver):
 
 
 def main():
-    users = User.get_every_users()
+    #users = User.get_every_users()
+    users = [User(id=0, name='Paolo', mail='paolomarconi1995@gmail.com', password='Internet0Cross')]
     threads = []
     for user in users:
         future_bookings = FutureBooking.get_future_booking_by_user_id(user.id)
