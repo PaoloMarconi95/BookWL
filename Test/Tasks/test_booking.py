@@ -3,8 +3,10 @@ from Workflows import WEBDRIVERFACTORY
 from Exceptions import NoReservationFoundException
 import os
 from Tasks.Booking import *
+from pathlib import Path
 
-wd = None
+wd = WEBDRIVERFACTORY.get_driver()
+wd.get('file://' + os.path.join(Path(__file__).parent.parent, 'html_pages', 'booking_test.html'))
 
 class TestBooking(unittest.TestCase):
 
@@ -26,15 +28,16 @@ class TestBooking(unittest.TestCase):
     def test_find_booking_row_by_class_name_correct(self):
         # Already booked class
         classes = get_all_classes_for_date(wd, '2024-01-03')
-        el, row = find_booking_row_by_class_name(classes, '18:00 WOD')
-        self.assertEqual(el, None)
+        row = find_row_for_class_name(classes, '18:00 WOD')
         self.assertNotEqual(row, None)
+        el = find_clickable_booking_element(row[0])
+        self.assertEqual(el, None)
 
 
     def test_find_booking_row_by_class_name_correct_exception(self):
         classes = get_all_classes_for_date(wd, '2024-01-03')
         with self.assertRaises(NoReservationFoundException):
-            find_booking_row_by_class_name(classes, '22:00 WOD')
+            find_row_for_class_name(classes, '22:00 WOD')
 
 
     def test_get_booked_row_for_datetime(self):
@@ -47,6 +50,4 @@ class TestBooking(unittest.TestCase):
 
 
 if __name__ == '__main__':
-    wd = WEBDRIVERFACTORY.get_driver()
-    wd.get('file://' + os.path.join(os.path.dirname(__file__), 'test_pages', 'booking_test.html'))
     unittest.main()
