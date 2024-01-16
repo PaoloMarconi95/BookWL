@@ -80,8 +80,8 @@ def book_future_bookings(future_bookings, user: User, webdriver):
 
 
 def main():
-    #users = User.get_every_users()
-    users = [User(id=0, name='Paolo', mail='paolomarconi1995@gmail.com', password='Internet0Cross')]
+    users = User.get_every_users()
+    #users = [User(id=0, name='Paolo', mail='paolomarconi1995@gmail.com', password='Internet0Cross')]
     threads = []
     for user in users:
         future_bookings = FutureBooking.get_future_booking_by_user_id(user.id)

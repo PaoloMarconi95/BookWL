@@ -39,14 +39,18 @@ class TestBooking(unittest.TestCase):
         with self.assertRaises(NoReservationFoundException):
             find_row_for_class_name(classes, '22:00 WOD')
 
-
-    def test_get_booked_row_for_datetime(self):
+    
+    def test_still_booked_true(self):
         booked_crossfit_class = CrossFitClass(date='2024-01-03', id=None, name='18:00 WOD', program='CrossFit WOD', time='18:00')
-        non_booked_crossfit_class = CrossFitClass(date='2024-01-03', id=None, name='17:00 WOD', program='CrossFit WOD', time='18:00')
         result_booked = is_still_booked(booked_crossfit_class, wd)
-        result_non_booked = is_still_booked(non_booked_crossfit_class, wd)
         self.assertTrue(result_booked)
+
+
+    def test_still_booked_false(self):
+        non_booked_crossfit_class = CrossFitClass(date='2024-01-03', id=None, name='17:00 WOD', program='CrossFit WOD', time='18:00')
+        result_non_booked = is_still_booked(non_booked_crossfit_class, wd)
         self.assertFalse(result_non_booked)
+
 
 
 if __name__ == '__main__':

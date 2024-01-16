@@ -1,4 +1,4 @@
-from Tasks.ClassSignIn import get_crossfit_class_for_time
+from Tasks.Booking import get_crossfit_class_for_time
 from Tasks.SendEmail import send_email
 from Config import LOGGER
 from Workflows import WEBDRIVERFACTORY
@@ -7,11 +7,13 @@ from DB.Entities.User import User
 from datetime import datetime, timedelta
 from multiprocessing.pool import ThreadPool
 import traceback
+import sys
 
 def error_handler(ex: Exception):
     exception = traceback.print_exception(type(ex), ex, ex.__traceback__)
+    ex_info = sys.exc_info()
     LOGGER.error(f"An error occurred in booking_sign_in thread.\n{str(ex)}")
-    send_email("paolomarconi1995@gmail.com", "Scan booked class Error", f"Exception: {str(ex)}\nTraceback:\n{str(exception)}")
+    send_email("paolomarconi1995@gmail.com", "Scan booked class Error", f"Exception: {str(ex)}\nTraceback:\n{str(exception)}\nInfo:\n{ex_info}")
 
 
 def main_thread_work(user: User, webdriver):

@@ -7,6 +7,7 @@ from selenium.common.exceptions import TimeoutException
 
 # Standard
 import time
+from datetime import datetime
 
 # Custom
 from Config import CONFIG, LOGGER
@@ -15,6 +16,38 @@ from Exceptions import NoReservationFoundException
 from Enum.BookingResult import BookingResult
 from DB.Entities.FutureBooking import FutureBooking
 from Utils.dateUtils import get_formatted_date
+from Utils.debugCurrentStatus import save_screenshot
+
+def get_crossfit_class_for_time(wd, hour) -> CrossFitClass:
+    current_date = datetime.strftime(datetime.today(), "%d-%m-%Y")
+    booked_classes = get_booked_row_for_datetime(wd, current_date, hour)
+    if len(booked_classes) != 0:
+        booked_class_el = booked_classes[0]
+        # Parse the element text
+        class_name = booked_class_el.text.split('\n')[0]
+        class_program = booked_class_el.text.split('\n')[3]
+        class_time = booked_class_el.text.split('\n')[4]
+
+        crossfit_class = CrossFitClass(date=current_date, name=class_name, program=class_program, time=class_time)
+        
+        LOGGER.info(f'Found that class {crossfit_class} was booked for current datetime')
+        return crossfit_class
+    else:
+        LOGGER.info('No class found for current datetime')
+        return None
+    
+    
+def check_correctness_date(wd, date):
+    try:
+        title = WebDriverWait(wd, 5).until(
+            EC.presence_of_element_located((By.CSS_SELECTOR, "span[class='h3']")))
+        formattedDate = get_formatted_date(date, '%d-%m-%Y')
+        if formattedDate not in title.text:
+            LOGGER.error(f"No date {date} found within title {title.text}!")
+        return True         
+    except NoSuchElementException:
+        LOGGER.error(f"No title found for date {date}!")
+        return False
     
 
 def find_clickable_booking_element(booking_row):
@@ -29,7 +62,6 @@ def find_clickable_booking_element(booking_row):
 
 def find_booked_rows(classes: list, class_name=None) -> list:
     booked_classes = []
-    # If crossfit_class is valorized, then filter out 
     classes = find_row_for_class_name(classes, class_name)    
     for cl in classes:
         if is_icon_present_in_row(cl, 'icon-forbidden'):
@@ -59,7 +91,7 @@ def is_icon_present_in_row(booking_row, css_class: str) -> bool:
 
 
 # Expects a string date with format dd-MM-yyyy
-def set_date(date, wd):
+def set_date(wd, date):
     element = wd.find_element(By.ID, "AthleteTheme_wt6_block_wtMainContent_wt9_W_Utils_UI_wt216_block_wtDateInputFrom")
     if element.get_attribute('value') != date:
         LOGGER.info('Setting date to ' + date)
@@ -68,18 +100,10 @@ def set_date(date, wd):
         time.sleep(3)
 
 
-def get_all_classes_for_date(wd, date)-> list:
-    set_date(date, wd)
+def get_all_classes_for_date(wd, date: str)-> list:
+    set_date(wd, date)
 
-    try:
-        title = WebDriverWait(wd, 5).until(
-            EC.presence_of_element_located((By.CSS_SELECTOR, "span[class='h3']")))
-        formattedDate = get_formatted_date(date, '%d-%m-%Y')
-        if formattedDate not in title.text:
-            LOGGER.error(f"No date {date} found within title {title.text}!")
-            return []            
-    except NoSuchElementException:
-        LOGGER.error(f"No title found for date {date}!")
+    if not check_correctness_date(wd, date):
         return []
 
     table_entries = wd.find_elements(By.XPATH, '//table/tbody/tr')
@@ -101,7 +125,10 @@ def get_all_classes_for_date(wd, date)-> list:
 
 
 def get_booked_row_for_datetime(wd, date, hour):
-    set_date(date, wd)
+    set_date(wd, date)
+
+    if not check_correctness_date(wd, date):
+        return []
 
     table_entries = wd.find_elements(By.XPATH, '//table/tbody/tr')
     # First elements is always the calendar filter, so discard it
@@ -159,10 +186,12 @@ def book_class(book: FutureBooking, wd) -> BookingResult:
             booking_button.click()
             # Wait for the reservation to be sent
             wd.refresh()
-            time.sleep(1)
+            time.sleep(2)
             classes = get_all_classes_for_date(wd, book.class_date)
             booked_row = find_row_for_class_name(classes, book.class_name)
             result = analyze_booking_result(booked_row[0])
+            if result == BookingResult.FAIL:
+                save_screenshot(wd, book.class_name)
         else:
             return BookingResult.ALREADY_BOOKED
     except NoSuchElementException:

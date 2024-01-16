@@ -9,12 +9,13 @@ from DB.Entities.User import User
 from DB.Entities.CrossFitClass import CrossFitClass
 from DB.Entities.BookedClass import BookedClass
 import traceback
-
+import sys
 
 def error_handler(ex):
     exception = traceback.print_exception(type(ex), ex, ex.__traceback__)
+    ex_info = sys.exc_info()
     LOGGER.error(f"An error occurred in booking_sign_in thread.\n{str(ex)}")
-    send_email("paolomarconi1995@gmail.com", "Auto SignIn Error", f"Exception: {str(ex)}\nTraceback:\n{str(exception)}")
+    send_email("paolomarconi1995@gmail.com", "Auto SignIn Error", f"Exception: {str(ex)}\nTraceback:\n{str(exception)}\nInfo:\n{ex_info}")
 
 
 def booking_sign_in(booked_class: BookedClass, webdriver):

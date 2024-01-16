@@ -1,7 +1,6 @@
 # Standard
 import time
 from datetime import datetime
-import os
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.wait import WebDriverWait
@@ -9,7 +8,8 @@ from selenium.common.exceptions import NoSuchElementException, StaleElementRefer
 import traceback
 
 # Custom
-from Config import LOGGER, CONFIG
+from Config import LOGGER
+from Utils.debugCurrentStatus import save_html_to_file
 
 def safe_access(driver, identifier, max_attempts=5, by=By.ID):
     element = None
@@ -22,8 +22,7 @@ def safe_access(driver, identifier, max_attempts=5, by=By.ID):
         except (NoSuchElementException, StaleElementReferenceException, TimeoutException) as e:
             now = datetime.now()
             id = f"{now.day}-{now.month}_{now.hour}:{now.minute}_a{attempts}"
-            with open(os.path.join(CONFIG.html_file_path, f'debug_{id}.html'), 'w+') as f:
-                f.write(driver.page_source)
+            save_html_to_file(driver, id)
             traceback.print_exc()
             LOGGER.warn(f"{identifier} retrieval failed, I'm going to refresh driver and wait for 2 seconds.")
             driver.refresh()

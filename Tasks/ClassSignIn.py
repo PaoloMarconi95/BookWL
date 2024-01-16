@@ -1,5 +1,4 @@
 # Standard
-from datetime import datetime
 import time
 
 # Selenium
@@ -9,31 +8,12 @@ from selenium.webdriver.support.ui import Select
 from Config import CONFIG, LOGGER
 from Exceptions import ClassNotFoundWithinDropDownException
 from Tasks.SafeAccess import safe_access
-from Tasks.Booking import get_booked_row_for_datetime
 from DB.Entities.CrossFitClass import CrossFitClass
 
 TIME_DROPDOWN_ID = 'AthleteTheme_wtLayout_block_wtMainContent_wtClass_Input'
 PROGRAM_DROPDOWN_ID = 'AthleteTheme_wtLayout_block_wtSubNavigation_wtProgram_Input'
 SIGNIN_BUTTON_ID = 'AthleteTheme_wtLayout_block_wtSubNavigation_wtSignInButton2'
 SETTINGS_ACCORDION_ID = 'settingsCollapsibleHeader'
-
-
-def get_crossfit_class_for_time(wd, hour) -> CrossFitClass:
-    current_date = datetime.strftime(datetime.today(), "%d-%m-%Y")
-    booked_class_el = get_booked_row_for_datetime(wd, current_date, hour)
-    if booked_class_el is not None:
-        # Parse the element text
-        class_name = booked_class_el.text.split('\n')[0]
-        class_program = booked_class_el.text.split('\n')[3]
-        class_time = booked_class_el.text.split('\n')[4]
-
-        crossfit_class = CrossFitClass(date=current_date, name=class_name, program=class_program, time=class_time)
-        
-        LOGGER.info(f'Found that class {crossfit_class} was booked for current datetime')
-        return crossfit_class
-    else:
-        LOGGER.info('No class found for current datetime')
-        return None
 
 
 def set_correct_program(class_name, wd):
