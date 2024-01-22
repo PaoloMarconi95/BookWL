@@ -20,9 +20,8 @@ from Utils.debugCurrentStatus import save_screenshot
 
 def get_crossfit_class_for_time(wd, hour) -> CrossFitClass:
     current_date = datetime.strftime(datetime.today(), "%d-%m-%Y")
-    booked_classes = get_booked_row_for_datetime(wd, current_date, hour)
-    if len(booked_classes) != 0:
-        booked_class_el = booked_classes[0]
+    booked_class_el = get_booked_row_for_datetime(wd, current_date, hour)
+    if booked_class_el is not None:
         # Parse the element text
         class_name = booked_class_el.text.split('\n')[0]
         class_program = booked_class_el.text.split('\n')[3]
@@ -43,7 +42,8 @@ def check_correctness_date(wd, date):
             EC.presence_of_element_located((By.CSS_SELECTOR, "span[class='h3']")))
         formattedDate = get_formatted_date(date, '%d-%m-%Y')
         if formattedDate not in title.text:
-            LOGGER.error(f"No date {date} found within title {title.text}!")
+            LOGGER.warn(f"No date {date} found within title {title.text}!")
+            return False
         return True         
     except NoSuchElementException:
         LOGGER.error(f"No title found for date {date}!")
@@ -54,7 +54,7 @@ def find_clickable_booking_element(booking_row):
     try:
         # Find the Reservation Icon
         booking_el = WebDriverWait(booking_row, 2).until(
-            EC.element_to_be_clickable((By.CSS_SELECTOR, "svg[class*='icon icon-calendar']")))
+            EC.element_to_be_clickable((By.CSS_SELECTOR, "svg[class*='icon-calendar']")))
     except (NoSuchElementException, TimeoutException):
         booking_el = None
     return booking_el
@@ -62,16 +62,16 @@ def find_clickable_booking_element(booking_row):
 
 def find_booked_rows(classes: list, class_name=None) -> list:
     booked_classes = []
-    classes = find_row_for_class_name(classes, class_name)    
+    if class_name is not None:
+        classes = find_row_for_class_name(classes, class_name)    
     for cl in classes:
-        if is_icon_present_in_row(cl, 'icon-forbidden'):
+        if is_icon_present_in_row(cl, "svg[class*='icon-forbidden']"):
             booked_classes.append(cl)
     return booked_classes
 
 
 def find_row_for_class_name(classes: list, class_name: str) -> list:
-    if class_name is not None:
-        classes = list(filter(lambda daily_class: class_name in daily_class.text, classes))
+    classes = list(filter(lambda daily_class: class_name in daily_class.text, classes))
     if len(classes) > 1:
         raise Exception(f"Too many booked classes found for {class_name}")
     if len(classes) == 0:
@@ -89,7 +89,6 @@ def is_icon_present_in_row(booking_row, css_class: str) -> bool:
         return False
 
 
-
 # Expects a string date with format dd-MM-yyyy
 def set_date(wd, date):
     element = wd.find_element(By.ID, "AthleteTheme_wt6_block_wtMainContent_wt9_W_Utils_UI_wt216_block_wtDateInputFrom")
@@ -100,7 +99,7 @@ def set_date(wd, date):
         time.sleep(3)
 
 
-def get_all_classes_for_date(wd, date: str)-> list:
+def get_all_classes_for_date(wd, date: str) -> list:
     set_date(wd, date)
 
     if not check_correctness_date(wd, date):
@@ -128,7 +127,7 @@ def get_booked_row_for_datetime(wd, date, hour):
     set_date(wd, date)
 
     if not check_correctness_date(wd, date):
-        return []
+        return None
 
     table_entries = wd.find_elements(By.XPATH, '//table/tbody/tr')
     # First elements is always the calendar filter, so discard it
@@ -161,8 +160,8 @@ def analyze_booking_result(booking_row) -> BookingResult:
         LOGGER.warn("Booking row is none, failed to book current class")
         return BookingResult.FAIL
 
-    ticket_present = is_icon_present_in_row(booking_row, 'icon-ticket')
-    forbidden_present = is_icon_present_in_row(booking_row, 'icon-forbidden')
+    ticket_present = is_icon_present_in_row(booking_row, "svg[class*='icon-ticket']")
+    forbidden_present = is_icon_present_in_row(booking_row, "svg[class*='icon-forbidden']")
 
     if ticket_present and forbidden_present:
         return BookingResult.SUCCESS
