@@ -4,10 +4,12 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.common.exceptions import TimeoutException
+from selenium.webdriver.common.keys import Keys
 
 # Standard
 import time
 from datetime import datetime
+from typing import Union
 
 # Custom
 from Config import CONFIG, LOGGER
@@ -18,7 +20,7 @@ from DB.Entities.FutureBooking import FutureBooking
 from Utils.dateUtils import get_formatted_date
 from Utils.debugCurrentStatus import save_screenshot
 
-def get_crossfit_class_for_time(wd, hour) -> CrossFitClass:
+def get_crossfit_class_for_time(wd, hour: Union[int, str]) -> CrossFitClass:
     current_date = datetime.strftime(datetime.today(), "%d-%m-%Y")
     booked_class_el = get_booked_row_for_datetime(wd, current_date, hour)
     if booked_class_el is not None:
@@ -36,7 +38,7 @@ def get_crossfit_class_for_time(wd, hour) -> CrossFitClass:
         return None
     
     
-def check_correctness_date(wd, date):
+def check_correctness_date(wd, date: str):
     try:
         title = WebDriverWait(wd, 5).until(
             EC.presence_of_element_located((By.CSS_SELECTOR, "span[class='h3']")))
@@ -44,6 +46,7 @@ def check_correctness_date(wd, date):
         if formattedDate not in title.text:
             LOGGER.warn(f"No date {date} found within title {title.text}!")
             return False
+        LOGGER.info("Date correctly checked")
         return True         
     except NoSuchElementException:
         LOGGER.error(f"No title found for date {date}!")
@@ -83,19 +86,20 @@ def find_row_for_class_name(classes: list, class_name: str) -> list:
 def is_icon_present_in_row(booking_row, css_class: str) -> bool:
     # css class should be either icon-ticket or icon-forbidden
     try:
-        booking_row.find_element(By.CLASS_NAME, css_class)
+        booking_row.find_element(By.CSS_SELECTOR, css_class)
         return True
     except NoSuchElementException:
         return False
 
 
 # Expects a string date with format dd-MM-yyyy
-def set_date(wd, date):
+def set_date(wd, date: str) -> None:
     element = wd.find_element(By.ID, "AthleteTheme_wt6_block_wtMainContent_wt9_W_Utils_UI_wt216_block_wtDateInputFrom")
     if element.get_attribute('value') != date:
         LOGGER.info('Setting date to ' + date)
         element.clear()
         element.send_keys(date)
+        element.send_keys(Keys.ENTER)
         time.sleep(3)
 
 
@@ -123,7 +127,7 @@ def get_all_classes_for_date(wd, date: str) -> list:
             daily_classes.append(el)
 
 
-def get_booked_row_for_datetime(wd, date, hour):
+def get_booked_row_for_datetime(wd, date: str, hour: Union[int, str]):
     set_date(wd, date)
 
     if not check_correctness_date(wd, date):
