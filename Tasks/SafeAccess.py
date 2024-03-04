@@ -9,7 +9,7 @@ import traceback
 
 # Custom
 from Config import LOGGER
-from Utils.debugCurrentStatus import save_html_to_file
+from Utils.debugCurrentStatus import save_html_to_file, save_screenshot
 
 def safe_access(driver, identifier, max_attempts=5, by=By.ID):
     element = None
@@ -23,6 +23,7 @@ def safe_access(driver, identifier, max_attempts=5, by=By.ID):
             now = datetime.now()
             id = f"{now.day}-{now.month}_{now.hour}:{now.minute}_a{attempts}"
             save_html_to_file(driver, id)
+            save_screenshot(driver, id)
             traceback.print_exc()
             LOGGER.warn(f"{identifier} retrieval failed, I'm going to refresh driver and wait for 2 seconds.")
             driver.refresh()

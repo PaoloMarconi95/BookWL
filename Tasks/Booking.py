@@ -45,7 +45,13 @@ def check_correctness_date(wd, date: str):
         formattedDate = get_formatted_date(date, '%d-%m-%Y')
         if formattedDate not in title.text:
             LOGGER.warn(f"No date {date} found within title {title.text}!")
-            return False
+            first_element_of_body = wd.find_element(By.XPATH, '//body[1]/form[1]/div[6]/div[2]/div[2]/div[1]/span[1]/table[1]/tbody[1]/tr[1]')
+            if first_element_of_body.get_attribute("style") == 'font-size: 0.75em;':
+                # Wodify bug
+                LOGGER.info("Found that day selected lacks of main title")                
+                return True
+            else:
+                return False
         LOGGER.info("Date correctly checked")
         return True         
     except NoSuchElementException:
@@ -151,8 +157,9 @@ def get_booked_row_for_datetime(wd, date: str, hour: Union[int, str]):
         else:
             try:
                 el.find_element(By.CLASS_NAME, 'icon-ticket')
-                title_el = el.find_element(By.XPATH, './/td/div/span')
-                if string_target in title_el.text:
+                row_entries = el.text.split("\n")
+                time = row_entries[-2]
+                if string_target in time:
                     return el
             except NoSuchElementException:
                 # Class may be not booked or concerns another hour
@@ -188,8 +195,9 @@ def book_class(book: FutureBooking, wd) -> BookingResult:
         if booking_button is not None:
             booking_button.click()
             # Wait for the reservation to be sent
-            wd.refresh()
             time.sleep(2)
+            wd.refresh()
+            time.sleep(1)
             classes = get_all_classes_for_date(wd, book.class_date)
             booked_row = find_row_for_class_name(classes, book.class_name)
             result = analyze_booking_result(booked_row[0])

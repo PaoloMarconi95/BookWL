@@ -24,6 +24,7 @@ class User:
         return self.__str__()
     
     def login(self, wd) -> bool:
+        #prova = 0 / 0
         attempts = 0
         while not self.is_logged_in and attempts < CONFIG.max_login_attempts:
             try:
