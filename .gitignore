@@ -7,3 +7,4 @@ __pycache__
 */configuration*.yaml
 /debug_html/
 /Test/html_pages/*
+/debug/*
