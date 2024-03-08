@@ -57,7 +57,7 @@ if __name__ == "__main__":
     try:
         main()
     except Exception as main_exception:
-        LOGGER.error(f"FATAL")
+        LOGGER.error("FATAL")
         LOGGER.error(main_exception)
         traceback.print_exc()
         send_email("paolomarconi1995@gmail.com", "Auto SignIn Error", str(main_exception))

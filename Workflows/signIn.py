@@ -1,7 +1,7 @@
 from Tasks.ClassSignIn import sign_in
 from Tasks.Booking import is_still_booked
 from Tasks.SendEmail import send_email
-from multiprocessing.pool import ThreadPool
+from multiprocessing import Pool
 from Config import LOGGER
 from Workflows import WEBDRIVERFACTORY
 from DB.Entities.Booking import Booking
@@ -51,15 +51,16 @@ def booking_sign_in(booked_class: BookedClass, webdriver):
 def main():
     webdriver_to_be_closed = []
     users = User.get_every_users()
-    with ThreadPool() as pool:
+    with Pool() as pool:
         for user in users:
             bookings = BookedClass.get_booked_class_by_user_id_for_current_datetime(user.id)
-            if len(bookings) == 1:
+            if len(bookings) >= 1:
                 webdriver = WEBDRIVERFACTORY.get_driver()
                 webdriver_to_be_closed.append(webdriver)
-                pool.apply_async(booking_sign_in, args=(bookings.pop(), webdriver), error_callback=error_handler)
+                for booking in bookings:
+                    pool.apply_async(booking_sign_in, args=(booking, webdriver), error_callback=error_handler)
             else:
-                LOGGER.info('No Booked Class Found!')
+                LOGGER.info('No booking found for current user and datetime')
         pool.close()
         pool.join()
     
@@ -70,7 +71,7 @@ if __name__ == "__main__":
     try:
         main()
     except Exception as main_exception:
-        LOGGER.error(f"FATAL")
+        LOGGER.error("FATAL")
         LOGGER.error(main_exception)
         traceback.print_exc()
         send_email("paolomarconi1995@gmail.com", "Auto SignIn Error", str(main_exception))
