@@ -8,7 +8,7 @@ from DB.Entities.FutureBooking import FutureBooking
 from DB.Entities.CrossFitClass import CrossFitClass
 from DB.Entities.Booking import Booking
 from DB.Entities.User import User
-from multiprocessing import Pool
+from multiprocessing.pool import ThreadPool
 
 
 def extract_class_array_summary(class_array):
@@ -37,6 +37,7 @@ def generate_email_summary(successful, waitlist, unsuccessful, not_found, alread
 
 
 def book_future_bookings(future_bookings, user: User, webdriver):
+    print(f"alalalalala")
     LOGGER.info("Starting booking process for user " + str(user.name))
     user.login(webdriver)
 
@@ -77,13 +78,15 @@ def book_future_bookings(future_bookings, user: User, webdriver):
         LOGGER.error(f'Login for user {user.name} failed!')
         send_email(user.mail, "Login Fallito!",
                    f"Ciao {user.name}, il tuo login è fallito. Contatta il paolino")
+        
+    return
 
 
 def main():
     webdriver_to_be_closed = []
     users = User.get_every_users()
     #users = [User(id=0, name='Paolo', mail='paolomarconi1995@gmail.com', password='Internet0Cross')] # Debug
-    with Pool(len(users)) as pool:
+    with ThreadPool() as pool:
         for user in users:
             future_bookings = FutureBooking.get_future_booking_by_user_id(user.id)
             webdriver = WEBDRIVERFACTORY.get_driver()

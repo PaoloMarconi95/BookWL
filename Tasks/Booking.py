@@ -20,16 +20,26 @@ from DB.Entities.FutureBooking import FutureBooking
 from Utils.dateUtils import get_formatted_date
 from Utils.debugCurrentStatus import save_screenshot
 
-def get_crossfit_class_for_time(wd, hour: Union[int, str]) -> CrossFitClass:
-    current_date = datetime.strftime(datetime.today(), "%d-%m-%Y")
-    booked_class_el = get_booked_row_for_datetime(wd, current_date, hour)
+
+def _parse_booking_class_row(booked_class_row: list) -> tuple[str, str, str]:
+    if booked_class_row is None or len(booked_class_row) == 0:
+        return None, None, None
+
+    class_name = booked_class_row[0]
+    class_program = booked_class_row[-3]
+    class_time = booked_class_row[-2]
+
+    return class_name, class_program, class_time
+
+
+
+def get_booked_crossfit_class_for_time(wd, hour: Union[int, str], date=datetime.strftime(datetime.today(), "%d-%m-%Y")) -> CrossFitClass:
+    booked_class_el = get_booked_row_for_datetime(wd, date, hour)
     if booked_class_el is not None:
         # Parse the element text
-        class_name = booked_class_el.text.split('\n')[0]
-        class_program = booked_class_el.text.split('\n')[3]
-        class_time = booked_class_el.text.split('\n')[4]
+        class_name, class_program, class_time = _parse_booking_class_row(booked_class_el.text.split('\n'))
 
-        crossfit_class = CrossFitClass(date=current_date, name=class_name, program=class_program, time=class_time)
+        crossfit_class = CrossFitClass(date=date, name=class_name, program=class_program, time=class_time)
         
         LOGGER.info(f'Found that class {crossfit_class} was booked for current datetime')
         return crossfit_class

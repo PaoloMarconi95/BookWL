@@ -1,7 +1,7 @@
 from Tasks.ClassSignIn import sign_in
 from Tasks.Booking import is_still_booked
 from Tasks.SendEmail import send_email
-from multiprocessing import Pool
+from multiprocessing.pool import ThreadPool
 from Config import LOGGER
 from Workflows import WEBDRIVERFACTORY
 from DB.Entities.Booking import Booking
@@ -51,7 +51,7 @@ def booking_sign_in(booked_class: BookedClass, webdriver):
 def main():
     webdriver_to_be_closed = []
     users = User.get_every_users()
-    with Pool() as pool:
+    with ThreadPool(2) as pool:
         for user in users:
             bookings = BookedClass.get_booked_class_by_user_id_for_current_datetime(user.id)
             if len(bookings) >= 1:

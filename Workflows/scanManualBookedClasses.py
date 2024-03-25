@@ -1,4 +1,4 @@
-from Tasks.Booking import get_crossfit_class_for_time
+from Tasks.Booking import get_booked_crossfit_class_for_time
 from Tasks.SendEmail import send_email
 from Config import LOGGER
 from Workflows import WEBDRIVERFACTORY
@@ -25,9 +25,9 @@ def main_thread_work(user: User, webdriver):
         next_hour = datetime.strftime(datetime.today() + timedelta(hours=1), "%H")
         classes = []
         # See If there's a class in current hour (it's 8 and class at 8:15 for example, rarely happens)
-        classes.append(get_crossfit_class_for_time(webdriver, current_hour))
+        classes.append(get_booked_crossfit_class_for_time(webdriver, current_hour))
         # See If there's a class in current hour (it's 17 and class at 18)
-        classes.append(get_crossfit_class_for_time(webdriver, next_hour))
+        classes.append(get_booked_crossfit_class_for_time(webdriver, next_hour))
         for crossfit_class in [c_class for c_class in classes if c_class is not None]:
             crossfit_class_id = crossfit_class.upsert()
             booking = Booking(user_id=user.id, class_id=crossfit_class_id)
