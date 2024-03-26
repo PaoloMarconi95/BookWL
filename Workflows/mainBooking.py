@@ -37,7 +37,6 @@ def generate_email_summary(successful, waitlist, unsuccessful, not_found, alread
 
 
 def book_future_bookings(future_bookings, user: User, webdriver):
-    print(f"alalalalala")
     LOGGER.info("Starting booking process for user " + str(user.name))
     user.login(webdriver)
 
