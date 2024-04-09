@@ -12,6 +12,7 @@ class Configuration(YamlDataClassConfig):
     chromedriver_folder: str = None
     gmail_key: str = None
     html_file_path: str = None
+    png_file_path: str = None
     calendar_el_id: str = None
     db_path: str = None
     max_login_attempts: int = 3

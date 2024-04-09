@@ -28,7 +28,7 @@ class BookedClass:
         
         time_string = ','.join(time_strings)
         LOGGER.info(f"looking for booked class within these time: {time_string} ")
-        return f"SELECT user_id, class_id FROM BOOKED_CLASS WHERE user_id = {user_id} and is_signed_in = 0" \
+        return f"SELECT user_id, class_id FROM V_BOOKED_CLASS WHERE user_id = {user_id} and is_signed_in = 0" \
              f" and class_time in({time_string}) and class_date = '{datetime.now().strftime('%Y-%m-%d')}'"
 
     @classmethod
