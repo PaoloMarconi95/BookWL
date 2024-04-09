@@ -51,10 +51,12 @@ def booking_sign_in(booked_class: BookedClass, webdriver):
 def main():
     webdriver_to_be_closed = []
     users = User.get_every_users()
-    with ThreadPool(2) as pool:
+    with ThreadPool(len(users)) as pool:
         for user in users:
             bookings = BookedClass.get_booked_class_by_user_id_for_current_datetime(user.id)
             if len(bookings) >= 1:
+                # You can't partecipate to more than 1 class per hour, but the final check is made by fun booking_sign_in with line 
+                # if is_still_booked(crossfit_class, webdriver), so we accept even more than 1 booked class, in case you unsubscribed from a previously booked class.
                 webdriver = WEBDRIVERFACTORY.get_driver()
                 webdriver_to_be_closed.append(webdriver)
                 for booking in bookings:
