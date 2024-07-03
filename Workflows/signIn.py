@@ -23,8 +23,7 @@ def sign_in_to_booked_class(user: User, bp: BrowserProvider):
         LOGGER.info(f"Found 1 class booked for user {str(user.name)}. Starting sign in")
         sign_in(booked_classes[0], bp)
         LOGGER.info(f"Sign in completed")
-    
-    send_email(user.mail, "Auto SignIn", f"Correctly signed in for class {booked_classes[0].name}")
+        send_email(user.mail, "Auto SignIn", f"Correctly signed in for class {booked_classes[0].name}")
 
 
 if __name__ == "__main__":
