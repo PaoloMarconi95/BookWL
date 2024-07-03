@@ -91,6 +91,6 @@ class Bookings:
         for date_classes in self.crossfit_classes.values():
             for cls in date_classes:
                 if cls.is_booked and not cls.is_waitlisted and cls.datetime < (
-                        datetime.now() - timedelta(minutes=minutes)):
+                        datetime.now() + timedelta(minutes=minutes)):
                     classes.append(cls)
         return classes
