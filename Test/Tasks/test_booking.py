@@ -1,8 +1,7 @@
 import unittest
 from Workflows import WEBDRIVERFACTORY
-from Exceptions import NoReservationFoundException
 import os
-from Tasks.Booking import *
+from Model.Booking import *
 from pathlib import Path
 
 wd = WEBDRIVERFACTORY.get_driver()

@@ -1,9 +1,8 @@
-from Tasks.Booking import book_class
+from Model.Booking import book_class
 from Tasks.SendEmail import send_email
 from Enum.BookingResult import BookingResult
 from Config import LOGGER
 import traceback
-from Workflows import WEBDRIVERFACTORY
 from DB.Entities.FutureBooking import FutureBooking
 from DB.Entities.CrossFitClass import CrossFitClass
 from DB.Entities.Booking import Booking
