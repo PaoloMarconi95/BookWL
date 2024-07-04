@@ -1,7 +1,7 @@
 import unittest
 from Workflows import WEBDRIVERFACTORY
 import os
-from Model.Booking import *
+from Model.Bookings import *
 from pathlib import Path
 
 wd = WEBDRIVERFACTORY.get_driver()

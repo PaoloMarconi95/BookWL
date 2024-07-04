@@ -15,6 +15,7 @@ from Model.BrowserProvider import BrowserProvider
 class Bookings:
     def __init__(self, bp: BrowserProvider):
         self.browser_provider: BrowserProvider = bp
+        self.class_rows: dict[datetime.date, list[Locator]] = {}
         self.crossfit_classes: dict[datetime.date, list[CrossFitClass]] = {}
 
     def compute_bookings(self, date: datetime = None) -> None:
@@ -32,8 +33,10 @@ class Bookings:
                     # exit from loop whenever I reach a date greater than the target one (if I have one)
                     break
                 self.crossfit_classes[parsed_datetime.date()] = []
+                self.class_rows[parsed_datetime.date()] = []
             elif is_booking_row(cls):
                 if parsed_datetime is not None:
+                    self.class_rows[parsed_datetime.date()].append(cls)
                     c_class = get_class_from_row(cls, parsed_datetime)
                     self.crossfit_classes[parsed_datetime.date()].append(c_class)
                 else:

@@ -2,7 +2,7 @@ from datetime import datetime
 
 # Custom
 from Config.Configuration import User
-from Model.Booking import Bookings
+from Model.Bookings import Bookings
 from Model.BrowserProvider import BrowserProvider
 from Tasks.SendEmail import send_email
 from Tasks.ClassSignIn import sign_in
@@ -31,8 +31,7 @@ def sign_in_to_booked_class(user: User, bp: BrowserProvider):
 
 if __name__ == "__main__":
     try:
-        users = CONFIG.users
-        for usr in users:
+        for usr in CONFIG.users:
             browser_provider = BrowserProvider(usr)
             sign_in_to_booked_class(usr, browser_provider)
             browser_provider.dispose()
