@@ -1,13 +1,12 @@
-import time
 from datetime import datetime
 
 # Custom
-from DB.Entities.User import User
+from Config.Configuration import User
 from Model.Booking import Bookings
 from Model.BrowserProvider import BrowserProvider
 from Tasks.SendEmail import send_email
 from Tasks.ClassSignIn import sign_in
-from Config import LOGGER
+from Config import LOGGER, CONFIG
 
 
 def sign_in_to_booked_class(user: User, bp: BrowserProvider):
@@ -26,15 +25,17 @@ def sign_in_to_booked_class(user: User, bp: BrowserProvider):
         LOGGER.info(f"Sign in completed")
         send_email(user.mail, "Auto SignIn", f"Correctly signed in for class {booked_classes[0].name}")
 
+    if len(booked_classes) == 0:
+        LOGGER.info(f"No booked class found! Terminating program...")
+
 
 if __name__ == "__main__":
     try:
-        users = User.get_every_users()
-        # users = [User(id=0, name='Paolo', mail='paolomarconi1995@gmail.com', password='Internet0Cross')]
-        for user in users:
-            bp = BrowserProvider(user)
-            sign_in_to_booked_class(user, bp)
-            bp.dispose()
+        users = CONFIG.users
+        for usr in users:
+            browser_provider = BrowserProvider(usr)
+            sign_in_to_booked_class(usr, browser_provider)
+            browser_provider.dispose()
     except Exception as main_exception:
         LOGGER.error("FATAL")
         LOGGER.error(main_exception)

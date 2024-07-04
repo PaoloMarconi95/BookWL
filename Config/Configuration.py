@@ -1,8 +1,19 @@
 from pathlib import Path
+
+from dataclasses_json import dataclass_json
 from yamldataclassconfig.config import YamlDataClassConfig
 from yamldataclassconfig import create_file_path_field
 import os
 from dataclasses import dataclass
+
+
+@dataclass_json()
+@dataclass()
+class User:
+    id: int = None
+    name: str = None
+    mail: str = None
+    password: str = None
 
 
 @dataclass()
@@ -18,4 +29,5 @@ class Configuration(YamlDataClassConfig):
     db_path: str = None
     max_login_attempts: int = 5
     sign_in_delta: int = 10
-    FILE_PATH: Path = create_file_path_field(os.path.join(Path(__file__).parent, 'configuration_new.yaml'))
+    users: list[User] = None
+    FILE_PATH: Path = create_file_path_field(os.path.join(Path(__file__).parent, 'configuration.yaml'))

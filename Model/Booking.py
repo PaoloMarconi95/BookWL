@@ -8,49 +8,8 @@ import re
 
 # Custom
 from Config import CONFIG
-from DB.Entities.CrossFitClass import CrossFitClass
+from Model.CrossFitClass import CrossFitClass
 from Model.BrowserProvider import BrowserProvider
-
-
-def get_class_from_row(cl: Locator, date: datetime) -> CrossFitClass:
-    text = cl.inner_text().replace('\t', '').split('\n')
-    text = [entry for entry in text if entry != ""]
-    is_forbidden_icon_present = cl.locator('svg.icon.icon-forbidden').count() > 0
-    is_ticket_icon_present = cl.locator('svg.icon.icon-ticket').count() > 0
-    is_waitlisted = is_forbidden_icon_present and not is_ticket_icon_present
-    # Standard case
-    if len(text) == 6:
-        date = date.replace(hour=int(text[4][:2]), minute=int(text[4][3:]))
-        return CrossFitClass(name=text[0], datetime=date, program=text[3],
-                             is_booked=is_ticket_icon_present, is_waitlisted=is_waitlisted)
-    else:
-        raise RuntimeError(f"Found a class that does not have 6 entries: {cl.inner_text()}")
-
-
-def get_title_date_from_row(cl: Locator) -> datetime:
-    text = cl.inner_text().replace('\n', '')
-    text = text.replace('\t', '')
-    pattern = '(0[1-9]|[12][0-9]|3[01])-(0[1-9]|1[0-2])-20\\d{2}'
-    date_string = re.search(pattern, text).group()
-    return datetime.strptime(date_string, '%d-%m-%Y')
-
-
-def is_title_row(cl: Locator) -> bool:
-    text = cl.inner_text().replace('\n', '')
-    text = text.replace('\t', '')
-
-    pattern = '(0[1-9]|[12][0-9]|3[01])-(0[1-9]|1[0-2])-20\\d{2}'
-    if re.search(pattern, text):
-        return True
-    else:
-        return False
-
-
-def is_booking_row(cl: Locator) -> bool:
-    if cl.get_attribute('style') == 'font-size: 0.75em':
-        return True
-    else:
-        return False
 
 
 class Bookings:
@@ -94,3 +53,44 @@ class Bookings:
                 if cls.is_booked and not cls.is_waitlisted and datetime_n_minutes_ahead > cls.datetime > datetime.now():
                     classes.append(cls)
         return classes
+
+
+def get_class_from_row(cl: Locator, date: datetime) -> CrossFitClass:
+    text = cl.inner_text().replace('\t', '').split('\n')
+    text = [entry for entry in text if entry != ""]
+    is_forbidden_icon_present = cl.locator('svg.icon.icon-forbidden').count() > 0
+    is_ticket_icon_present = cl.locator('svg.icon.icon-ticket').count() > 0
+    is_waitlisted = is_forbidden_icon_present and not is_ticket_icon_present
+    # Standard case
+    if len(text) == 6:
+        date = date.replace(hour=int(text[4][:2]), minute=int(text[4][3:]))
+        return CrossFitClass(name=text[0], datetime=date, program=text[3],
+                             is_booked=is_ticket_icon_present, is_waitlisted=is_waitlisted)
+    else:
+        raise RuntimeError(f"Found a class that does not have 6 entries: {cl.inner_text()}")
+
+
+def get_title_date_from_row(cl: Locator) -> datetime:
+    text = cl.inner_text().replace('\n', '')
+    text = text.replace('\t', '')
+    pattern = '(0[1-9]|[12][0-9]|3[01])-(0[1-9]|1[0-2])-20\\d{2}'
+    date_string = re.search(pattern, text).group()
+    return datetime.strptime(date_string, '%d-%m-%Y')
+
+
+def is_title_row(cl: Locator) -> bool:
+    text = cl.inner_text().replace('\n', '')
+    text = text.replace('\t', '')
+
+    pattern = '(0[1-9]|[12][0-9]|3[01])-(0[1-9]|1[0-2])-20\\d{2}'
+    if re.search(pattern, text):
+        return True
+    else:
+        return False
+
+
+def is_booking_row(cl: Locator) -> bool:
+    if cl.get_attribute('style') == 'font-size: 0.75em':
+        return True
+    else:
+        return False

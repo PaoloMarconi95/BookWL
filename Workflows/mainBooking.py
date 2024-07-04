@@ -4,9 +4,9 @@ from Enum.BookingResult import BookingResult
 from Config import LOGGER
 import traceback
 from DB.Entities.FutureBooking import FutureBooking
-from DB.Entities.CrossFitClass import CrossFitClass
+from Model.CrossFitClass import CrossFitClass
 from DB.Entities.Booking import Booking
-from DB.Entities.User import User
+from Model.User import User
 from multiprocessing.pool import ThreadPool
 
 

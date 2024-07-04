@@ -3,7 +3,7 @@ import time
 
 # Custom
 from Config import CONFIG, LOGGER
-from DB.Entities.CrossFitClass import CrossFitClass
+from Model.CrossFitClass import CrossFitClass
 from Model.BrowserProvider import BrowserProvider
 
 PROGRAM_DROPDOWN_ID = 'AthleteTheme_wtLayout_block_wtSubNavigation_wtProgram_Input'
