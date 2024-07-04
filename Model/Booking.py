@@ -88,9 +88,9 @@ class Bookings:
 
     def get_booked_classes_within_minutes(self, minutes: int = None) -> list[CrossFitClass]:
         classes = []
+        datetime_n_minutes_ahead = datetime.now() + timedelta(minutes=minutes)
         for date_classes in self.crossfit_classes.values():
             for cls in date_classes:
-                if cls.is_booked and not cls.is_waitlisted and cls.datetime < (
-                        datetime.now() + timedelta(minutes=minutes)):
+                if cls.is_booked and not cls.is_waitlisted and datetime_n_minutes_ahead > cls.datetime > datetime.now():
                     classes.append(cls)
         return classes

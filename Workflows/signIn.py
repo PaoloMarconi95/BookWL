@@ -30,12 +30,11 @@ def sign_in_to_booked_class(user: User, bp: BrowserProvider):
 if __name__ == "__main__":
     try:
         users = User.get_every_users()
-        #users = [User(id=0, name='Paolo', mail='paolomarconi1995@gmail.com', password='Internet0Cross')]
+        # users = [User(id=0, name='Paolo', mail='paolomarconi1995@gmail.com', password='Internet0Cross')]
         for user in users:
             bp = BrowserProvider(user)
             sign_in_to_booked_class(user, bp)
-            bp.page.close()
-            bp.browser.close()
+            bp.dispose()
     except Exception as main_exception:
         LOGGER.error("FATAL")
         LOGGER.error(main_exception)
