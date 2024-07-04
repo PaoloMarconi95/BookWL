@@ -1,5 +1,4 @@
 import datetime as dt
-import threading
 from datetime import datetime
 import os
 import pathlib
@@ -29,7 +28,7 @@ class Logger:
         self.__write(msg, 'error')
 
     def __write(self, msg, severity):
-        final_message = f"Thread {threading.get_ident()} - {str(datetime.now().strftime('%d/%m %H:%M:%S'))} - {severity.upper()}: {str(msg)} \n"
+        final_message = f"{str(datetime.now().strftime('%d/%m %H:%M:%S'))} - {severity.upper()}: {str(msg)} \n"
         print(final_message, end="")
         self.file = open(self.file.name, 'a')
         self.file.write(final_message)
