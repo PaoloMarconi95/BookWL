@@ -69,6 +69,11 @@ def get_class_from_row(cl: Locator, date: datetime) -> CrossFitClass:
         date = date.replace(hour=int(text[4][:2]), minute=int(text[4][3:]))
         return CrossFitClass(name=text[0], datetime=date, program=text[3],
                              is_booked=is_ticket_icon_present, is_waitlisted=is_waitlisted)
+    # Yoga case
+    elif len(text) == 5:
+        date = date.replace(hour=int(text[3][:2]), minute=int(text[3][3:]))
+        return CrossFitClass(name=text[0], datetime=date, program=text[2],
+                             is_booked=is_ticket_icon_present, is_waitlisted=is_waitlisted)
     else:
         raise RuntimeError(f"Found a class that does not have 6 entries: {cl.inner_text()}")
 

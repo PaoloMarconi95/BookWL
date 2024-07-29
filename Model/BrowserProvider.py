@@ -3,6 +3,7 @@ import os.path
 from Config import CONFIG
 from playwright.sync_api import sync_playwright, Playwright, Page
 from Config.Configuration import User
+from pathlib import Path
 
 
 class BrowserProvider:
@@ -24,7 +25,7 @@ class BrowserProvider:
         self.playwright.stop()
 
     def load_cookies(self, user: User):
-        cookie_path = os.path.join(CONFIG.cookie_path, f"cookies_{user.name}.json")
+        cookie_path = os.path.join(os.path.join(Path(__file__).parent.parent, 'Cookies'), f"cookies_{user.name}.json")
         if not os.path.exists(cookie_path):
             raise Exception(f"Cookie file does not exist at {cookie_path}")
 

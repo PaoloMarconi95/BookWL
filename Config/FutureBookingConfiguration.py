@@ -8,6 +8,8 @@ from yamldataclassconfig import create_file_path_field
 import os
 from dataclasses import dataclass
 
+from Model.BookingResult import BookingResult
+
 
 @dataclass_json()
 @dataclass(init=False)
@@ -18,6 +20,7 @@ class ClassToBeBooked:
     time: str = None
     week_day: int = None
     date: Optional[datetime] = None
+    booking_result: Optional[BookingResult] = None
 
     def __init__(self, user_id, name, program, time, week_day, date):
         self.user_id = user_id
