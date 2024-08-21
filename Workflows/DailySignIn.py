@@ -13,7 +13,7 @@ def sign_in_to_booked_class(user: User, bp: BrowserProvider):
     now = datetime.now()
     LOGGER.info(f"Starting sign-in process for user {str(user.name)} and date {now}")
     bookings = Bookings(bp)
-    bookings.compute_bookings(date=now)
+    bookings.compute_bookings_for_datetime(date=now)
     booked_classes = bookings.get_booked_classes_within_minutes(minutes=20)
 
     if len(booked_classes) > 1:
@@ -36,7 +36,6 @@ if __name__ == "__main__":
             sign_in_to_booked_class(usr, browser_provider)
             browser_provider.dispose()
     except Exception as main_exception:
-        LOGGER.error("FATAL")
         LOGGER.error(main_exception)
         send_email("paolomarconi1995@gmail.com", "Auto SignIn Error", str(main_exception))
     finally:

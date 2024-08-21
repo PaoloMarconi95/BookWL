@@ -71,13 +71,13 @@ def book_future_bookings(user: User, bp: BrowserProvider):
     LOGGER.info("Starting booking process for user " + str(user.name))
     next_monday = get_next_monday_date()
     bookings = Bookings(bp)
-    bookings.compute_bookings_for_date(next_monday)
+    bookings.compute_bookings_from_date(next_monday)
     classes_to_be_booked = get_classes_to_be_booked_for_user(user)
     for class_to_be_booked in classes_to_be_booked:
         class_to_be_booked.date = next_monday + timedelta(days=class_to_be_booked.week_day)
         Tasks.BookClass.book_class(class_to_be_booked, bookings.class_rows)
 
-    bookings.compute_bookings_for_date(next_monday)
+    bookings.compute_bookings_from_date(next_monday)
     set_booking_result(bookings, classes_to_be_booked)
     summary = generate_email_summary(classes_to_be_booked)
     send_email(user.mail, "Auto Booking", summary)

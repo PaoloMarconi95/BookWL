@@ -10,6 +10,7 @@ import re
 from Config import CONFIG
 from Model.CrossFitClass import CrossFitClass
 from Model.BrowserProvider import BrowserProvider
+from typing import Union
 
 
 class Bookings:
@@ -17,36 +18,52 @@ class Bookings:
         self.browser_provider: BrowserProvider = bp
         self.class_rows: dict[datetime.date, list[Locator]] = {}
         self.crossfit_classes: dict[datetime.date, list[CrossFitClass]] = {}
+        self.calendar_input_id = "#AthleteTheme_wt6_block_wtMainContent_wt9_W_Utils_UI_wt216_block_wtDateInputFrom"
 
-    def compute_bookings_for_date(self, date: date = None) -> None:
+    def compute_bookings(self, date: Union[date, datetime], should_compute_one_date_only: bool = False) -> None:
         self.browser_provider.change_url(CONFIG.calendar_url, f"#{CONFIG.calendar_el_id}")
-        if date is not None:
+        if self.is_date_different_than_actual(date):
             self.set_calendar_date(date)
 
         classes = self.browser_provider.page.locator('//table/tbody/tr')
-        parsed_date = None
+        parsed_datetime = None
         for i in range(1, classes.count()):
             cls = classes.nth(i)
             if is_title_row(cls):
-                parsed_date = get_title_date_from_row(cls)
-                self.crossfit_classes[parsed_date] = []
-                self.class_rows[parsed_date] = []
+                parsed_datetime = get_title_date_from_row(cls)
+                if should_compute_one_date_only and date is not None and parsed_datetime > date.date():
+                    # exit from loop whenever I reach a date greater than the target one
+                    break
+                self.crossfit_classes[parsed_datetime] = []
+                self.class_rows[parsed_datetime] = []
             elif is_booking_row(cls):
-                if parsed_date is not None:
-                    self.class_rows[parsed_date].append(cls)
-                    c_class = get_class_from_row(cls, parsed_date)
-                    self.crossfit_classes[parsed_date].append(c_class)
+                if parsed_datetime is not None:
+                    self.class_rows[parsed_datetime].append(cls)
+                    c_class = get_class_from_row(cls, parsed_datetime)
+                    self.crossfit_classes[parsed_datetime].append(c_class)
                 else:
                     raise RuntimeError("Booking row found without previous title (weekday + date)")
 
+    def compute_bookings_from_date(self, date: date) -> None:
+        self.compute_bookings(date, should_compute_one_date_only=False)
+
+    def compute_bookings_for_datetime(self, date: datetime) -> None:
+        self.compute_bookings(date, should_compute_one_date_only=True)
+
     def set_calendar_date(self, date: date) -> None:
         date_str = date.strftime('%d-%m-%Y')
-        self.browser_provider.page.fill(
-            '#AthleteTheme_wt6_block_wtMainContent_wt9_W_Utils_UI_wt216_block_wtDateInputFrom', " ")
+        self.browser_provider.page.fill(self.calendar_input_id, " ")
         time.sleep(0.5)
-        self.browser_provider.page.fill(
-            '#AthleteTheme_wt6_block_wtMainContent_wt9_W_Utils_UI_wt216_block_wtDateInputFrom', date_str)
+        self.browser_provider.page.fill(self.calendar_input_id, date_str)
         time.sleep(2)
+
+
+    def is_date_different_than_actual(self, date: Union[date, datetime]):
+        date_str = date.strftime('%d-%m-%Y')
+        input_selector = self.browser_provider.page.locator(self.calendar_input_id)
+        return date_str != input_selector.input_value()
+
+
 
     def get_booked_classes_within_minutes(self, minutes: int = None) -> list[CrossFitClass]:
         classes = []
@@ -66,12 +83,14 @@ def get_class_from_row(cl: Locator, date: date) -> CrossFitClass:
     is_waitlisted = is_forbidden_icon_present and not is_ticket_icon_present
     # Standard case
     if len(text) == 6:
-        class_datetime = datetime(year=date.year, month=date.month, day=date.day, hour=int(text[4][:2]), minute=int(text[4][3:]))
+        class_datetime = datetime(year=date.year, month=date.month, day=date.day, hour=int(text[4][:2]),
+                                  minute=int(text[4][3:]))
         return CrossFitClass(name=text[0], datetime=class_datetime, program=text[3],
                              is_booked=is_ticket_icon_present, is_waitlisted=is_waitlisted)
     # Yoga case
     elif len(text) == 5:
-        class_datetime = datetime(year=date.year, month=date.month, day=date.day, hour=int(text[3][:2]), minute=int(text[3][3:]))
+        class_datetime = datetime(year=date.year, month=date.month, day=date.day, hour=int(text[3][:2]),
+                                  minute=int(text[3][3:]))
         return CrossFitClass(name=text[0], datetime=class_datetime, program=text[2],
                              is_booked=is_ticket_icon_present, is_waitlisted=is_waitlisted)
     else:
