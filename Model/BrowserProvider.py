@@ -4,19 +4,28 @@ from Config import CONFIG
 from playwright.sync_api import sync_playwright, Playwright, Page
 from Config.Configuration import User
 from pathlib import Path
+import platform
 
 
 class BrowserProvider:
     def __init__(self, user: User):
+        args = ["--disable-blink-features=AutomationControlled"]
         pl = sync_playwright().start()
         self.playwright: Playwright = pl
-        self.browser = pl.chromium.launch(headless=True)
+        headless = platform.system() != "Windows"
+        self.browser = pl.chromium.launch(headless=headless, args=args)
         self.context = self.browser.new_context(
-            user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) "
-                       "Chrome/58.0.3029.110 Safari/537.3")
+            # user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) "
+            #            "Chrome/58.0.3029.110 Safari/537.3")
+            user_agent='5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Mobile Safari/537.36')
 
         self.load_cookies(user)
         self.page: Page = self.context.new_page()
+        self.page.add_init_script("""
+                Object.defineProperty(navigator, 'webdriver', {
+                  get: () => false,
+                });
+                """)
 
     def dispose(self):
         self.page.close()

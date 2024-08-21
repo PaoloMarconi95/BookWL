@@ -20,6 +20,7 @@ class User:
 class Configuration(YamlDataClassConfig):
     signin_url: str = None
     calendar_url: str = None
+    login_url: str = None
     gmail_key: str = None
     png_file_path: str = None
     calendar_el_id: str = None

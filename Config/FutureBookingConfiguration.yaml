@@ -1,0 +1,51 @@
+classes:
+  - user_id: 0
+    name: 18:00 WOD
+    program: CrossFit WOD
+    time: '18:00'
+    week_day: 0
+  - user_id: 0
+    name: 18:00 WOD
+    program: CrossFit WOD
+    time: '18:00'
+    week_day: 2
+  - user_id: 0
+    name: "YOGA: 18:00"
+    program: YOGA
+    time: '18:00'
+    week_day: 3
+  - user_id: 0
+    name: 19:00 WOD
+    program: CrossFit WOD
+    time: '19:00'
+    week_day: 3
+  - user_id: 0
+    name: "OPEN GYM: 11:00"
+    program: OPEN GYM
+    time: '11:00'
+    week_day: 5
+  - user_id: 1
+    name: 18:00 WOD
+    program: CrossFit WOD
+    time: '18:00'
+    week_day: 0
+  - user_id: 1
+    name: 18:00 WOD
+    program: CrossFit WOD
+    time: '18:00'
+    week_day: 2
+  - user_id: 1
+    name: "YOGA: 18:00"
+    program: YOGA
+    time: '18:00'
+    week_day: 3
+  - user_id: 1
+    name: 19:00 WOD
+    program: CrossFit WOD
+    time: '19:00'
+    week_day: 3
+  - user_id: 1
+    name: "OPEN GYM: 11:00"
+    program: OPEN GYM
+    time: '11:00'
+    week_day: 5

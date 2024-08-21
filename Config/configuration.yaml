@@ -1,0 +1,15 @@
+signin_url: 'https://app.wodify.com/Coachboard/CoachboardEntry.aspx'
+calendar_url: 'https://app.wodify.com/Schedule/CalendarListViewEntry.aspx'
+login_url: 'https://app.wodify.com/SignIn/Login?OriginalURL=&RequiresConfirm=false'
+gmail_key: 'ijnixrimexllxprs'
+png_file_path: /home/paolo.marconi/repoBookWL/BookWL/debug/png/
+calendar_el_id: AthleteTheme_wt6_block_wtMainContent_wt9_wtFilters_Wrapper
+users:
+  - id: 0
+    name: Paolo
+    mail: paolomarconi1995@gmail.com
+    password: Internet0Cross
+  - id: 1
+    name: Vero
+    mail: masottov@gmail.com
+    password: mErlino9!23/05

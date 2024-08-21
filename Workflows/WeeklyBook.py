@@ -1,3 +1,4 @@
+from datetime import datetime, timedelta, date
 import Tasks.BookClass
 from Config.Configuration import User
 from Config.FutureBookingConfiguration import ClassToBeBooked
@@ -11,48 +12,35 @@ import traceback
 
 
 def extract_class_array_summary(class_array: list[BookingResult]) -> str:
-    text = "".join([f"{cfls.name} on {cfls.date.date()} \n" for cfls in class_array])
+    text = "".join([f"{cfls.name} on {cfls.date} \n" for cfls in class_array])
     return text[:len(text) - 2] + "\n\n"
 
 
-def get_classes_with_booking_result(classes_to_be_booked: list[ClassToBeBooked], booking_result: BookingResult) -> list[BookingResult]:
+def get_classes_by_booking_result(classes_to_be_booked: list[ClassToBeBooked], booking_result: BookingResult) -> list[BookingResult]:
     return list(filter(lambda x: x.booking_result == booking_result, classes_to_be_booked))
+
+
+def get_text_for_booking_result(classes_to_be_booked: list[ClassToBeBooked], booking_result: BookingResult, text: str) -> str:
+    final_text = ""
+    matching_classes = get_classes_by_booking_result(classes_to_be_booked, booking_result)
+    if len(matching_classes) > 0:
+        final_text += f"{text} {len(matching_classes)} classes: \n"
+        final_text += extract_class_array_summary(matching_classes)
+    return final_text
 
 
 def generate_email_summary(classes_to_be_booked: list[ClassToBeBooked]) -> str:
     text = ""
-
-    successful = get_classes_with_booking_result(classes_to_be_booked, BookingResult.SUCCESS)
-    if len(successful) > 0:
-        text += f"Succesfully booked {len(successful)} classes: \n"
-        text += extract_class_array_summary(successful)
-
-    waitlist = get_classes_with_booking_result(classes_to_be_booked, BookingResult.WAITLIST)
-    if len(waitlist) > 0:
-        text += f"Waitlisted {len(waitlist)} classes: \n"
-        text += extract_class_array_summary(waitlist)
-
-    unsuccessful = get_classes_with_booking_result(classes_to_be_booked, BookingResult.FAIL)
-    if len(unsuccessful) > 0:
-        text += f"Could not book {len(unsuccessful)} classes: \n"
-        text += extract_class_array_summary(unsuccessful)
-
-    not_found = get_classes_with_booking_result(classes_to_be_booked, BookingResult.NOT_FOUND)
-    if len(not_found) > 0:
-        text += f"Didn't found {len(not_found)} classes: \n"
-        text += extract_class_array_summary(not_found)
-
-    already_booked = get_classes_with_booking_result(classes_to_be_booked, BookingResult.ALREADY_BOOKED)
-    if len(already_booked) > 0:
-        text += f"Found that {len(already_booked)} classes was already booked: \n"
-        text += extract_class_array_summary(already_booked)
+    text += get_text_for_booking_result(classes_to_be_booked, BookingResult.SUCCESS, "Succesfully booked")
+    text += get_text_for_booking_result(classes_to_be_booked, BookingResult.WAITLIST, "Waitlisted")
+    text += get_text_for_booking_result(classes_to_be_booked, BookingResult.FAIL, "Could not book")
+    text += get_text_for_booking_result(classes_to_be_booked, BookingResult.NOT_FOUND, "Didn't found")
     return text
 
 
 def set_booking_result(bookings: Bookings, classes_to_be_booked: list[ClassToBeBooked]) -> None:
-    classes_to_be_booked = [book for book in classes_to_be_booked if book.date.date() in bookings.crossfit_classes.keys()]
     for class_to_be_booked in classes_to_be_booked:
-        matching_books = list(filter(lambda x: x.name == class_to_be_booked.name, bookings.crossfit_classes[class_to_be_booked.date.date()]))
+        matching_books = list(filter(lambda x: x.name == class_to_be_booked.name, bookings.crossfit_classes[class_to_be_booked.date]))
         if len(matching_books) == 0:
             class_to_be_booked.booking_result = BookingResult.NOT_FOUND
         else:
@@ -66,16 +54,30 @@ def set_booking_result(bookings: Bookings, classes_to_be_booked: list[ClassToBeB
                     class_to_be_booked.booking_result = BookingResult.FAIL
 
 
+def get_next_monday_date() -> date:
+    today = datetime.now()
+    days_ahead = (7 - today.weekday()) % 7
+    if days_ahead == 0:
+        days_ahead = 7
+    next_monday = today + timedelta(days=days_ahead)
+    return next_monday.date()
+
+
+def get_classes_to_be_booked_for_user(user: User) -> list[ClassToBeBooked]:
+    return list(filter(lambda x: x.user_id == user.id, FUTUREBOOKINGCONFIG.classes))
+
+
 def book_future_bookings(user: User, bp: BrowserProvider):
     LOGGER.info("Starting booking process for user " + str(user.name))
+    next_monday = get_next_monday_date()
     bookings = Bookings(bp)
-    bookings.compute_bookings()
-    classes_to_be_booked = list(filter(lambda x: x.user_id == user.id, FUTUREBOOKINGCONFIG.classes))
+    bookings.compute_bookings_for_date(next_monday)
+    classes_to_be_booked = get_classes_to_be_booked_for_user(user)
     for class_to_be_booked in classes_to_be_booked:
-        if class_to_be_booked.date.date() in bookings.class_rows.keys():
-            Tasks.BookClass.book_class(class_to_be_booked, bookings.class_rows)
+        class_to_be_booked.date = next_monday + timedelta(days=class_to_be_booked.week_day)
+        Tasks.BookClass.book_class(class_to_be_booked, bookings.class_rows)
 
-    bookings.compute_bookings()
+    bookings.compute_bookings_for_date(next_monday)
     set_booking_result(bookings, classes_to_be_booked)
     summary = generate_email_summary(classes_to_be_booked)
     send_email(user.mail, "Auto Booking", summary)
