@@ -56,14 +56,12 @@ class Bookings:
         time.sleep(0.5)
         self.browser_provider.page.fill(self.calendar_input_id, date_str)
         time.sleep(2)
+        self.browser_provider.page.reload(wait_until='networkidle')
 
-
-    def is_date_different_than_actual(self, date: Union[date, datetime]):
+    def is_date_different_than_actual(self, date: Union[date, datetime]) -> bool:
         date_str = date.strftime('%d-%m-%Y')
         input_selector = self.browser_provider.page.locator(self.calendar_input_id)
         return date_str != input_selector.input_value()
-
-
 
     def get_booked_classes_within_minutes(self, minutes: int = None) -> list[CrossFitClass]:
         classes = []

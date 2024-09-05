@@ -9,7 +9,7 @@ from Tasks.ClassSignIn import sign_in
 from Config import LOGGER, CONFIG
 
 
-def sign_in_to_booked_class(user: User, bp: BrowserProvider):
+def sign_in_to_booked_class(user: User, bp: BrowserProvider) -> None:
     now = datetime.now()
     LOGGER.info(f"Starting sign-in process for user {str(user.name)} and date {now}")
     bookings = Bookings(bp)
