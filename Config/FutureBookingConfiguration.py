@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime
 from pathlib import Path
 from typing import Optional
 from dataclasses_json import dataclass_json
@@ -8,7 +8,6 @@ import os
 from dataclasses import dataclass
 
 from Model.BookingResult import BookingResult
-
 
 @dataclass_json()
 @dataclass(init=False)
@@ -21,7 +20,7 @@ class ClassToBeBooked:
     date: Optional[datetime] = None
     booking_result: Optional[BookingResult] = None
 
-    def __init__(self, user_id, name, program, time, week_day, date, booking_result):
+    def __init__(self, user_id: int, name: str, program: str, time: str, week_day: int, date, booking_result):
         self.user_id = user_id
         self.name = name
         self.program = program

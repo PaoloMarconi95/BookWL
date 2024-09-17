@@ -8,15 +8,14 @@ from Config.FutureBookingConfiguration import ClassToBeBooked
 
 
 def remove_punctuation(string: str) -> str:
-    string.replace(":", " ").replace(".", "")
-    return string
-
+    replaced_string = string.replace(":", "").replace(".", "")
+    return replaced_string
 
 def book_class(class_to_book: ClassToBeBooked, calendar_rows: dict[datetime, list[Locator]]) -> None:
     row_class_to_book = None
     for row in calendar_rows[class_to_book.date]:
         inner_text = remove_punctuation(row.inner_text())
-        if remove_punctuation(class_to_book.name) in inner_text and remove_punctuation(class_to_book.program) in inner_text:
+        if remove_punctuation(class_to_book.name) in inner_text and class_to_book.program in inner_text:
             row_class_to_book = row
 
     if row_class_to_book is not None:

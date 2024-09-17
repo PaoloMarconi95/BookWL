@@ -56,7 +56,7 @@ class Bookings:
         time.sleep(0.5)
         self.browser_provider.page.fill(self.calendar_input_id, date_str)
         time.sleep(2)
-        self.browser_provider.page.reload(wait_until='networkidle')
+        self.browser_provider.page.reload(wait_until='domcontentloaded')
 
     def is_date_different_than_actual(self, date: Union[date, datetime]) -> bool:
         date_str = date.strftime('%d-%m-%Y')

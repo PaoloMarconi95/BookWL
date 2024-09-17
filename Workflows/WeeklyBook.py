@@ -38,9 +38,14 @@ def generate_email_summary(classes_to_be_booked: list[ClassToBeBooked]) -> str:
     return text
 
 
+def remove_punctuation(string: str) -> str:
+    replaced_string = string.replace(":", "").replace(".", "")
+    return replaced_string
+
+
 def set_booking_result(bookings: Bookings, classes_to_be_booked: list[ClassToBeBooked]) -> None:
     for class_to_be_booked in classes_to_be_booked:
-        matching_books = list(filter(lambda x: x.name == class_to_be_booked.name, bookings.crossfit_classes[class_to_be_booked.date]))
+        matching_books = list(filter(lambda x: remove_punctuation(x.name) in remove_punctuation(class_to_be_booked.name), bookings.crossfit_classes[class_to_be_booked.date]))
         if len(matching_books) == 0:
             class_to_be_booked.booking_result = BookingResult.NOT_FOUND
         else:
