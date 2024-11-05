@@ -4,6 +4,7 @@ login_url: 'https://app.wodify.com/SignIn/Login?OriginalURL=&RequiresConfirm=fal
 gmail_key: 'ijnixrimexllxprs'
 png_file_path: /home/paolo.marconi/repoBookWL/BookWL/debug/png/
 calendar_el_id: AthleteTheme_wt6_block_wtMainContent_wt9_wtFilters_Wrapper
+max_login_attempts: 10
 users:
   - id: 0
     name: Paolo

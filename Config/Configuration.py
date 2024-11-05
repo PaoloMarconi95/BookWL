@@ -24,6 +24,6 @@ class Configuration(YamlDataClassConfig):
     gmail_key: str = None
     png_file_path: str = None
     calendar_el_id: str = None
-    max_login_attempts: int = 5
+    max_login_attempts: int = None
     users: list[User] = None
     FILE_PATH: Path = create_file_path_field(os.path.join(Path(__file__).parent, 'configuration.yaml'))

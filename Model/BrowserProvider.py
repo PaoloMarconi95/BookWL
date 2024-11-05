@@ -1,5 +1,7 @@
 import json
 import os.path
+import time
+
 from Config import CONFIG
 from playwright.sync_api import sync_playwright, Playwright, Page
 from Config.Configuration import User
@@ -13,6 +15,7 @@ class BrowserProvider:
         pl = sync_playwright().start()
         self.playwright: Playwright = pl
         headless = platform.system() != "Windows"
+        self.user = user
         self.browser = pl.chromium.launch(headless=headless, args=args)
         self.context = self.browser.new_context(
             # user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) "
@@ -51,12 +54,16 @@ class BrowserProvider:
                 is_page_changed = True
 
                 if html_id is not None:
-                    self.page.wait_for_selector(html_id, state='visible', timeout=10000)
+                    self.page.wait_for_selector(html_id, state='visible', timeout=15000)
 
             except Exception:
-                is_page_changed = False
+                if i >= CONFIG.max_login_attempts / 2:
+                    self.dispose()
+                    time.sleep(5)
+                    self.__init__(self.user)
+                    time.sleep(5)
             finally:
                 i += 1
 
         if i >= CONFIG.max_login_attempts:
-            raise Exception(f"page cannot be set to url {new_url}, and waited until {html_id} is visible")
+            raise Exception(f"page cannot be set to url {new_url}, max login attempts reached ({i})")
