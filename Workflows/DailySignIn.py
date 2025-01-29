@@ -32,7 +32,8 @@ def sign_in_to_booked_class(user: User, bp: BrowserProvider) -> None:
 if __name__ == "__main__":
     try:
         for usr in CONFIG.users:
-            browser_provider = BrowserProvider(usr)
+            browser_provider = BrowserProvider()
+            browser_provider.load_cookies(usr)
             sign_in_to_booked_class(usr, browser_provider)
             browser_provider.dispose()
     except Exception as main_exception:

@@ -90,7 +90,8 @@ def book_future_bookings(user: User, bp: BrowserProvider):
 
 def main():
     for usr in CONFIG.users:
-        browser_provider = BrowserProvider(usr)
+        browser_provider = BrowserProvider()
+        browser_provider.load_cookies(usr)
         book_future_bookings(usr, browser_provider)
         browser_provider.dispose()
 

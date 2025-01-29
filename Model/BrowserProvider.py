@@ -10,19 +10,15 @@ import platform
 
 
 class BrowserProvider:
-    def __init__(self, user: User):
+    def __init__(self):
         args = ["--disable-blink-features=AutomationControlled"]
         pl = sync_playwright().start()
         self.playwright: Playwright = pl
         headless = platform.system() != "Windows"
-        self.user = user
+        self.cookie_user = None
         self.browser = pl.chromium.launch(headless=headless, args=args)
         self.context = self.browser.new_context(
-            # user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) "
-            #            "Chrome/58.0.3029.110 Safari/537.3")
             user_agent='5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Mobile Safari/537.36')
-
-        self.load_cookies(user)
         self.page: Page = self.context.new_page()
         self.page.add_init_script("""
                 Object.defineProperty(navigator, 'webdriver', {
@@ -37,6 +33,7 @@ class BrowserProvider:
         self.playwright.stop()
 
     def load_cookies(self, user: User):
+        self.cookie_user = user
         cookie_path = os.path.join(os.path.join(Path(__file__).parent.parent, 'Cookies'), f"cookies_{user.name}.json")
         if not os.path.exists(cookie_path):
             raise Exception(f"Cookie file does not exist at {cookie_path}")
@@ -60,7 +57,8 @@ class BrowserProvider:
                 if i >= CONFIG.max_login_attempts / 2:
                     self.dispose()
                     time.sleep(5)
-                    self.__init__(self.user)
+                    self.__init__()
+                    self.load_cookies(self.cookie_user)
                     time.sleep(5)
             finally:
                 i += 1

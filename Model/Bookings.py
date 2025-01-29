@@ -18,7 +18,7 @@ class Bookings:
         self.browser_provider: BrowserProvider = bp
         self.class_rows: dict[datetime.date, list[Locator]] = {}
         self.crossfit_classes: dict[datetime.date, list[CrossFitClass]] = {}
-        self.calendar_input_id = "#AthleteTheme_wt6_block_wtMainContent_wt9_W_Utils_UI_wt216_block_wtDateInputFrom"
+        self.calendar_input_id = "#AthleteTheme_wt6_block_wtMainContent_wt9_AthleteTheme_wt216_block_wtDateInputFrom"
 
     def compute_bookings(self, date: Union[date, datetime], should_compute_one_date_only: bool = False) -> None:
         self.browser_provider.change_url(CONFIG.calendar_url, f"#{CONFIG.calendar_el_id}")
@@ -92,7 +92,9 @@ def get_class_from_row(cl: Locator, date: date) -> CrossFitClass:
         return CrossFitClass(name=text[0], datetime=class_datetime, program=text[2],
                              is_booked=is_ticket_icon_present, is_waitlisted=is_waitlisted)
     else:
-        raise RuntimeError(f"Found a class that does not have 6 entries: {cl.inner_text()}")
+        # Hardcoded since it's an error on wodify's side (or crossfit box), where for yoga class
+        # There's a missing entry on total participants
+        raise RuntimeError(f"Found a class that does not have 6 (WOD) or 5 (Yoga) entries: {cl.inner_text()}")
 
 
 def get_title_date_from_row(cl: Locator) -> date:
